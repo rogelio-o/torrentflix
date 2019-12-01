@@ -47,16 +47,6 @@ export class PlayerServiceImpl implements IPlayerService {
   }
 
   private startPlaying(torrentServerID: number, renderizationID: number): void {
-    let intervalID: any;
-    intervalID = setInterval(() => {
-      const currentPercentage = this.torrentService.getDownloadData(
-        torrentServerID,
-      ).downloadedPerentage;
-
-      if (currentPercentage >= 0.02) {
-        clearInterval(intervalID);
-        this.rendererService.play(renderizationID);
-      }
-    }, 5000);
+    this.rendererService.play(renderizationID);
   }
 }

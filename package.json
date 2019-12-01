@@ -1,0 +1,25 @@
+{
+  "name": "torrentflix",
+  "version": "0.0.0",
+  "description": "Stream torrent to Smart TVs, phones,...",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "lint": "tslint --project tsconfig.json",
+    "watch": "tsc -w",
+    "start": "node dist/index.js"
+  },
+  "author": "Rogelio Orts",
+  "license": "ISC",
+  "dependencies": {
+    "node-ssdp": "^4.0.0",
+    "upnp-mediarenderer-client": "^1.2.4",
+    "webtorrent": "^0.107.17"
+  },
+  "devDependencies": {
+    "@types/node": "^12.12.14",
+    "@types/webtorrent": "^0.107.0",
+    "tslint": "^5.20.1",
+    "typescript": "^3.7.2"
+  }
+}

@@ -1,5 +1,5 @@
-import { IDevice } from "../common/entity/IDevice";
-import { IVideo } from "../common/entity/IVideo";
+import { IDevice } from "../entity/IDevice";
+import { IVideo } from "../entity/IVideo";
 
 export interface IRenderService {
   load(video: IVideo, device: IDevice): Promise<number>;

@@ -1,4 +1,4 @@
-import { TorrentAction } from "../ITorrentService";
+import { TorrentAction } from "../service/ITorrentService";
 
 export interface ITorrentCallback {
   action: TorrentAction;

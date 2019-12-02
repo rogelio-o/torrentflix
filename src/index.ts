@@ -1,13 +1,13 @@
 import express from "express";
 
-import { PlayerServiceImpl } from "./common/service/impl/PlayerServiceImpl";
-import { IPlayerService } from "./common/service/IPlayerService";
-import { IDevicesService } from "./device/service/IDevicesService";
-import { SspdDevicesService } from "./device/service/ssdp/SspdDevicesService";
-import { IRenderService } from "./renderer/IRenderService";
-import { UpnpMediaRendererService } from "./renderer/upnp-mediarenderer/UpnpMediarendererService";
-import { ITorrentService } from "./torrent/services/ITorrentService";
-import { WebTorrentService } from "./torrent/services/webtorrent/WebTorrentService";
+import { IDevicesService } from "./service/IDevicesService";
+import { PlayerServiceImpl } from "./service/impl/PlayerServiceImpl";
+import { SspdDevicesService } from "./service/impl/SspdDevicesService";
+import { UpnpMediaRendererService } from "./service/impl/UpnpMediarendererService";
+import { WebTorrentService } from "./service/impl/WebTorrentService";
+import { IPlayerService } from "./service/IPlayerService";
+import { IRenderService } from "./service/IRenderService";
+import { ITorrentService } from "./service/ITorrentService";
 
 const magnetURI = process.env.MAGNET_URI;
 

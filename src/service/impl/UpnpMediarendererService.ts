@@ -1,9 +1,8 @@
 import MediaRendererClient from "upnp-mediarenderer-client";
 
-import { IDevice } from "../../common/entity/IDevice";
-import { IVideo } from "../../common/entity/IVideo";
+import { IDevice } from "../../entity/IDevice";
+import { IVideo } from "../../entity/IVideo";
 import { IRenderService, RenderAction } from "../IRenderService";
-import { IRenderCallback } from "./entity/IRenderCallback";
 
 export class UpnpMediaRendererService implements IRenderService {
   private data: any[] = [];
@@ -89,4 +88,10 @@ export class UpnpMediaRendererService implements IRenderService {
         .forEach((c) => c.callback());
     }
   }
+}
+
+interface IRenderCallback {
+  action: RenderAction;
+
+  callback: () => void;
 }

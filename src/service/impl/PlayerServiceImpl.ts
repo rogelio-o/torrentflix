@@ -1,7 +1,7 @@
-import { IDevicesService } from "../../../device/service/IDevicesService";
-import { IRenderService, RenderAction } from "../../../renderer/IRenderService";
-import { ITorrentService } from "../../../torrent/services/ITorrentService";
+import { IDevicesService } from "../IDevicesService";
 import { IPlayerService } from "../IPlayerService";
+import { IRenderService, RenderAction } from "../IRenderService";
+import { ITorrentService } from "../ITorrentService";
 
 export class PlayerServiceImpl implements IPlayerService {
   private devicesService: IDevicesService;

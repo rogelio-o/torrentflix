@@ -1,6 +1,6 @@
 import SsdpClient from "node-ssdp";
 
-import { IDevice } from "../../../common/entity/IDevice";
+import { IDevice } from "../../entity/IDevice";
 import { IDevicesService } from "../IDevicesService";
 
 export class SspdDevicesService implements IDevicesService {

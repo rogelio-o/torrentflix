@@ -1,4 +1,4 @@
-import { IDevice } from "../../common/entity/IDevice";
+import { IDevice } from "../entity/IDevice";
 
 export interface IDevicesService {
   loadDevices(): Promise<void>;

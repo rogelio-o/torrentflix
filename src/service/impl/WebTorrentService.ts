@@ -4,9 +4,9 @@ import pump from "pump";
 import rangeParser, { Range, Ranges } from "range-parser";
 import WebTorrent, { Instance, Torrent, TorrentFile } from "webtorrent";
 
-import { IVideo } from "../../../common/entity/IVideo";
-import { ITorrentDownloadData } from "../entity/ITorrendDonloadData";
-import { ITorrentCallback } from "../entity/ITorrentCallback";
+import { ITorrentDownloadData } from "../../entity/ITorrendDonloadData";
+import { ITorrentCallback } from "../../entity/ITorrentCallback";
+import { IVideo } from "../../entity/IVideo";
 import { ITorrentService, TorrentAction } from "../ITorrentService";
 
 const isVideoFilename = (filename: string): boolean => {

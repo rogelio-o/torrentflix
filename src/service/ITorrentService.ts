@@ -1,5 +1,5 @@
-import { IVideo } from "../../common/entity/IVideo";
-import { ITorrentDownloadData } from "./entity/ITorrendDonloadData";
+import { ITorrentDownloadData } from "../entity/ITorrendDonloadData";
+import { IVideo } from "../entity/IVideo";
 
 export interface ITorrentService {
   createServer(magnetURI: string): Promise<number>;

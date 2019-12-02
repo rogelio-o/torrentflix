@@ -7,7 +7,7 @@ import { SspdDevicesService } from "./device/service/ssdp/SspdDevicesService";
 import { IRenderService } from "./renderer/IRenderService";
 import { UpnpMediaRendererService } from "./renderer/upnp-mediarenderer/UpnpMediarendererService";
 import { ITorrentService } from "./torrent/services/ITorrentService";
-import { TorrentStreamService } from "./torrent/services/torrent-stream/TorrentStreamService";
+import { WebTorrentService } from "./torrent/services/webtorrent/WebTorrentService";
 
 const magnetURI = process.env.MAGNET_URI;
 
@@ -15,10 +15,12 @@ if (!magnetURI) {
   throw new Error("Env variable MAGNER_URI is required.");
 }
 
+require("events").EventEmitter.defaultMaxListeners = 0;
+
 const app = express();
 
 const devicesService: IDevicesService = new SspdDevicesService();
-const torrentService: ITorrentService = new TorrentStreamService(
+const torrentService: ITorrentService = new WebTorrentService(
   process.env.DATA_FOLDER || "/tmp",
   process.env.HOST || "http://192.168.0.15:9090",
   app,

@@ -15,7 +15,6 @@
     "express": "^4.17.1",
     "node-ssdp": "^4.0.0",
     "pump": "^3.0.0",
-    "torrent-stream": "^1.2.0",
     "upnp-mediarenderer-client": "^1.2.4",
     "webtorrent": "^0.107.17"
   },

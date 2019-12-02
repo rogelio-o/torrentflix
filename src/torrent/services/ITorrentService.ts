@@ -10,6 +10,8 @@ export interface ITorrentService {
 
   findVideoById(serverID: number, videoID: number): Promise<IVideo>;
 
+  startDownload(serverID: number, videoID: number): void;
+
   on(serverID: number, action: TorrentAction, callback: () => void): void;
 
   getDownloadData(serverID: number): ITorrentDownloadData;

@@ -38,15 +38,11 @@ export class PlayerServiceImpl implements IPlayerService {
                 },
               );
 
-              this.startPlaying(torrentServerID, renderizationID);
+              this.rendererService.play(renderizationID);
 
               return renderizationID;
             });
         });
     });
-  }
-
-  private startPlaying(torrentServerID: number, renderizationID: number): void {
-    this.rendererService.play(renderizationID);
   }
 }

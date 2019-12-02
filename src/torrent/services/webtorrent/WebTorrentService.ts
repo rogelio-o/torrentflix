@@ -108,7 +108,7 @@ export class WebTorrentService implements ITorrentService {
   }
 
   public startDownload(serverID: number, videoID: number): void {
-    // TODO
+    return this.data[serverID].files[videoID].file.select();
   }
 
   public on(

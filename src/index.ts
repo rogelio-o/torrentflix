@@ -1,5 +1,8 @@
+import bodyParser from "body-parser";
 import express from "express";
 
+import { DevicesHandler } from "./handlers/DevicesHandler";
+import { TorrentsHandler } from "./handlers/TorrentsHandler";
 import { IDevicesService } from "./service/IDevicesService";
 import { PlayerServiceImpl } from "./service/impl/PlayerServiceImpl";
 import { SspdDevicesService } from "./service/impl/SspdDevicesService";
@@ -8,12 +11,6 @@ import { WebTorrentService } from "./service/impl/WebTorrentService";
 import { IPlayerService } from "./service/IPlayerService";
 import { IRenderService } from "./service/IRenderService";
 import { ITorrentService } from "./service/ITorrentService";
-
-const magnetURI = process.env.MAGNET_URI;
-
-if (!magnetURI) {
-  throw new Error("Env variable MAGNER_URI is required.");
-}
 
 require("events").EventEmitter.defaultMaxListeners = 0;
 
@@ -32,10 +29,19 @@ const playerService: IPlayerService = new PlayerServiceImpl(
   renderService,
 );
 
-app.listen(9090, () => console.log(`Torrentflix listening on port ${9090}!`));
+app.use(bodyParser.json({ type: "application/json" }));
+
+const deviceHandler = new DevicesHandler(devicesService, playerService);
+app.post("/devices/refresh", deviceHandler.load.bind(deviceHandler));
+app.get("/devices", deviceHandler.findAll.bind(deviceHandler));
+app.put(
+  "/devices/:deviceID/torrents/:torrentID/videos/:videoID",
+  deviceHandler.attach.bind(deviceHandler),
+);
+
+const torrentsHandler = new TorrentsHandler(torrentService);
+app.post("/torrents", torrentsHandler.add.bind(torrentsHandler));
 
 devicesService.loadDevices().then(() => {
-  torrentService.createServer(magnetURI).then((torrentServerID) => {
-    playerService.load(0, torrentServerID, 0);
-  });
+  app.listen(9090, () => console.log(`Torrentflix listening on port ${9090}!`));
 });

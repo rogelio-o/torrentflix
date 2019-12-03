@@ -2,6 +2,7 @@ import bodyParser from "body-parser";
 import express from "express";
 
 import { DevicesHandler } from "./handlers/DevicesHandler";
+import { RenderizationsHandler } from "./handlers/RenderizationsHandler";
 import { TorrentsHandler } from "./handlers/TorrentsHandler";
 import { TorrentsVideosHandler } from "./handlers/TorrentsVideosHandler";
 import { IDevicesService } from "./service/IDevicesService";
@@ -54,6 +55,32 @@ app.get(
 app.get(
   "/torrents/:torrentID/videos/:videoID",
   torrentsVideosHandler.findById.bind(torrentsVideosHandler),
+);
+
+const renderizationsHandler = new RenderizationsHandler(renderService);
+app.get(
+  "/renderizations",
+  renderizationsHandler.findAll.bind(renderizationsHandler),
+);
+app.get(
+  "/renderizations/:renderizationID",
+  renderizationsHandler.findById.bind(renderizationsHandler),
+);
+app.put(
+  "/renderizations/:renderizationID/stop",
+  renderizationsHandler.stop.bind(renderizationsHandler),
+);
+app.put(
+  "/renderizations/:renderizationID/play",
+  renderizationsHandler.play.bind(renderizationsHandler),
+);
+app.put(
+  "/renderizations/:renderizationID/pause",
+  renderizationsHandler.pause.bind(renderizationsHandler),
+);
+app.put(
+  "/renderizations/:renderizationID/autoplay",
+  renderizationsHandler.pause.bind(renderizationsHandler),
 );
 
 devicesService.loadDevices().then(() => {

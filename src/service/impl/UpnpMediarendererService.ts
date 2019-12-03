@@ -1,11 +1,12 @@
 import MediaRendererClient from "upnp-mediarenderer-client";
 
 import { IDevice } from "../../entity/IDevice";
+import { IRenderization, RenderizationStatus } from "../../entity/IRenderization";
 import { IVideo } from "../../entity/IVideo";
 import { IRenderService, RenderAction } from "../IRenderService";
 
 export class UpnpMediaRendererService implements IRenderService {
-  private data: any[] = [];
+  private data: IRenderizationWrapper[] = [];
 
   private callbacks: {
     [id: number]: IRenderCallback[];
@@ -27,20 +28,46 @@ export class UpnpMediaRendererService implements IRenderService {
         if (err) {
           reject(err);
         } else {
-          const renderizationID = this.data.push(client) - 1;
+          const renderization: IRenderization = {
+            autoplay: true,
+            deviceID: device.id,
+            status: RenderizationStatus.PLAYING,
+            torrentID: video.torrentID,
+            videoID: video.id,
+          };
+          const renderizationID =
+            this.data.push({
+              client,
+              renderization,
+            }) - 1;
 
-          client.on("loading", () =>
-            this.runCallbacks(renderizationID, RenderAction.LOADING),
-          );
-          client.on("playing", () =>
-            this.runCallbacks(renderizationID, RenderAction.PLAYING),
-          );
-          client.on("paused", () =>
-            this.runCallbacks(renderizationID, RenderAction.PAUSED),
-          );
-          client.on("stopped", () =>
-            this.runCallbacks(renderizationID, RenderAction.STOPPED),
-          );
+          client.on("loading", () => {
+            renderization.status = RenderizationStatus.LOADING;
+
+            this.runCallbacks(renderizationID, RenderAction.LOADING);
+          });
+          client.on("playing", () => {
+            renderization.status = RenderizationStatus.PLAYING;
+
+            this.startUpdatingPosition(renderizationID);
+
+            this.runCallbacks(renderizationID, RenderAction.PLAYING);
+          });
+          client.on("paused", () => {
+            renderization.status = RenderizationStatus.PAUSED;
+
+            this.stopUpdatingPosition(renderizationID);
+
+            this.runCallbacks(renderizationID, RenderAction.PAUSED);
+          });
+          client.on("stopped", () => {
+            renderization.status = RenderizationStatus.STOPPED;
+
+            this.stopUpdatingPosition(renderizationID);
+
+            this.runCallbacks(renderizationID, RenderAction.STOPPED);
+          });
+
           client.on("speedChanged", () =>
             this.runCallbacks(renderizationID, RenderAction.SPEED_CHANGED),
           );
@@ -52,19 +79,19 @@ export class UpnpMediaRendererService implements IRenderService {
   }
 
   public play(renderizationID: number): Promise<void> {
-    this.data[renderizationID].play();
+    this.data[renderizationID].client.play();
 
     return Promise.resolve();
   }
 
   public pause(renderizationID: number): Promise<void> {
-    this.data[renderizationID].pause();
+    this.data[renderizationID].client.pause();
 
     return Promise.resolve();
   }
 
   public stop(renderizationID: number): Promise<void> {
-    this.data[renderizationID].stop();
+    this.data[renderizationID].client.stop();
 
     return Promise.resolve();
   }
@@ -81,6 +108,51 @@ export class UpnpMediaRendererService implements IRenderService {
     this.callbacks[renderizationID].push({ action, callback });
   }
 
+  public findAll(): Promise<IRenderization[]> {
+    return Promise.resolve(this.data.map((w) => w.renderization));
+  }
+
+  public findById(renderizationID: number): Promise<IRenderization> {
+    return Promise.resolve(this.data[renderizationID].renderization);
+  }
+
+  public autoplay(renderizationID: number, autoplay: boolean): Promise<void> {
+    this.data[renderizationID].renderization.autoplay = autoplay;
+
+    return Promise.resolve();
+  }
+
+  private startUpdatingPosition(renderizationID: number) {
+    this.data[renderizationID].interval = setInterval(() => {
+      const renderizationWrapper = this.data[renderizationID];
+      const client = renderizationWrapper.client;
+      const renderization = renderizationWrapper.renderization;
+
+      client.getPosition((err: Error, position: number) => {
+        if (err) {
+          console.error(err);
+        } else {
+          renderization.position = position;
+        }
+      });
+
+      client.getDuration((err: Error, duration: number) => {
+        if (err) {
+          console.error(err);
+        } else {
+          renderization.duration = duration;
+        }
+      });
+    }, 1000);
+  }
+
+  private stopUpdatingPosition(renderizationID: number) {
+    const inverval = this.data[renderizationID].interval;
+    if (inverval) {
+      clearInterval(inverval);
+    }
+  }
+
   private runCallbacks(renderizationID: number, action: RenderAction): void {
     if (this.callbacks[renderizationID]) {
       this.callbacks[renderizationID]
@@ -88,6 +160,14 @@ export class UpnpMediaRendererService implements IRenderService {
         .forEach((c) => c.callback());
     }
   }
+}
+
+interface IRenderizationWrapper {
+  renderization: IRenderization;
+
+  client: any;
+
+  interval?: any;
 }
 
 interface IRenderCallback {

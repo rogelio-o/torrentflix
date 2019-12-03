@@ -157,6 +157,7 @@ export class WebTorrentService implements ITorrentService {
       id: videoID,
       length: (file as any).length,
       name: file.name,
+      torrentID,
       url: this.parseUrlFromFile(torrentID, videoID),
     };
   }

@@ -4,7 +4,7 @@ import pump from "pump";
 import rangeParser, { Range, Ranges } from "range-parser";
 import WebTorrent, { Instance, Torrent, TorrentFile } from "webtorrent";
 
-import { ITorrentDownloadData } from "../../entity/ITorrendDonloadData";
+import { ITorrent } from "../../entity/ITorren";
 import { ITorrentCallback } from "../../entity/ITorrentCallback";
 import { IVideo } from "../../entity/IVideo";
 import { ITorrentService, TorrentAction } from "../ITorrentService";
@@ -43,7 +43,7 @@ export class WebTorrentService implements ITorrentService {
 
   private hostURL: string;
 
-  private callbacks: { [serverID: number]: ITorrentCallback[] } = {};
+  private callbacks: { [torrentID: number]: ITorrentCallback[] } = {};
 
   constructor(dataFolder: string, hostURL: string, app: express.Application) {
     this.dataFolder = dataFolder;
@@ -52,37 +52,37 @@ export class WebTorrentService implements ITorrentService {
     this.createHandler(app);
   }
 
-  public createServer(magnetURI: string): Promise<number> {
+  public load(magnetURI: string): Promise<number> {
     return new Promise((resolve, reject) => {
       // TODO on error mechanism
       this.webTorrent.add(
         magnetURI,
         { path: this.dataFolder },
         (torrent: Torrent) => {
-          const serverID = this.data.length;
+          const torrentID = this.data.length;
           this.data.push({
-            files: this.getFiles(serverID, torrent),
+            files: this.getFiles(torrentID, torrent),
             torrent,
           });
 
           this.webTorrent.addListener("download", () =>
-            this.runCallbacks(serverID, TorrentAction.DOWNLOAD),
+            this.runCallbacks(torrentID, TorrentAction.DOWNLOAD),
           );
           this.webTorrent.addListener("done", () =>
-            this.runCallbacks(serverID, TorrentAction.DONE),
+            this.runCallbacks(torrentID, TorrentAction.DONE),
           );
           this.webTorrent.addListener("noPeers", () =>
-            this.runCallbacks(serverID, TorrentAction.NO_PEERS),
+            this.runCallbacks(torrentID, TorrentAction.NO_PEERS),
           );
 
-          resolve(serverID);
+          resolve(torrentID);
         },
       );
     });
   }
 
-  public destroyServer(serverID: number): Promise<void> {
-    const { torrent } = this.data.splice(serverID, 1)[0];
+  public remove(torrentID: number): Promise<void> {
+    const { torrent } = this.data.splice(torrentID, 1)[0];
 
     return new Promise((resolve, reject) => {
       this.webTorrent.remove(torrent, (err?) => {
@@ -95,67 +95,86 @@ export class WebTorrentService implements ITorrentService {
     });
   }
 
-  public findAllVideos(serverID: number): Promise<IVideo[]> {
-    const { files } = this.data[serverID];
+  public findAllVideos(torrentID: number): Promise<IVideo[]> {
+    const { files } = this.data[torrentID];
 
-    return Promise.resolve(files.map((f) => f.video));
+    return Promise.resolve(
+      files.map((f, index) => this.parseVideo(torrentID, index, f)),
+    );
   }
 
-  public findVideoById(serverID: number, videoID: number): Promise<IVideo> {
-    const { files } = this.data[serverID];
+  public findVideoById(torrentID: number, videoID: number): Promise<IVideo> {
+    const { files } = this.data[torrentID];
 
-    return Promise.resolve(files[videoID].video);
+    return Promise.resolve(this.parseVideo(torrentID, videoID, files[videoID]));
   }
 
-  public startDownload(serverID: number, videoID: number): void {
-    return this.data[serverID].files[videoID].file.select();
+  public startDownload(torrentID: number, videoID: number): void {
+    return this.data[torrentID].files[videoID].select();
   }
 
   public on(
-    serverID: number,
+    torrentID: number,
     action: TorrentAction,
     callback: () => void,
   ): void {
-    if (!this.callbacks[serverID]) {
-      this.callbacks[serverID] = [];
+    if (!this.callbacks[torrentID]) {
+      this.callbacks[torrentID] = [];
     }
 
-    this.callbacks[serverID].push({ action, callback });
+    this.callbacks[torrentID].push({ action, callback });
   }
 
-  public getDownloadData(serverID: number): ITorrentDownloadData {
-    const { torrent } = this.data[serverID];
+  public findAll(): Promise<ITorrent[]> {
+    return Promise.resolve(
+      this.data.map(({ torrent }) => this.parseTorrent(torrent)),
+    );
+  }
 
+  public findById(torrentID: number): Promise<ITorrent> {
+    const { torrent } = this.data[torrentID];
+
+    return Promise.resolve(this.parseTorrent(torrent));
+  }
+
+  private parseTorrent(torrent: Torrent): ITorrent {
     return {
       downloadSpeed: torrent.downloadSpeed,
       downloaded: torrent.downloaded,
       downloadedPerentage: torrent.progress,
+      magnetUri: torrent.magnetURI,
+      name: torrent.name,
+      uploadSpeed: torrent.uploadSpeed,
     };
   }
 
-  private parseUrlFromFile(serverID: number, fileID: number) {
-    return this.hostURL + this.parsePathFromFile(serverID, fileID);
+  private parseVideo(torrentID: number, videoID: number, file: TorrentFile) {
+    return {
+      contentType: contentTypeFromFilename(file.name),
+      downloaded: (file as any).downloaded,
+      downloadedPerentage: (file as any).progress,
+      filename: file.name,
+      id: videoID,
+      length: (file as any).length,
+      name: file.name,
+      url: this.parseUrlFromFile(torrentID, videoID),
+    };
   }
 
-  private parsePathFromFile(serverID: number, fileID: number): string {
-    return "/torrent/servers/" + serverID + "/files/" + fileID + "/stream";
+  private parseUrlFromFile(torrentID: number, fileID: number) {
+    return this.hostURL + this.parsePathFromFile(torrentID, fileID);
   }
 
-  private getFiles(serverID: number, torrent: Torrent): IWebTorrentFile[] {
+  private parsePathFromFile(torrentID: number, fileID: number): string {
+    return "/torrent/servers/" + torrentID + "/files/" + fileID + "/stream";
+  }
+
+  private getFiles(torrentID: number, torrent: Torrent): TorrentFile[] {
     const videos = [];
     let fileIndex = 0;
     for (const file of torrent.files) {
       if (isVideoFilename(file.name)) {
-        videos.push({
-          file,
-          video: {
-            contentType: contentTypeFromFilename(file.name),
-            filename: file.name,
-            id: fileIndex,
-            name: file.name,
-            url: this.parseUrlFromFile(serverID, fileIndex),
-          },
-        });
+        videos.push(file);
         fileIndex++;
       }
     }
@@ -163,16 +182,16 @@ export class WebTorrentService implements ITorrentService {
     return videos;
   }
 
-  private runCallbacks(serverID: number, action: TorrentAction): void {
-    if (this.callbacks[serverID]) {
-      this.callbacks[serverID]
+  private runCallbacks(torrentID: number, action: TorrentAction): void {
+    if (this.callbacks[torrentID]) {
+      this.callbacks[torrentID]
         .filter((c) => c.action === action)
         .forEach((c) => c.callback());
     }
   }
 
   private createHandler(app: express.Application) {
-    app.all("/torrent/servers/:serverID/files/:fileID/stream", (req, res) => {
+    app.all("/torrent/servers/:torrentID/files/:fileID/stream", (req, res) => {
       if (
         req.method === "OPTIONS" &&
         req.headers["access-control-request-headers"]
@@ -189,15 +208,16 @@ export class WebTorrentService implements ITorrentService {
         }
         res.end();
       } else {
-        const serverID = parseInt(req.params.serverID, 10);
+        const torrentID = parseInt(req.params.torrentID, 10);
         const fileID = parseInt(req.params.fileID, 10);
 
-        const server = this.data[serverID];
-        const fileWrapper = (server || { videos: [] }).files[fileID];
+        const server = this.data[torrentID];
+        const file = (server || { videos: [] }).files[fileID];
 
-        if (server && fileWrapper) {
-          const file = fileWrapper.file;
-          const video = fileWrapper.video;
+        if (server && file) {
+          let stream: any | undefined;
+          res.on("close", () => stream && stream.destroy());
+          res.on("end", () => stream && stream.destroy());
 
           res.statusCode = 200;
           res.setHeader(
@@ -249,10 +269,12 @@ export class WebTorrentService implements ITorrentService {
           }
 
           if (range === null) {
-            pump(file.createReadStream(), res);
+            stream = file.createReadStream();
           } else {
-            pump(file.createReadStream(range), res);
+            stream = file.createReadStream(range);
           }
+
+          pump(stream, res);
         } else {
           res.sendStatus(404);
         }
@@ -261,14 +283,8 @@ export class WebTorrentService implements ITorrentService {
   }
 }
 
-interface IWebTorrentFile {
-  video: IVideo;
-
-  file: TorrentFile;
-}
-
 interface IWebTorrentServer {
   torrent: Torrent;
 
-  files: IWebTorrentFile[];
+  files: TorrentFile[];
 }

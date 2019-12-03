@@ -8,4 +8,10 @@ export interface IVideo {
   contentType: string;
 
   url: string;
+
+  downloaded: number;
+
+  downloadedPerentage: number;
+
+  length: number;
 }

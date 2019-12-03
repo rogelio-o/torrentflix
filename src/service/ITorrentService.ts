@@ -1,20 +1,22 @@
-import { ITorrentDownloadData } from "../entity/ITorrendDonloadData";
+import { ITorrent } from "../entity/ITorren";
 import { IVideo } from "../entity/IVideo";
 
 export interface ITorrentService {
-  createServer(magnetURI: string): Promise<number>;
+  load(magnetURI: string): Promise<number>;
 
-  destroyServer(serverID: number): Promise<void>;
+  remove(torrentID: number): Promise<void>;
 
-  findAllVideos(serverID: number): Promise<IVideo[]>;
+  findAllVideos(torrentID: number): Promise<IVideo[]>;
 
-  findVideoById(serverID: number, videoID: number): Promise<IVideo>;
+  findVideoById(torrentID: number, videoID: number): Promise<IVideo>;
 
-  startDownload(serverID: number, videoID: number): void;
+  startDownload(torrentID: number, videoID: number): void;
 
-  on(serverID: number, action: TorrentAction, callback: () => void): void;
+  on(torrentID: number, action: TorrentAction, callback: () => void): void;
 
-  getDownloadData(serverID: number): ITorrentDownloadData;
+  findAll(): Promise<ITorrent[]>;
+
+  findById(torrentID: number): Promise<ITorrent>;
 }
 
 export enum TorrentAction {

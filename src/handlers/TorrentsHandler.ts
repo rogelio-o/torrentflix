@@ -13,8 +13,38 @@ export class TorrentsHandler {
     const body = req.body;
 
     this.torrentService
-      .createServer(body.magnet_uri)
+      .load(body.magnet_uri)
       .then(() => res.sendStatus(201))
+      .catch((e) => {
+        console.error(e);
+        res.sendStatus(500);
+      });
+  }
+
+  public remove(req: express.Request, res: express.Response) {
+    this.torrentService
+      .remove(parseInt(req.params.torrentID, 10))
+      .then(() => res.sendStatus(204))
+      .catch((e) => {
+        console.error(e);
+        res.sendStatus(500);
+      });
+  }
+
+  public findAll(req: express.Request, res: express.Response) {
+    this.torrentService
+      .findAll()
+      .then((torrents) => res.json(torrents))
+      .catch((e) => {
+        console.error(e);
+        res.sendStatus(500);
+      });
+  }
+
+  public findById(req: express.Request, res: express.Response) {
+    this.torrentService
+      .findById(parseInt(req.params.torrentID, 10))
+      .then((torrent) => res.json(torrent))
       .catch((e) => {
         console.error(e);
         res.sendStatus(500);

@@ -1,6 +1,6 @@
 import { IDevicesService } from "../IDevicesService";
 import { IPlayerService } from "../IPlayerService";
-import { IRenderService, RenderAction } from "../IRenderService";
+import { IRenderService } from "../IRenderService";
 import { ITorrentService } from "../ITorrentService";
 
 export class PlayerServiceImpl implements IPlayerService {
@@ -30,14 +30,6 @@ export class PlayerServiceImpl implements IPlayerService {
           return this.rendererService
             .load(video, device)
             .then((renderizationID) => {
-              this.rendererService.on(
-                renderizationID,
-                RenderAction.STOPPED,
-                () => {
-                  this.torrentService.destroyServer(torrentServerID);
-                },
-              );
-
               this.rendererService.play(renderizationID);
 
               return renderizationID;

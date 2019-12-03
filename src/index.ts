@@ -3,6 +3,7 @@ import express from "express";
 
 import { DevicesHandler } from "./handlers/DevicesHandler";
 import { TorrentsHandler } from "./handlers/TorrentsHandler";
+import { TorrentsVideosHandler } from "./handlers/TorrentsVideosHandler";
 import { IDevicesService } from "./service/IDevicesService";
 import { PlayerServiceImpl } from "./service/impl/PlayerServiceImpl";
 import { SspdDevicesService } from "./service/impl/SspdDevicesService";
@@ -41,7 +42,23 @@ app.put(
 
 const torrentsHandler = new TorrentsHandler(torrentService);
 app.post("/torrents", torrentsHandler.add.bind(torrentsHandler));
+app.get("/torrents", torrentsHandler.findAll.bind(torrentsHandler));
+app.get("/torrents/:torrentID", torrentsHandler.findById.bind(torrentsHandler));
+app.delete("/torrents", torrentsHandler.remove.bind(torrentsHandler));
+
+const torrentsVideosHandler = new TorrentsVideosHandler(torrentService);
+app.get(
+  "/torrents/:torrentID/videos",
+  torrentsVideosHandler.findAll.bind(torrentsVideosHandler),
+);
+app.get(
+  "/torrents/:torrentID/videos/:videoID",
+  torrentsVideosHandler.findById.bind(torrentsVideosHandler),
+);
 
 devicesService.loadDevices().then(() => {
-  app.listen(9090, () => console.log(`Torrentflix listening on port ${9090}!`));
+  const server = app.listen(9090, () =>
+    console.log(`Torrentflix listening on port ${9090}!`),
+  );
+  server.setTimeout(3600000);
 });

@@ -80,7 +80,7 @@ app.put(
 );
 app.put(
   "/renderizations/:renderizationID/autoplay",
-  renderizationsHandler.pause.bind(renderizationsHandler),
+  renderizationsHandler.autoplay.bind(renderizationsHandler),
 );
 
 devicesService.loadDevices().then(() => {

@@ -87,5 +87,7 @@ devicesService.loadDevices().then(() => {
   const server = app.listen(9090, () =>
     console.log(`Torrentflix listening on port ${9090}!`),
   );
-  server.setTimeout(3600000);
+  server.on("connection", (socket) => {
+    server.setTimeout(36000000);
+  });
 });

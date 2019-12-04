@@ -1,7 +1,7 @@
 import * as express from "express";
 import mime from "mime";
-import pump from "pump";
 import rangeParser, { Range, Ranges } from "range-parser";
+import { pipeline } from "stream";
 import WebTorrent, { Instance, Torrent, TorrentFile } from "webtorrent";
 
 import { ITorrent } from "../../entity/ITorren";
@@ -217,8 +217,6 @@ export class WebTorrentService implements ITorrentService {
 
         if (server && file) {
           let stream: any | undefined;
-          res.on("close", () => stream && stream.destroy());
-          res.on("end", () => stream && stream.destroy());
 
           res.statusCode = 200;
           res.setHeader(
@@ -275,7 +273,7 @@ export class WebTorrentService implements ITorrentService {
             stream = file.createReadStream(range);
           }
 
-          pump(stream, res);
+          pipeline(stream, res);
         } else {
           res.sendStatus(404);
         }

@@ -11,6 +11,8 @@ export interface IRenderService {
 
   stop(renderizationID: number): Promise<void>;
 
+  seek(renderizationID: number, seconds: number): Promise<void>;
+
   on(renderizationID: number, action: RenderAction, callback: () => void): void;
 
   findAll(): Promise<IRenderization[]>;

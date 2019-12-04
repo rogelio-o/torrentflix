@@ -20,12 +20,12 @@ export class PlayerServiceImpl implements IPlayerService {
 
   public load(
     deviceID: number,
-    torrentServerID: number,
+    torrentID: number,
     videoID: number,
   ): Promise<number> {
     return this.devicesService.getDevice(deviceID).then((device) => {
       return this.torrentService
-        .findVideoById(torrentServerID, videoID)
+        .findVideoById(torrentID, videoID)
         .then((video) => {
           return this.rendererService
             .load(video, device)

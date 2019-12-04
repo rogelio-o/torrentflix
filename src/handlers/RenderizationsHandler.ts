@@ -70,4 +70,16 @@ export class RenderizationsHandler {
         res.sendStatus(500);
       });
   }
+
+  public seek(req: express.Request, res: express.Response) {
+    const body = req.body;
+
+    this.renderService
+      .seek(parseInt(req.params.renderizationID, 10), body.seconds)
+      .then(() => res.sendStatus(204))
+      .catch((e) => {
+        console.error(e);
+        res.sendStatus(500);
+      });
+  }
 }

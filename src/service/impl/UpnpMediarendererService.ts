@@ -91,7 +91,15 @@ export class UpnpMediaRendererService implements IRenderService {
   }
 
   public stop(renderizationID: number): Promise<void> {
-    this.data[renderizationID].client.stop();
+    const wrapper = this.data[renderizationID];
+    wrapper.renderization.autoplay = false;
+    wrapper.client.stop();
+
+    return Promise.resolve();
+  }
+
+  public seek(renderizationID: number, seconds: number): Promise<void> {
+    this.data[renderizationID].client.seek(seconds);
 
     return Promise.resolve();
   }

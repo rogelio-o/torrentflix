@@ -1,5 +1,5 @@
 import * as express from "express";
-import mime from "mime";
+import * as mime from "mime";
 import rangeParser, { Range, Ranges } from "range-parser";
 import { pipeline } from "stream";
 import WebTorrent, { Instance, Torrent, TorrentFile } from "webtorrent";
@@ -273,7 +273,13 @@ export class WebTorrentService implements ITorrentService {
             stream = file.createReadStream(range);
           }
 
-          pipeline(stream, res);
+          pipeline(stream, res, (err) => {
+            if (err) {
+              console.error("Pipeline failed.", err);
+            } else {
+              console.log("Pipeline succeeded.");
+            }
+          });
         } else {
           res.sendStatus(404);
         }

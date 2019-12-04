@@ -274,10 +274,8 @@ export class WebTorrentService implements ITorrentService {
           }
 
           pipeline(stream, res, (err) => {
-            if (err) {
+            if (err && err.code !== "ERR_STREAM_PREMATURE_CLOSE") {
               console.error("Pipeline failed.", err);
-            } else {
-              console.log("Pipeline succeeded.");
             }
           });
         } else {

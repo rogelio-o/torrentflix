@@ -82,12 +82,24 @@ app.put(
   "/renderizations/:renderizationID/autoplay",
   renderizationsHandler.autoplay.bind(renderizationsHandler),
 );
+app.put(
+  "/renderizations/:renderizationID/seek",
+  renderizationsHandler.autoplay.bind(renderizationsHandler),
+);
 
 devicesService.loadDevices().then(() => {
   const server = app.listen(9090, () =>
     console.log(`Torrentflix listening on port ${9090}!`),
   );
+  const sockets: any[] = [];
   server.on("connection", (socket) => {
-    server.setTimeout(36000000);
+    socket.setTimeout(36000000);
+    const index = sockets.push(socket) - 1;
+    socket.once("close", () => {
+      sockets.splice(index, 1);
+    });
+  });
+  server.on("close", () => {
+    sockets.forEach((socket) => socket.destroy());
   });
 });

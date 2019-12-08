@@ -4,14 +4,17 @@ import express from "express";
 import { DevicesHandler } from "./handlers/DevicesHandler";
 import { RenderizationsHandler } from "./handlers/RenderizationsHandler";
 import { TorrentsHandler } from "./handlers/TorrentsHandler";
+import { TorrentsSearchHandler } from "./handlers/TorrentsSearchHandler";
 import { TorrentsVideosHandler } from "./handlers/TorrentsVideosHandler";
 import { IDevicesService } from "./service/IDevicesService";
+import { ApiTorrentSearchService } from "./service/impl/ApiTorrentSearchService";
 import { PlayerServiceImpl } from "./service/impl/PlayerServiceImpl";
 import { SspdDevicesService } from "./service/impl/SspdDevicesService";
 import { UpnpMediaRendererService } from "./service/impl/UpnpMediarendererService";
 import { WebTorrentService } from "./service/impl/WebTorrentService";
 import { IPlayerService } from "./service/IPlayerService";
 import { IRenderService } from "./service/IRenderService";
+import { ITorrentSearchService } from "./service/ITorrentSearchService";
 import { ITorrentService } from "./service/ITorrentService";
 
 require("events").EventEmitter.defaultMaxListeners = 0;
@@ -30,6 +33,7 @@ const playerService: IPlayerService = new PlayerServiceImpl(
   torrentService,
   renderService,
 );
+const torrentSearchService: ITorrentSearchService = new ApiTorrentSearchService();
 
 app.use(bodyParser.json({ type: "application/json" }));
 
@@ -39,6 +43,14 @@ app.get("/devices", deviceHandler.findAll.bind(deviceHandler));
 app.put(
   "/devices/:deviceID/torrents/:torrentID/videos/:videoID",
   deviceHandler.attach.bind(deviceHandler),
+);
+
+const torrentsSearchHandler: TorrentsSearchHandler = new TorrentsSearchHandler(
+  torrentSearchService,
+);
+app.get(
+  "/torrents/search",
+  torrentsSearchHandler.search.bind(torrentsSearchHandler),
 );
 
 const torrentsHandler = new TorrentsHandler(torrentService);

@@ -10,7 +10,11 @@ import { IVideo } from "../../entity/IVideo";
 import { ITorrentService, TorrentAction } from "../ITorrentService";
 
 const isVideoFilename = (filename: string): boolean => {
-  return filename.endsWith(".mkv") || filename.endsWith(".mp4");
+  return (
+    filename.endsWith(".mkv") ||
+    filename.endsWith(".mp4") ||
+    filename.endsWith(".avi")
+  );
 };
 
 const contentTypeFromFilename = (filename: string) => {

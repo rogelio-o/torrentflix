@@ -21,7 +21,7 @@ export class RenderizationsHandler {
 
   public findById(req: express.Request, res: express.Response) {
     this.renderService
-      .findById(parseInt(req.params.renderizationID, 10))
+      .findById(req.params.renderizationID)
       .then((renderization) => res.json(renderization))
       .catch((e) => {
         console.error(e);
@@ -31,7 +31,7 @@ export class RenderizationsHandler {
 
   public stop(req: express.Request, res: express.Response) {
     this.renderService
-      .stop(parseInt(req.params.renderizationID, 10))
+      .stop(req.params.renderizationID)
       .then(() => res.sendStatus(204))
       .catch((e) => {
         console.error(e);
@@ -41,7 +41,7 @@ export class RenderizationsHandler {
 
   public play(req: express.Request, res: express.Response) {
     this.renderService
-      .play(parseInt(req.params.renderizationID, 10))
+      .play(req.params.renderizationID)
       .then(() => res.sendStatus(204))
       .catch((e) => {
         console.error(e);
@@ -51,7 +51,7 @@ export class RenderizationsHandler {
 
   public pause(req: express.Request, res: express.Response) {
     this.renderService
-      .pause(parseInt(req.params.renderizationID, 10))
+      .pause(req.params.renderizationID)
       .then(() => res.sendStatus(204))
       .catch((e) => {
         console.error(e);
@@ -63,7 +63,7 @@ export class RenderizationsHandler {
     const body = req.body;
 
     this.renderService
-      .autoplay(parseInt(req.params.renderizationID, 10), body.autoplay)
+      .autoplay(req.params.renderizationID, body.autoplay)
       .then(() => res.sendStatus(204))
       .catch((e) => {
         console.error(e);
@@ -75,7 +75,7 @@ export class RenderizationsHandler {
     const body = req.body;
 
     this.renderService
-      .seek(parseInt(req.params.renderizationID, 10), body.seconds)
+      .seek(req.params.renderizationID, body.seconds)
       .then(() => res.sendStatus(204))
       .catch((e) => {
         console.error(e);

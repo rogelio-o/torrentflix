@@ -1,7 +1,7 @@
 export interface IVideo {
-  id: number;
+  id: string;
 
-  torrentID: number;
+  torrentID: string;
 
   filename: string;
 

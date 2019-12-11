@@ -5,5 +5,5 @@ export interface IDevicesService {
 
   getDevices(): Promise<IDevice[]>;
 
-  getDevice(deviceID: number): Promise<IDevice>;
+  getDevice(deviceID: string): Promise<IDevice>;
 }

@@ -1,11 +1,13 @@
 export interface IRenderization {
-  deviceID: number;
+  id: string;
+
+  deviceID: string;
 
   status: RenderizationStatus;
 
-  torrentID: number;
+  torrentID: string;
 
-  videoID: number;
+  videoID: string;
 
   autoplay: boolean;
 

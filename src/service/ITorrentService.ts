@@ -2,21 +2,21 @@ import { ITorrent } from "../entity/ITorren";
 import { IVideo } from "../entity/IVideo";
 
 export interface ITorrentService {
-  load(magnetURI: string): Promise<number>;
+  createFromMagnet(magnetURI: string): Promise<ITorrent>;
 
-  remove(torrentID: number): Promise<void>;
+  remove(torrentID: string): Promise<void>;
 
-  findAllVideos(torrentID: number): Promise<IVideo[]>;
+  findAllVideos(torrentID: string): Promise<IVideo[]>;
 
-  findVideoById(torrentID: number, videoID: number): Promise<IVideo>;
+  findVideoById(torrentID: string, videoID: string): Promise<IVideo>;
 
-  startDownload(torrentID: number, videoID: number): void;
+  startDownload(torrentID: string, videoID: string): void;
 
-  on(torrentID: number, action: TorrentAction, callback: () => void): void;
+  on(torrentID: string, action: TorrentAction, callback: () => void): void;
 
   findAll(): Promise<ITorrent[]>;
 
-  findById(torrentID: number): Promise<ITorrent>;
+  findById(torrentID: string): Promise<ITorrent>;
 }
 
 export enum TorrentAction {

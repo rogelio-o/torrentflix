@@ -3,23 +3,23 @@ import { IRenderization } from "../entity/IRenderization";
 import { IVideo } from "../entity/IVideo";
 
 export interface IRenderService {
-  load(video: IVideo, device: IDevice): Promise<number>;
+  load(video: IVideo, device: IDevice): Promise<IRenderization>;
 
-  play(renderizationID: number): Promise<void>;
+  play(renderizationID: string): Promise<void>;
 
-  pause(renderizationID: number): Promise<void>;
+  pause(renderizationID: string): Promise<void>;
 
-  stop(renderizationID: number): Promise<void>;
+  stop(renderizationID: string): Promise<void>;
 
-  seek(renderizationID: number, seconds: number): Promise<void>;
+  seek(renderizationID: string, seconds: number): Promise<void>;
 
-  on(renderizationID: number, action: RenderAction, callback: () => void): void;
+  on(renderizationID: string, action: RenderAction, callback: () => void): void;
 
   findAll(): Promise<IRenderization[]>;
 
-  findById(renderizationID: number): Promise<IRenderization>;
+  findById(renderizationID: string): Promise<IRenderization>;
 
-  autoplay(renderizationID: number, autoplay: boolean): Promise<void>;
+  autoplay(renderizationID: string, autoplay: boolean): Promise<void>;
 }
 
 export enum RenderAction {

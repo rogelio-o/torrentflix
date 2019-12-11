@@ -1,7 +1,9 @@
+import { IRenderization } from "../entity/IRenderization";
+
 export interface IPlayerService {
-  load(
-    deviceID: number,
-    torrentServerID: number,
-    videoID: number,
-  ): Promise<number>;
+  attach(
+    deviceID: string,
+    torrentID: string,
+    videoID: string,
+  ): Promise<IRenderization>;
 }

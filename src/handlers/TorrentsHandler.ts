@@ -13,7 +13,7 @@ export class TorrentsHandler {
     const body = req.body;
 
     this.torrentService
-      .load(body.magnet_uri)
+      .createFromMagnet(body.magnet_uri)
       .then(() => res.sendStatus(201))
       .catch((e) => {
         console.error(e);
@@ -23,7 +23,7 @@ export class TorrentsHandler {
 
   public remove(req: express.Request, res: express.Response) {
     this.torrentService
-      .remove(parseInt(req.params.torrentID, 10))
+      .remove(req.params.torrentID)
       .then(() => res.sendStatus(204))
       .catch((e) => {
         console.error(e);
@@ -43,7 +43,7 @@ export class TorrentsHandler {
 
   public findById(req: express.Request, res: express.Response) {
     this.torrentService
-      .findById(parseInt(req.params.torrentID, 10))
+      .findById(req.params.torrentID)
       .then((torrent) => res.json(torrent))
       .catch((e) => {
         console.error(e);

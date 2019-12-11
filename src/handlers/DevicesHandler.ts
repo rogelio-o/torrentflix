@@ -35,11 +35,7 @@ export class DevicesHandler {
 
   public attach(req: express.Request, res: express.Response) {
     this.playerService
-      .load(
-        parseInt(req.params.deviceID, 10),
-        parseInt(req.params.torrentID, 10),
-        parseInt(req.params.videoID, 10),
-      )
+      .attach(req.params.deviceID, req.params.torrentID, req.params.videoID)
       .then(() => res.sendStatus(204))
       .catch((e) => {
         console.error(e);

@@ -11,7 +11,7 @@ export class TorrentsVideosHandler {
 
   public findAll(req: express.Request, res: express.Response) {
     this.torrentsService
-      .findAllVideos(parseInt(req.params.torrentID, 10))
+      .findAllVideos(req.params.torrentID)
       .then((videos) => res.json(videos))
       .catch((e) => {
         console.error(e);
@@ -21,10 +21,7 @@ export class TorrentsVideosHandler {
 
   public findById(req: express.Request, res: express.Response) {
     this.torrentsService
-      .findVideoById(
-        parseInt(req.params.torrentID, 10),
-        parseInt(req.params.videoID, 10),
-      )
+      .findVideoById(req.params.torrentID, req.params.videoID)
       .then((video) => res.json(video))
       .catch((e) => {
         console.error(e);

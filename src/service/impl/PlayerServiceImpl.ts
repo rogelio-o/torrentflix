@@ -1,3 +1,4 @@
+import { IRenderization } from "../../entity/IRenderization";
 import { IDevicesService } from "../IDevicesService";
 import { IPlayerService } from "../IPlayerService";
 import { IRenderService } from "../IRenderService";
@@ -18,21 +19,21 @@ export class PlayerServiceImpl implements IPlayerService {
     this.rendererService = rendererService;
   }
 
-  public load(
-    deviceID: number,
-    torrentID: number,
-    videoID: number,
-  ): Promise<number> {
+  public attach(
+    deviceID: string,
+    torrentID: string,
+    videoID: string,
+  ): Promise<IRenderization> {
     return this.devicesService.getDevice(deviceID).then((device) => {
       return this.torrentService
         .findVideoById(torrentID, videoID)
         .then((video) => {
           return this.rendererService
             .load(video, device)
-            .then((renderizationID) => {
-              this.rendererService.play(renderizationID);
+            .then((renderization) => {
+              this.rendererService.play(renderization.id);
 
-              return renderizationID;
+              return renderization;
             });
         });
     });

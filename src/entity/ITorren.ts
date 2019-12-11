@@ -1,4 +1,6 @@
 export interface ITorrent {
+  id: string;
+
   name: string;
 
   magnetUri: string;

@@ -1,11 +1,14 @@
 import bodyParser from "body-parser";
 import express from "express";
+import sqlite from "sqlite";
 
 import { DevicesHandler } from "./handlers/DevicesHandler";
 import { RenderizationsHandler } from "./handlers/RenderizationsHandler";
 import { TorrentsHandler } from "./handlers/TorrentsHandler";
 import { TorrentsSearchHandler } from "./handlers/TorrentsSearchHandler";
 import { TorrentsVideosHandler } from "./handlers/TorrentsVideosHandler";
+import { ITorrentRepository } from "./repositories/ITorrentRepository";
+import { SqliteTorrentRepository } from "./repositories/sqlite/SqliteTorrentRepository";
 import { IDevicesService } from "./service/IDevicesService";
 import { ApiTorrentSearchService } from "./service/impl/ApiTorrentSearchService";
 import { PlayerServiceImpl } from "./service/impl/PlayerServiceImpl";
@@ -19,11 +22,21 @@ import { ITorrentService } from "./service/ITorrentService";
 
 require("events").EventEmitter.defaultMaxListeners = 0;
 
+const dataFolder = process.env.DATA_FOLDER || "/tmp";
+const dbPromise = Promise.resolve()
+  .then(() => sqlite.open(`${dataFolder}/database.sqlite`))
+  .then((db) => db.migrate({}));
+
 const app = express();
+
+const torrentsRepository: ITorrentRepository = new SqliteTorrentRepository(
+  dbPromise,
+);
 
 const devicesService: IDevicesService = new SspdDevicesService();
 const torrentService: ITorrentService = new WebTorrentService(
-  process.env.DATA_FOLDER || "/tmp",
+  torrentsRepository,
+  dataFolder,
   process.env.HOST || "http://192.168.0.15:9090",
   app,
 );
@@ -57,7 +70,10 @@ const torrentsHandler = new TorrentsHandler(torrentService);
 app.post("/torrents", torrentsHandler.add.bind(torrentsHandler));
 app.get("/torrents", torrentsHandler.findAll.bind(torrentsHandler));
 app.get("/torrents/:torrentID", torrentsHandler.findById.bind(torrentsHandler));
-app.delete("/torrents", torrentsHandler.remove.bind(torrentsHandler));
+app.delete(
+  "/torrents/:torrentID",
+  torrentsHandler.remove.bind(torrentsHandler),
+);
 
 const torrentsVideosHandler = new TorrentsVideosHandler(torrentService);
 app.get(
@@ -99,7 +115,17 @@ app.put(
   renderizationsHandler.autoplay.bind(renderizationsHandler),
 );
 
-devicesService.loadDevices().then(() => {
+devicesService.loadDevices().then(async () => {
+  // LOAD saved torrents
+  console.log("Loading torrents...");
+  const savedTorrents = await torrentsRepository.findAll();
+  await Promise.all(
+    savedTorrents.map((savedTorrent) =>
+      torrentService.createFromRow(savedTorrent),
+    ),
+  );
+
+  // LOAD server
   const server = app.listen(9090, () =>
     console.log(`Torrentflix listening on port ${9090}!`),
   );

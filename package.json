@@ -17,6 +17,7 @@
     "mime": "^2.4.4",
     "node-ssdp": "^4.0.0",
     "pump": "^3.0.0",
+    "sqlite": "^3.0.3",
     "torrent-search-api": "^2.0.10",
     "upnp-mediarenderer-client": "^1.2.4",
     "uuid": "^3.3.3",

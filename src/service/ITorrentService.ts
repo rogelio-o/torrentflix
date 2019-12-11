@@ -1,8 +1,11 @@
 import { ITorrent } from "../entity/ITorren";
+import { ITorrentRow } from "../entity/ITorrentRow";
 import { IVideo } from "../entity/IVideo";
 
 export interface ITorrentService {
   createFromMagnet(magnetURI: string): Promise<ITorrent>;
+
+  createFromRow(torrentRow: ITorrentRow): Promise<ITorrent>;
 
   remove(torrentID: string): Promise<void>;
 

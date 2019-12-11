@@ -7,7 +7,9 @@ import WebTorrent, { Instance, Torrent, TorrentFile } from "webtorrent";
 
 import { ITorrent } from "../../entity/ITorren";
 import { ITorrentCallback } from "../../entity/ITorrentCallback";
+import { ITorrentRow } from "../../entity/ITorrentRow";
 import { IVideo } from "../../entity/IVideo";
+import { ITorrentRepository } from "../../repositories/ITorrentRepository";
 import { ITorrentService, TorrentAction } from "../ITorrentService";
 
 const isVideoFilename = (filename: string): boolean => {
@@ -48,45 +50,56 @@ export class WebTorrentService implements ITorrentService {
 
   private hostURL: string;
 
+  private torrentsRepository: ITorrentRepository;
+
   private callbacks: { [torrentID: string]: ITorrentCallback[] } = {};
 
-  constructor(dataFolder: string, hostURL: string, app: express.Application) {
+  constructor(
+    torrentsRepository: ITorrentRepository,
+    dataFolder: string,
+    hostURL: string,
+    app: express.Application,
+  ) {
+    this.torrentsRepository = torrentsRepository;
     this.dataFolder = dataFolder;
     this.hostURL = hostURL;
 
     this.createHandler(app);
   }
 
-  public createFromMagnet(magnetURI: string): Promise<ITorrent> {
-    return new Promise((resolve, reject) => {
-      // TODO on error mechanism
-      this.webTorrent.add(
-        magnetURI,
-        { path: this.dataFolder },
-        (torrent: Torrent) => {
-          const torrentID = uuidv4();
-          this.data[torrentID] = {
-            files: this.getFiles(torrentID, torrent),
-            torrent,
-          };
-
-          this.webTorrent.addListener("download", () =>
-            this.runCallbacks(torrentID, TorrentAction.DOWNLOAD),
-          );
-          this.webTorrent.addListener("done", () =>
-            this.runCallbacks(torrentID, TorrentAction.DONE),
-          );
-          this.webTorrent.addListener("noPeers", () =>
-            this.runCallbacks(torrentID, TorrentAction.NO_PEERS),
-          );
-
-          resolve(this.parseTorrent(torrent));
-        },
-      );
-    });
+  public createFromMagnet(magnetUri: string): Promise<ITorrent> {
+    return this.createFromRow({ magnetUri });
   }
 
-  public remove(torrentID: string): Promise<void> {
+  public async createFromRow(torrentRow: ITorrentRow): Promise<ITorrent> {
+    const torrent = await this.createWebTorrentFromMagnet(torrentRow.magnetUri);
+
+    if (!torrentRow.id) {
+      await this.torrentsRepository.save(torrentRow);
+    }
+
+    const torrentID = torrentRow.id || uuidv4();
+    this.data[torrentID] = {
+      files: this.getFiles(torrentID, torrent),
+      torrent,
+    };
+
+    this.webTorrent.addListener("download", () =>
+      this.runCallbacks(torrentID, TorrentAction.DOWNLOAD),
+    );
+    this.webTorrent.addListener("done", () =>
+      this.runCallbacks(torrentID, TorrentAction.DONE),
+    );
+    this.webTorrent.addListener("noPeers", () =>
+      this.runCallbacks(torrentID, TorrentAction.NO_PEERS),
+    );
+
+    return this.parseTorrent(torrentID, torrent);
+  }
+
+  public async remove(torrentID: string): Promise<void> {
+    await this.torrentsRepository.delete(torrentID);
+
     const { torrent } = this.data[torrentID];
     delete this.data[torrentID];
 
@@ -95,6 +108,8 @@ export class WebTorrentService implements ITorrentService {
         if (err) {
           reject(err);
         } else {
+          // TODO remove folder
+
           resolve();
         }
       });
@@ -135,21 +150,37 @@ export class WebTorrentService implements ITorrentService {
 
   public findAll(): Promise<ITorrent[]> {
     return Promise.resolve(
-      Object.values(this.data).map(({ torrent }) => this.parseTorrent(torrent)),
+      Object.keys(this.data).map((torrentID) =>
+        this.parseTorrent(torrentID, this.data[torrentID].torrent),
+      ),
     );
   }
 
   public findById(torrentID: string): Promise<ITorrent> {
     const { torrent } = this.data[torrentID];
 
-    return Promise.resolve(this.parseTorrent(torrent));
+    return Promise.resolve(this.parseTorrent(torrentID, torrent));
   }
 
-  private parseTorrent(torrent: Torrent): ITorrent {
+  private createWebTorrentFromMagnet(magnetURI: string): Promise<Torrent> {
+    return new Promise((resolve, reject) => {
+      // TODO on error mechanism
+      this.webTorrent.add(
+        magnetURI,
+        { path: this.dataFolder },
+        (torrent: Torrent) => {
+          resolve(torrent);
+        },
+      );
+    });
+  }
+
+  private parseTorrent(torrentID: string, torrent: Torrent): ITorrent {
     return {
       downloadSpeed: torrent.downloadSpeed,
       downloaded: torrent.downloaded,
       downloadedPerentage: torrent.progress,
+      id: torrentID,
       magnetUri: torrent.magnetURI,
       name: torrent.name,
       uploadSpeed: torrent.uploadSpeed,

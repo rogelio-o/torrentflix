@@ -1,6 +1,7 @@
 import * as express from "express";
 import * as mime from "mime";
 import rangeParser, { Range, Ranges } from "range-parser";
+import rimraf from "rimraf";
 import { pipeline } from "stream";
 import uuidv4 from "uuid/v4";
 import WebTorrent, { Instance, Torrent, TorrentFile } from "webtorrent";
@@ -108,9 +109,13 @@ export class WebTorrentService implements ITorrentService {
         if (err) {
           reject(err);
         } else {
-          // TODO remove folder
-
-          resolve();
+          rimraf(this.dataFolder + "/" + torrent.name, (err2?) => {
+            if (err2) {
+              reject(err2);
+            } else {
+              resolve();
+            }
+          });
         }
       });
     });

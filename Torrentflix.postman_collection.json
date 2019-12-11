@@ -1,219 +1,271 @@
 {
-	"variables": [],
-	"info": {
-		"name": "Torrentflix",
-		"_postman_id": "5ea180a1-9be8-6792-0a01-c545230a7b35",
-		"description": "",
-		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
-	},
-	"item": [
-		{
-			"name": "Devices",
-			"description": "",
-			"item": [
-				{
-					"name": "Attach video to device",
-					"request": {
-						"url": "http://localhost:9090/devices/0/torrents/0/videos/0",
-						"method": "PUT",
-						"header": [],
-						"body": {},
-						"description": ""
-					},
-					"response": []
-				},
-				{
-					"name": "List",
-					"request": {
-						"url": "http://localhost:9090/devices",
-						"method": "GET",
-						"header": [],
-						"body": {},
-						"description": ""
-					},
-					"response": []
-				},
-				{
-					"name": "Refresh",
-					"request": {
-						"url": "http://localhost:9090/devices/refresh",
-						"method": "POST",
-						"header": [],
-						"body": {},
-						"description": ""
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Torrents",
-			"description": "",
-			"item": [
-				{
-					"name": "Videos",
-					"description": "",
-					"item": [
-						{
-							"name": "List",
-							"request": {
-								"url": "http://localhost:9090/torrents/0/videos",
-								"method": "GET",
-								"header": [],
-								"body": {},
-								"description": ""
-							},
-							"response": []
-						},
-						{
-							"name": "View",
-							"request": {
-								"url": "http://localhost:9090/torrents/0/videos/0",
-								"method": "GET",
-								"header": [],
-								"body": {},
-								"description": ""
-							},
-							"response": []
-						}
-					],
-					"_postman_isSubFolder": true
-				},
-				{
-					"name": "List",
-					"request": {
-						"url": "http://localhost:9090/torrents",
-						"method": "GET",
-						"header": [],
-						"body": {},
-						"description": ""
-					},
-					"response": []
-				},
-				{
-					"name": "View",
-					"request": {
-						"url": "http://localhost:9090/torrents/0",
-						"method": "GET",
-						"header": [],
-						"body": {},
-						"description": ""
-					},
-					"response": []
-				},
-				{
-					"name": "Add",
-					"request": {
-						"url": "http://localhost:9090/torrents",
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"magnet_uri\": \"magnet:?xt=urn:btih:eba7b7e519a240b5b54b654ebadf58af0d3eaf91&dn=Silicon.Valley.S06E06.720p.WEB.x265-MiNX%5BTGx%5D&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Fopen.demonii.com%3A1337&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Fexodus.desync.com%3A6969\"\n}"
-						},
-						"description": ""
-					},
-					"response": []
-				},
-				{
-					"name": "Remove",
-					"request": {
-						"url": "http://localhost:9090/torrents/0",
-						"method": "DELETE",
-						"header": [],
-						"body": {},
-						"description": ""
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Renderizations",
-			"description": "",
-			"item": [
-				{
-					"name": "List",
-					"request": {
-						"url": "http://localhost:9090/renderizations",
-						"method": "GET",
-						"header": [],
-						"body": {},
-						"description": ""
-					},
-					"response": []
-				},
-				{
-					"name": "View",
-					"request": {
-						"url": "http://localhost:9090/renderizations/0",
-						"method": "GET",
-						"header": [],
-						"body": {},
-						"description": ""
-					},
-					"response": []
-				},
-				{
-					"name": "Change autoplay",
-					"request": {
-						"url": "http://localhost:9090/renderizations/0/autoplay",
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\"autoplay\": true}"
-						},
-						"description": ""
-					},
-					"response": []
-				},
-				{
-					"name": "Play",
-					"request": {
-						"url": "http://localhost:9090/renderizations/0/play",
-						"method": "PUT",
-						"header": [],
-						"body": {},
-						"description": ""
-					},
-					"response": []
-				},
-				{
-					"name": "Pause",
-					"request": {
-						"url": "http://localhost:9090/renderizations/0/pause",
-						"method": "PUT",
-						"header": [],
-						"body": {},
-						"description": ""
-					},
-					"response": []
-				},
-				{
-					"name": "Stop",
-					"request": {
-						"url": "http://localhost:9090/renderizations/0/stop",
-						"method": "PUT",
-						"header": [],
-						"body": {},
-						"description": ""
-					},
-					"response": []
-				}
-			]
-		}
-	]
+  "variables": [],
+  "info": {
+    "name": "Torrentflix",
+    "_postman_id": "5ea180a1-9be8-6792-0a01-c545230a7b35",
+    "description": "",
+    "schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Devices",
+      "description": "",
+      "item": [
+        {
+          "name": "Attach video to device",
+          "request": {
+            "url": "http://{{host}}:9090/devices/0/torrents/0/videos/0",
+            "method": "PUT",
+            "header": [],
+            "body": {},
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "List",
+          "request": {
+            "url": "http://{{host}}:9090/devices",
+            "method": "GET",
+            "header": [],
+            "body": {},
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh",
+          "request": {
+            "url": "http://{{host}}:9090/devices/refresh",
+            "method": "POST",
+            "header": [],
+            "body": {},
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Torrents",
+      "description": "",
+      "item": [
+        {
+          "name": "Videos",
+          "description": "",
+          "item": [
+            {
+              "name": "List",
+              "request": {
+                "url": "http://{{host}}:9090/torrents/0/videos",
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "description": ""
+              },
+              "response": []
+            },
+            {
+              "name": "View",
+              "request": {
+                "url": "http://{{host}}:9090/torrents/0/videos/0",
+                "method": "GET",
+                "header": [],
+                "body": {},
+                "description": ""
+              },
+              "response": []
+            }
+          ],
+          "_postman_isSubFolder": true
+        },
+        {
+          "name": "List",
+          "request": {
+            "url": "http://{{host}}:9090/torrents",
+            "method": "GET",
+            "header": [],
+            "body": {},
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "View",
+          "request": {
+            "url": "http://{{host}}:9090/torrents/0",
+            "method": "GET",
+            "header": [],
+            "body": {},
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Add",
+          "request": {
+            "url": "http://{{host}}:9090/torrents",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": ""
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"magnet_uri\": \"magnet:\"\n}"
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Remove",
+          "request": {
+            "url": "http://{{host}}:9090/torrents/1",
+            "method": "DELETE",
+            "header": [],
+            "body": {},
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Search",
+          "request": {
+            "url": {
+              "raw": "http://{{host}}:9090/torrents/search?q=...&category=movie",
+              "protocol": "http",
+              "host": ["{{host}}"],
+              "port": "9090",
+              "path": ["torrents", "search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "...",
+                  "equals": true,
+                  "description": ""
+                },
+                {
+                  "key": "category",
+                  "value": "movie",
+                  "equals": true,
+                  "description": ""
+                }
+              ],
+              "variable": []
+            },
+            "method": "GET",
+            "header": [],
+            "body": {},
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Renderizations",
+      "description": "",
+      "item": [
+        {
+          "name": "List",
+          "request": {
+            "url": "http://{{host}}:9090/renderizations",
+            "method": "GET",
+            "header": [],
+            "body": {},
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "View",
+          "request": {
+            "url": "http://{{host}}:9090/renderizations/0",
+            "method": "GET",
+            "header": [],
+            "body": {},
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Change autoplay",
+          "request": {
+            "url": "http://{{host}}:9090/renderizations/0/autoplay",
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": ""
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"autoplay\": true}"
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Play",
+          "request": {
+            "url": "http://{{host}}:9090/renderizations/0/play",
+            "method": "PUT",
+            "header": [],
+            "body": {},
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Pause",
+          "request": {
+            "url": "http://{{host}}:9090/renderizations/0/pause",
+            "method": "PUT",
+            "header": [],
+            "body": {},
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Stop",
+          "request": {
+            "url": "http://{{host}}:9090/renderizations/0/stop",
+            "method": "PUT",
+            "header": [],
+            "body": {},
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Seek",
+          "request": {
+            "url": "http://{{host}}:9090/renderizations/0/seek",
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": ""
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"seconds\": 120}"
+            },
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
 }

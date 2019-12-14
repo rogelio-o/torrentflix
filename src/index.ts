@@ -3,16 +3,23 @@ import express from "express";
 import sqlite from "sqlite";
 
 import { DevicesHandler } from "./handlers/DevicesHandler";
+import { MoviesHandler } from "./handlers/MoviesHandler";
 import { RenderizationsHandler } from "./handlers/RenderizationsHandler";
 import { TorrentsHandler } from "./handlers/TorrentsHandler";
 import { TorrentsSearchHandler } from "./handlers/TorrentsSearchHandler";
 import { TorrentsVideosHandler } from "./handlers/TorrentsVideosHandler";
+import { IMoviesRepository } from "./repositories/IMoviesRepository";
 import { ITorrentRepository } from "./repositories/ITorrentRepository";
+import { SqliteMoviesRepository } from "./repositories/sqlite/SqliteMoviesRepository";
 import { SqliteTorrentRepository } from "./repositories/sqlite/SqliteTorrentRepository";
+import { IApiMoviesService } from "./service/IApiMoviesService";
 import { IDevicesService } from "./service/IDevicesService";
+import { IMoviesService } from "./service/IMoviesService";
 import { ApiTorrentSearchService } from "./service/impl/ApiTorrentSearchService";
+import { MoviesServiceImpl } from "./service/impl/MoviesServiceImpl";
 import { PlayerServiceImpl } from "./service/impl/PlayerServiceImpl";
 import { SspdDevicesService } from "./service/impl/SspdDevicesService";
+import { TMDBApiMoviesService } from "./service/impl/TMDBApiMoviesService";
 import { UpnpMediaRendererService } from "./service/impl/UpnpMediarendererService";
 import { WebTorrentService } from "./service/impl/WebTorrentService";
 import { IPlayerService } from "./service/IPlayerService";
@@ -32,6 +39,9 @@ const app = express();
 const torrentsRepository: ITorrentRepository = new SqliteTorrentRepository(
   dbPromise,
 );
+const moviesRepository: IMoviesRepository = new SqliteMoviesRepository(
+  dbPromise,
+);
 
 const devicesService: IDevicesService = new SspdDevicesService();
 const torrentService: ITorrentService = new WebTorrentService(
@@ -47,6 +57,13 @@ const playerService: IPlayerService = new PlayerServiceImpl(
   renderService,
 );
 const torrentSearchService: ITorrentSearchService = new ApiTorrentSearchService();
+const apiMoviesService: IApiMoviesService = new TMDBApiMoviesService(
+  process.env.TMDB_API_KEY || "",
+);
+const moviesService: IMoviesService = new MoviesServiceImpl(
+  apiMoviesService,
+  moviesRepository,
+);
 
 app.use(bodyParser.json({ type: "application/json" }));
 
@@ -114,6 +131,14 @@ app.put(
   "/renderizations/:renderizationID/seek",
   renderizationsHandler.autoplay.bind(renderizationsHandler),
 );
+
+const moviesHandler: MoviesHandler = new MoviesHandler(moviesService);
+app.get("/movies/search", moviesHandler.search.bind(moviesHandler));
+app.get("/movies", moviesHandler.findAll.bind(moviesHandler));
+app.get("/movies/:movieId", moviesHandler.findById.bind(moviesHandler));
+app.post("/movies", moviesHandler.create.bind(moviesHandler));
+app.put("/movies/:movieId/refresh", moviesHandler.refresh.bind(moviesHandler));
+app.delete("/movies/:movieId", moviesHandler.delete.bind(moviesHandler));
 
 devicesService.loadDevices().then(async () => {
   // LOAD saved torrents

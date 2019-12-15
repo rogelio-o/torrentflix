@@ -1,30 +1,54 @@
 import React from "react";
-import { Card, CardBody, CardGroup, CardImg, CardSubtitle, CardText, CardTitle } from "reactstrap";
+import { Card, CardBody, CardDeck, CardImg, CardSubtitle, CardText, CardTitle } from "reactstrap";
 import Button from "reactstrap-button-loader";
 
-const ItemsList = ({ loading, handleSubmit, items }) => {
+const groupByN = (n, data) => {
+  let result = [];
+  for (let i = 0; i < data.length; i += n) {
+    result.push(data.slice(i, i + n));
+  }
+  return result;
+};
+
+const ItemsList = ({ items }) => {
+  const groupedItems = groupByN(3, items);
+
   return (
-    <CardGroup className="items-list">
-      {items.map((item) => (
-        <Card>
-          <CardImg top width="100%" src={item.image} alt={item.title} />
-          <CardBody>
-            <CardTitle>{item.title}</CardTitle>
-            {item.subtitle ? (
-              <CardSubtitle>{item.subtitle}</CardSubtitle>
-            ) : (
-              undefined
-            )}
-            <CardText>{item.text}</CardText>
-            {item.onClick ? (
-              <Button onClick={item.onClick}>{item.button}</Button>
-            ) : (
-              undefined
-            )}
-          </CardBody>
-        </Card>
+    <div>
+      {groupedItems.map((itemsGroup) => (
+        <CardDeck className="items-list">
+          {itemsGroup.map((item) => (
+            <Card className="mb-3">
+              <CardImg top width="100%" src={item.image} alt={item.title} />
+              <CardBody>
+                <CardTitle>{item.title}</CardTitle>
+                {item.subtitle ? (
+                  <CardSubtitle>{item.subtitle}</CardSubtitle>
+                ) : (
+                  undefined
+                )}
+                <CardText>{item.text}</CardText>
+                {item.buttons ? (
+                  <div>
+                    {item.buttons.map((button) => (
+                      <Button
+                        color={button.color || "default"}
+                        onClick={button.onClick}
+                        className="mr-sm-2"
+                      >
+                        {button.text}
+                      </Button>
+                    ))}
+                  </div>
+                ) : (
+                  undefined
+                )}
+              </CardBody>
+            </Card>
+          ))}
+        </CardDeck>
       ))}
-    </CardGroup>
+    </div>
   );
 };
 

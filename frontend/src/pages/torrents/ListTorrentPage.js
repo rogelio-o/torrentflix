@@ -1,3 +1,5 @@
+import "video.js/dist/video-js.css";
+
 import axios from "axios";
 import React from "react";
 import {
@@ -20,6 +22,7 @@ import {
 
 import Loading from "./../../components/Loading";
 import SearchForm from "./../../components/SearchForm";
+import VideoPlayer from "./../../components/VideoPlayer";
 
 class ListTorrentsPage extends React.Component {
   _source = axios.CancelToken.source();
@@ -195,6 +198,17 @@ class ListTorrentsPage extends React.Component {
 
   _renderTorrentsInDevice(deviceId, torrentId, videoId) {
     this._closeModal();
+
+    if (deviceId === "browser") {
+      this._renderTorrentsInBrowser(
+        this.state.videos.filter((video) => video.id === videoId)[0],
+      );
+    } else {
+      this._renderTorrentsInRemoteDevice(deviceId, torrentId, videoId);
+    }
+  }
+
+  _renderTorrentsInRemoteDevice(deviceId, torrentId, videoId) {
     this.setState({ loading: true });
 
     axios
@@ -211,6 +225,14 @@ class ListTorrentsPage extends React.Component {
           this.setState({ loading: false });
         }
       });
+  }
+
+  _renderTorrentsInBrowser(video) {
+    this.setState({ playerVideo: video });
+  }
+
+  _closeBrowserPlayer() {
+    this.setState({ playerVideo: undefined });
   }
 
   _openModal(viewItem) {
@@ -289,6 +311,7 @@ class ListTorrentsPage extends React.Component {
                     {devices.map((device) => (
                       <option value={device.id}>{device.name}</option>
                     ))}
+                    <option value="browser">Browser</option>
                   </CustomInput>
                 )}{" "}
                 <Button
@@ -338,8 +361,35 @@ class ListTorrentsPage extends React.Component {
     }
   }
 
+  _renderBrowserPlayer(video) {
+    if (!video) {
+      return null;
+    }
+
+    const videoJsOptions = {
+      autoplay: true,
+      controls: true,
+      sources: [
+        {
+          src: video.url,
+          type: video.contentType,
+        },
+      ],
+    };
+    const toggle = this._closeBrowserPlayer.bind(this);
+
+    return (
+      <Modal isOpen={true} fade={false} toggle={toggle}>
+        <ModalHeader toggle={toggle}>{video.name}</ModalHeader>
+        <ModalBody>
+          <VideoPlayer {...videoJsOptions} />
+        </ModalBody>
+      </Modal>
+    );
+  }
+
   render() {
-    const { loading, items, searchItems, viewItem } = this.state;
+    const { loading, items, searchItems, viewItem, playerVideo } = this.state;
     return (
       <div>
         <SearchForm onChangeSearch={this._onChangeSearch.bind(this)} />
@@ -351,6 +401,7 @@ class ListTorrentsPage extends React.Component {
           this._renderTorrents(items)
         )}
         {this._renderModal(viewItem)}
+        {this._renderBrowserPlayer(playerVideo)}
       </div>
     );
   }

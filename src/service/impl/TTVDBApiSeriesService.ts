@@ -117,7 +117,8 @@ export class TTVDBApiSeriesService implements IApiSeriesService {
       },
     );
 
-    return response.data.token;
+    this.jwtToken = response.data.token;
+    return this.jwtToken || "";
   }
 
   private hasExpired(jwtToken: { [key: string]: any }): boolean {

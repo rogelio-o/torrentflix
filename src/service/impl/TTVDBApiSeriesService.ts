@@ -14,7 +14,7 @@ const API_VERSION = 3;
 const parseJwt = (jwt: string): { [key: string]: any } => {
   const parts = jwt.split(".");
 
-  return JSON.parse(new Buffer(parts[1], "base64").toString("ascii"));
+  return JSON.parse(Buffer.from(parts[1], "base64").toString("ascii"));
 };
 
 const parseHeaders = (jwtToken?: string): { [key: string]: string } => {

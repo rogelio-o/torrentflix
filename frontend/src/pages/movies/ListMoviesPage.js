@@ -7,6 +7,7 @@ import SearchForm from "./../../components/SearchForm";
 
 const mapItem = (item, buttons) => {
   return {
+    link: item.id ? `/movies/${item.id}` : undefined,
     title: item.title,
     image: `https://image.tmdb.org/t/p/original${item.backdrop}`,
     text: item.description,

@@ -6,6 +6,8 @@ import { BrowserRouter, Redirect, Switch } from "react-router-dom";
 import { LayoutRoute, MainLayout } from "./components/Layout";
 import ListMoviesPage from "./pages/movies/ListMoviesPage";
 import ListSeriesPage from "./pages/series/ListSeriesPage";
+import ViewMoviePage from "./pages/movies/ViewMoviePage";
+import ViewSeriePage from "./pages/series/ViewSeriePage";
 
 const getBasename = () => {
   return `/${process.env.PUBLIC_URL.split("/").pop()}`;
@@ -24,9 +26,21 @@ class App extends Component {
           />
           <LayoutRoute
             exact
+            path="/series/:id"
+            layout={MainLayout}
+            component={ViewSeriePage}
+          />
+          <LayoutRoute
+            exact
             path="/movies"
             layout={MainLayout}
             component={ListMoviesPage}
+          />
+          <LayoutRoute
+            exact
+            path="/movies/:id"
+            layout={MainLayout}
+            component={ViewMoviePage}
           />
           <Redirect to="/series" />
         </Switch>

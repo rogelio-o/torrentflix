@@ -211,7 +211,7 @@ export class WebTorrentService implements ITorrentService {
   }
 
   private parsePathFromFile(torrentID: string, fileID: string): string {
-    return "/torrent/servers/" + torrentID + "/files/" + fileID + "/stream";
+    return "/api/torrent/servers/" + torrentID + "/files/" + fileID + "/stream";
   }
 
   private getFiles(
@@ -236,97 +236,100 @@ export class WebTorrentService implements ITorrentService {
   }
 
   private createHandler(app: express.Application) {
-    app.all("/api/torrent/servers/:torrentID/files/:fileID/stream", (req, res) => {
-      if (
-        req.method === "OPTIONS" &&
-        req.headers["access-control-request-headers"]
-      ) {
-        res.statusCode = 204; // no content
-        res.setHeader("Access-Control-Max-Age", "600");
-        res.setHeader("Access-Control-Allow-Methods", "GET,HEAD");
+    app.all(
+      "/api/torrent/servers/:torrentID/files/:fileID/stream",
+      (req, res) => {
+        if (
+          req.method === "OPTIONS" &&
+          req.headers["access-control-request-headers"]
+        ) {
+          res.statusCode = 204; // no content
+          res.setHeader("Access-Control-Max-Age", "600");
+          res.setHeader("Access-Control-Allow-Methods", "GET,HEAD");
 
-        if (req.headers["access-control-request-headers"]) {
-          res.setHeader(
-            "Access-Control-Allow-Headers",
-            req.headers["access-control-request-headers"],
-          );
-        }
-        res.end();
-      } else {
-        const torrentID = parseInt(req.params.torrentID, 10);
-        const fileID = parseInt(req.params.fileID, 10);
-
-        const server = this.data[torrentID];
-        const file = (server || { videos: [] }).files[fileID];
-
-        if (server && file) {
-          let stream: any | undefined;
-
-          res.statusCode = 200;
-          res.setHeader(
-            "Content-Type",
-            mime.getType(file.name) || "application/octet-stream",
-          );
-
-          // Support range-requests
-          res.setHeader("Accept-Ranges", "bytes");
-
-          // Set name of file (for "Save Page As..." dialog)
-          res.setHeader(
-            "Content-Disposition",
-            `inline; filename*=UTF-8''${encodeRFC5987(file.name)}`,
-          );
-
-          // Support DLNA streaming
-          res.setHeader("transferMode.dlna.org", "Streaming");
-          res.setHeader(
-            "contentFeatures.dlna.org",
-            "DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=01700000000000000000000000000000",
-          );
-
-          // `rangeParser` returns an array of ranges, or an error code (number) if
-          // there was an error parsing the range.
-          let range: Ranges | -1 | -2 | Range | null = rangeParser(
-            file.length,
-            req.headers.range || "",
-          );
-
-          if (Array.isArray(range)) {
-            res.statusCode = 206; // indicates that range-request was understood
-
-            // no support for multi-range request, just use the first range
-            range = range[0];
-
+          if (req.headers["access-control-request-headers"]) {
             res.setHeader(
-              "Content-Range",
-              `bytes ${range.start}-${range.end}/${file.length}`,
+              "Access-Control-Allow-Headers",
+              req.headers["access-control-request-headers"],
             );
-            res.setHeader("Content-Length", range.end - range.start + 1);
-          } else {
-            range = null;
-            res.setHeader("Content-Length", file.length);
           }
-
-          if (req.method === "HEAD") {
-            return res.end();
-          }
-
-          if (range === null) {
-            stream = file.createReadStream();
-          } else {
-            stream = file.createReadStream(range);
-          }
-
-          pipeline(stream, res, (err) => {
-            if (err && err.code !== "ERR_STREAM_PREMATURE_CLOSE") {
-              console.error("Pipeline failed.", err);
-            }
-          });
+          res.end();
         } else {
-          res.sendStatus(404);
+          const torrentID = req.params.torrentID;
+          const fileID = req.params.fileID;
+
+          const torrent = this.data[torrentID];
+          const file = (torrent || { files: [] }).files[fileID];
+
+          if (file) {
+            let stream: any | undefined;
+
+            res.statusCode = 200;
+            res.setHeader(
+              "Content-Type",
+              mime.getType(file.name) || "application/octet-stream",
+            );
+
+            // Support range-requests
+            res.setHeader("Accept-Ranges", "bytes");
+
+            // Set name of file (for "Save Page As..." dialog)
+            res.setHeader(
+              "Content-Disposition",
+              `inline; filename*=UTF-8''${encodeRFC5987(file.name)}`,
+            );
+
+            // Support DLNA streaming
+            res.setHeader("transferMode.dlna.org", "Streaming");
+            res.setHeader(
+              "contentFeatures.dlna.org",
+              "DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=01700000000000000000000000000000",
+            );
+
+            // `rangeParser` returns an array of ranges, or an error code (number) if
+            // there was an error parsing the range.
+            let range: Ranges | -1 | -2 | Range | null = rangeParser(
+              file.length,
+              req.headers.range || "",
+            );
+
+            if (Array.isArray(range)) {
+              res.statusCode = 206; // indicates that range-request was understood
+
+              // no support for multi-range request, just use the first range
+              range = range[0];
+
+              res.setHeader(
+                "Content-Range",
+                `bytes ${range.start}-${range.end}/${file.length}`,
+              );
+              res.setHeader("Content-Length", range.end - range.start + 1);
+            } else {
+              range = null;
+              res.setHeader("Content-Length", file.length);
+            }
+
+            if (req.method === "HEAD") {
+              return res.end();
+            }
+
+            if (range === null) {
+              stream = file.createReadStream();
+            } else {
+              stream = file.createReadStream(range);
+            }
+
+            pipeline(stream, res, (err) => {
+              if (err && err.code !== "ERR_STREAM_PREMATURE_CLOSE") {
+                console.error("Pipeline failed.", err);
+              }
+            });
+          } else {
+            res.sendStatus(404);
+          }
         }
-      }
-    });
+      },
+    );
   }
 }
 

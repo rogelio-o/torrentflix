@@ -121,13 +121,10 @@ class ListMoviesPage extends React.Component {
 
       this.setState({ loading: true });
       this._request = axios
-        .get(
-          "/api/movies/search",
-          { params: { q: value } },
-          {
-            cancelToken: this._source.token,
-          },
-        )
+        .get("/api/movies/search", {
+          params: { q: value },
+          cancelToken: this._source.token,
+        })
         .then((response) => {
           this.setState({
             loading: false,

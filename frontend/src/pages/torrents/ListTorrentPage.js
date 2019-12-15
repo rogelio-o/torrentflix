@@ -1,21 +1,21 @@
 import axios from "axios";
 import React from "react";
 import {
+  Button,
+  ButtonGroup,
+  CustomInput,
+  Form,
+  FormGroup,
+  Label,
   ListGroup,
   ListGroupItem,
   ListGroupItemHeading,
   ListGroupItemText,
-  Progress,
-  Button,
-  ButtonGroup,
   Modal,
-  ModalHeader,
   ModalBody,
   ModalFooter,
-  Form,
-  FormGroup,
-  CustomInput,
-  Label,
+  ModalHeader,
+  Progress,
 } from "reactstrap";
 
 import Loading from "./../../components/Loading";
@@ -127,9 +127,13 @@ class ListTorrentsPage extends React.Component {
     this.setState({ loadingDevices: true });
 
     axios
-      .post("/api/devices/refresh", {
-        cancelToken: this._sourceDevices.token,
-      })
+      .post(
+        "/api/devices/refresh",
+        {},
+        {
+          cancelToken: this._sourceDevices.token,
+        },
+      )
       .then(() => this._loadDevices())
       .catch((error) => {
         if (!axios.isCancel(error)) {
@@ -162,18 +166,15 @@ class ListTorrentsPage extends React.Component {
   _onChangeSearch(e) {
     const value = e.target.value;
 
-    if (value.length > 2) {
-      this._cancelRequest();
+    this._cancelRequest();
 
+    if (value.length > 2) {
       this.setState({ loading: true });
       this._request = axios
-        .get(
-          "/api/torrents/search",
-          { params: { q: value } },
-          {
-            cancelToken: this._source.token,
-          },
-        )
+        .get("/api/torrents/search", {
+          params: { q: value },
+          cancelToken: this._source.token,
+        })
         .then((response) => {
           this.setState({
             loading: false,

@@ -1,5 +1,6 @@
 import bodyParser from "body-parser";
 import express from "express";
+import path from "path";
 import sqlite from "sqlite";
 
 import { DevicesHandler } from "./handlers/DevicesHandler";
@@ -85,10 +86,10 @@ const seriesService: ISeriesService = new SeriesServiceImpl(
 app.use(bodyParser.json({ type: "application/json" }));
 
 const deviceHandler = new DevicesHandler(devicesService, playerService);
-app.post("/devices/refresh", deviceHandler.load.bind(deviceHandler));
-app.get("/devices", deviceHandler.findAll.bind(deviceHandler));
+app.post("/api/devices/refresh", deviceHandler.load.bind(deviceHandler));
+app.get("/api/devices", deviceHandler.findAll.bind(deviceHandler));
 app.put(
-  "/devices/:deviceID/torrents/:torrentID/videos/:videoID",
+  "/api/devices/:deviceID/torrents/:torrentID/videos/:videoID",
   deviceHandler.attach.bind(deviceHandler),
 );
 
@@ -96,74 +97,88 @@ const torrentsSearchHandler: TorrentsSearchHandler = new TorrentsSearchHandler(
   torrentSearchService,
 );
 app.get(
-  "/torrents/search",
+  "/api/torrents/search",
   torrentsSearchHandler.search.bind(torrentsSearchHandler),
 );
 
 const torrentsHandler = new TorrentsHandler(torrentService);
-app.post("/torrents", torrentsHandler.add.bind(torrentsHandler));
-app.get("/torrents", torrentsHandler.findAll.bind(torrentsHandler));
-app.get("/torrents/:torrentID", torrentsHandler.findById.bind(torrentsHandler));
+app.post("/api/torrents", torrentsHandler.add.bind(torrentsHandler));
+app.get("/api/torrents", torrentsHandler.findAll.bind(torrentsHandler));
+app.get(
+  "/api/torrents/:torrentID",
+  torrentsHandler.findById.bind(torrentsHandler),
+);
 app.delete(
-  "/torrents/:torrentID",
+  "/api/torrents/:torrentID",
   torrentsHandler.remove.bind(torrentsHandler),
 );
 
 const torrentsVideosHandler = new TorrentsVideosHandler(torrentService);
 app.get(
-  "/torrents/:torrentID/videos",
+  "/api/torrents/:torrentID/videos",
   torrentsVideosHandler.findAll.bind(torrentsVideosHandler),
 );
 app.get(
-  "/torrents/:torrentID/videos/:videoID",
+  "/api/torrents/:torrentID/videos/:videoID",
   torrentsVideosHandler.findById.bind(torrentsVideosHandler),
 );
 
 const renderizationsHandler = new RenderizationsHandler(renderService);
 app.get(
-  "/renderizations",
+  "/api/renderizations",
   renderizationsHandler.findAll.bind(renderizationsHandler),
 );
 app.get(
-  "/renderizations/:renderizationID",
+  "/api/renderizations/:renderizationID",
   renderizationsHandler.findById.bind(renderizationsHandler),
 );
 app.put(
-  "/renderizations/:renderizationID/stop",
+  "/api/renderizations/:renderizationID/stop",
   renderizationsHandler.stop.bind(renderizationsHandler),
 );
 app.put(
-  "/renderizations/:renderizationID/play",
+  "/api/renderizations/:renderizationID/play",
   renderizationsHandler.play.bind(renderizationsHandler),
 );
 app.put(
-  "/renderizations/:renderizationID/pause",
+  "/api/renderizations/:renderizationID/pause",
   renderizationsHandler.pause.bind(renderizationsHandler),
 );
 app.put(
-  "/renderizations/:renderizationID/autoplay",
+  "/api/renderizations/:renderizationID/autoplay",
   renderizationsHandler.autoplay.bind(renderizationsHandler),
 );
 app.put(
-  "/renderizations/:renderizationID/seek",
+  "/api/renderizations/:renderizationID/seek",
   renderizationsHandler.autoplay.bind(renderizationsHandler),
 );
 
 const moviesHandler: MoviesHandler = new MoviesHandler(moviesService);
-app.get("/movies/search", moviesHandler.search.bind(moviesHandler));
-app.get("/movies", moviesHandler.findAll.bind(moviesHandler));
-app.get("/movies/:movieId", moviesHandler.findById.bind(moviesHandler));
-app.post("/movies", moviesHandler.create.bind(moviesHandler));
-app.put("/movies/:movieId/refresh", moviesHandler.refresh.bind(moviesHandler));
-app.delete("/movies/:movieId", moviesHandler.delete.bind(moviesHandler));
+app.get("/api/movies/search", moviesHandler.search.bind(moviesHandler));
+app.get("/api/movies", moviesHandler.findAll.bind(moviesHandler));
+app.get("/api/movies/:movieId", moviesHandler.findById.bind(moviesHandler));
+app.post("/api/movies", moviesHandler.create.bind(moviesHandler));
+app.put(
+  "/api/movies/:movieId/refresh",
+  moviesHandler.refresh.bind(moviesHandler),
+);
+app.delete("/api/movies/:movieId", moviesHandler.delete.bind(moviesHandler));
 
 const seriesHandler: SeriesHandler = new SeriesHandler(seriesService);
-app.get("/series/search", seriesHandler.search.bind(seriesHandler));
-app.get("/series", seriesHandler.findAll.bind(seriesHandler));
-app.get("/series/:serieId", seriesHandler.findById.bind(seriesHandler));
-app.post("/series", seriesHandler.create.bind(seriesHandler));
-app.put("/series/:serieId/refresh", seriesHandler.refresh.bind(seriesHandler));
-app.delete("/series/:serieId", seriesHandler.delete.bind(seriesHandler));
+app.get("/api/series/search", seriesHandler.search.bind(seriesHandler));
+app.get("/api/series", seriesHandler.findAll.bind(seriesHandler));
+app.get("/api/series/:serieId", seriesHandler.findById.bind(seriesHandler));
+app.post("/api/series", seriesHandler.create.bind(seriesHandler));
+app.put(
+  "/api/series/:serieId/refresh",
+  seriesHandler.refresh.bind(seriesHandler),
+);
+app.delete("/api/series/:serieId", seriesHandler.delete.bind(seriesHandler));
+
+app.use("/", express.static("frontend/build"));
+app.use((req, res) => {
+  res.sendFile(path.resolve("frontend/build/index.html"));
+});
 
 devicesService.loadDevices().then(async () => {
   // LOAD saved torrents

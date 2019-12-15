@@ -5,25 +5,32 @@ import sqlite from "sqlite";
 import { DevicesHandler } from "./handlers/DevicesHandler";
 import { MoviesHandler } from "./handlers/MoviesHandler";
 import { RenderizationsHandler } from "./handlers/RenderizationsHandler";
+import { SeriesHandler } from "./handlers/SeriesHandler";
 import { TorrentsHandler } from "./handlers/TorrentsHandler";
 import { TorrentsSearchHandler } from "./handlers/TorrentsSearchHandler";
 import { TorrentsVideosHandler } from "./handlers/TorrentsVideosHandler";
 import { IMoviesRepository } from "./repositories/IMoviesRepository";
+import { ISeriesRepository } from "./repositories/ISeriesRepository";
 import { ITorrentRepository } from "./repositories/ITorrentRepository";
 import { SqliteMoviesRepository } from "./repositories/sqlite/SqliteMoviesRepository";
+import { SqliteSeriesRepository } from "./repositories/sqlite/SqliteSeriesRepository";
 import { SqliteTorrentRepository } from "./repositories/sqlite/SqliteTorrentRepository";
 import { IApiMoviesService } from "./service/IApiMoviesService";
+import { IApiSeriesService } from "./service/IApiSeriesService";
 import { IDevicesService } from "./service/IDevicesService";
 import { IMoviesService } from "./service/IMoviesService";
 import { ApiTorrentSearchService } from "./service/impl/ApiTorrentSearchService";
 import { MoviesServiceImpl } from "./service/impl/MoviesServiceImpl";
 import { PlayerServiceImpl } from "./service/impl/PlayerServiceImpl";
+import { SeriesServiceImpl } from "./service/impl/SeriesServiceImpl";
 import { SspdDevicesService } from "./service/impl/SspdDevicesService";
 import { TMDBApiMoviesService } from "./service/impl/TMDBApiMoviesService";
+import { TTVDBApiSeriesService } from "./service/impl/TTVDBApiSeriesService";
 import { UpnpMediaRendererService } from "./service/impl/UpnpMediarendererService";
 import { WebTorrentService } from "./service/impl/WebTorrentService";
 import { IPlayerService } from "./service/IPlayerService";
 import { IRenderService } from "./service/IRenderService";
+import { ISeriesService } from "./service/ISeriesService";
 import { ITorrentSearchService } from "./service/ITorrentSearchService";
 import { ITorrentService } from "./service/ITorrentService";
 
@@ -40,6 +47,9 @@ const torrentsRepository: ITorrentRepository = new SqliteTorrentRepository(
   dbPromise,
 );
 const moviesRepository: IMoviesRepository = new SqliteMoviesRepository(
+  dbPromise,
+);
+const seriesRepository: ISeriesRepository = new SqliteSeriesRepository(
   dbPromise,
 );
 
@@ -63,6 +73,13 @@ const apiMoviesService: IApiMoviesService = new TMDBApiMoviesService(
 const moviesService: IMoviesService = new MoviesServiceImpl(
   apiMoviesService,
   moviesRepository,
+);
+const apiSeriesService: IApiSeriesService = new TTVDBApiSeriesService(
+  process.env.TTVDB_API_KEY || "",
+);
+const seriesService: ISeriesService = new SeriesServiceImpl(
+  apiSeriesService,
+  seriesRepository,
 );
 
 app.use(bodyParser.json({ type: "application/json" }));
@@ -139,6 +156,14 @@ app.get("/movies/:movieId", moviesHandler.findById.bind(moviesHandler));
 app.post("/movies", moviesHandler.create.bind(moviesHandler));
 app.put("/movies/:movieId/refresh", moviesHandler.refresh.bind(moviesHandler));
 app.delete("/movies/:movieId", moviesHandler.delete.bind(moviesHandler));
+
+const seriesHandler: SeriesHandler = new SeriesHandler(seriesService);
+app.get("/series/search", seriesHandler.search.bind(seriesHandler));
+app.get("/series", seriesHandler.findAll.bind(seriesHandler));
+app.get("/series/:serieId", seriesHandler.findById.bind(seriesHandler));
+app.post("/series", seriesHandler.create.bind(seriesHandler));
+app.put("/series/:serieId/refresh", seriesHandler.refresh.bind(seriesHandler));
+app.delete("/series/:serieId", seriesHandler.delete.bind(seriesHandler));
 
 devicesService.loadDevices().then(async () => {
   // LOAD saved torrents

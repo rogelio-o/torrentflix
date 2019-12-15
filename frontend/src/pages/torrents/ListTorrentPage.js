@@ -21,7 +21,7 @@ import {
 import Loading from "./../../components/Loading";
 import SearchForm from "./../../components/SearchForm";
 
-class ListSeriesPage extends React.Component {
+class ListTorrentsPage extends React.Component {
   _source = axios.CancelToken.source();
   _sourceDevices = axios.CancelToken.source();
 
@@ -199,8 +199,8 @@ class ListSeriesPage extends React.Component {
     axios
       .put(`/api/devices/${deviceId}/torrents/${torrentId}/videos/${videoId}`)
       .then((response) => {
-        this.setState({
-          loading: false,
+        this.props.history.push({
+          pathname: "/renderizations",
         });
       })
       .catch((error) => {
@@ -355,4 +355,4 @@ class ListSeriesPage extends React.Component {
   }
 }
 
-export default ListSeriesPage;
+export default ListTorrentsPage;

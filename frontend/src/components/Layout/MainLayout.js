@@ -37,6 +37,11 @@ const MainLayout = (props) => {
                 Torrents
               </NavLink>
             </NavItem>
+            <NavItem>
+              <NavLink tag={Link} to="/renderizations">
+                Renderizations
+              </NavLink>
+            </NavItem>
           </Nav>
         </Collapse>
       </Navbar>

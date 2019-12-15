@@ -7,6 +7,7 @@ import { LayoutRoute, MainLayout } from "./components/Layout";
 import ListMoviesPage from "./pages/movies/ListMoviesPage";
 import ListSeriesPage from "./pages/series/ListSeriesPage";
 import ListTorrentPage from "./pages/torrents/ListTorrentPage";
+import ListRenderizationsPage from "./pages/renderizations/ListRenderizationsPage";
 import ViewMoviePage from "./pages/movies/ViewMoviePage";
 import ViewSeriePage from "./pages/series/ViewSeriePage";
 
@@ -48,6 +49,12 @@ class App extends Component {
             path="/torrents"
             layout={MainLayout}
             component={ListTorrentPage}
+          />
+          <LayoutRoute
+            exact
+            path="/renderizations"
+            layout={MainLayout}
+            component={ListRenderizationsPage}
           />
           <Redirect to="/series" />
         </Switch>

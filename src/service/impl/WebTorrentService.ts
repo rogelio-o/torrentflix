@@ -236,7 +236,7 @@ export class WebTorrentService implements ITorrentService {
   }
 
   private createHandler(app: express.Application) {
-    app.all("/torrent/servers/:torrentID/files/:fileID/stream", (req, res) => {
+    app.all("/api/torrent/servers/:torrentID/files/:fileID/stream", (req, res) => {
       if (
         req.method === "OPTIONS" &&
         req.headers["access-control-request-headers"]

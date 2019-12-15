@@ -6,6 +6,7 @@ import { BrowserRouter, Redirect, Switch } from "react-router-dom";
 import { LayoutRoute, MainLayout } from "./components/Layout";
 import ListMoviesPage from "./pages/movies/ListMoviesPage";
 import ListSeriesPage from "./pages/series/ListSeriesPage";
+import ListTorrentPage from "./pages/torrents/ListTorrentPage";
 import ViewMoviePage from "./pages/movies/ViewMoviePage";
 import ViewSeriePage from "./pages/series/ViewSeriePage";
 
@@ -41,6 +42,12 @@ class App extends Component {
             path="/movies/:id"
             layout={MainLayout}
             component={ViewMoviePage}
+          />
+          <LayoutRoute
+            exact
+            path="/torrents"
+            layout={MainLayout}
+            component={ListTorrentPage}
           />
           <Redirect to="/series" />
         </Switch>

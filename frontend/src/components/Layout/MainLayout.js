@@ -1,6 +1,14 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Collapse, Nav, Navbar, NavbarBrand, NavbarToggler, NavItem, NavLink } from "reactstrap";
+import {
+  Collapse,
+  Nav,
+  Navbar,
+  NavbarBrand,
+  NavbarToggler,
+  NavItem,
+  NavLink,
+} from "reactstrap";
 
 const MainLayout = (props) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,6 +30,11 @@ const MainLayout = (props) => {
             <NavItem>
               <NavLink tag={Link} to="/movies">
                 Movies
+              </NavLink>
+            </NavItem>
+            <NavItem>
+              <NavLink tag={Link} to="/torrents">
+                Torrents
               </NavLink>
             </NavItem>
           </Nav>

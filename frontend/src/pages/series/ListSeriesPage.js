@@ -140,7 +140,7 @@ class ListSeriesPage extends React.Component {
           if (!axios.isCancel(error)) {
             alert(error.message);
             console.error(error);
-            this.setState({ loading: false, searchItems: [] });
+            this.setState({ loading: false, searchItems: null });
           }
         });
     } else {

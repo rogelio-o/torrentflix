@@ -24,7 +24,12 @@ const formatEpisodeNumber = (number) => {
 };
 
 const formatEpisodeCode = (season, episode) => {
-  return "S" + season.number + "E" + formatEpisodeNumber(episode.number);
+  return (
+    "S" +
+    formatEpisodeNumber(season.number) +
+    "E" +
+    formatEpisodeNumber(episode.number)
+  );
 };
 
 class ViewSeriePage extends React.Component {

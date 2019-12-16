@@ -1,6 +1,6 @@
-import React from "react";
 import axios from "axios";
-import { Container, Row, Col, Button } from "reactstrap";
+import React from "react";
+import { Button, Col, Container, Row } from "reactstrap";
 
 import Loading from "./../../components/Loading";
 
@@ -44,7 +44,7 @@ class ViewMoviePage extends React.Component {
       return (
         <Container>
           <Row>
-            <Col xs="3">
+            <Col md="3">
               <img
                 src={
                   movie.poster
@@ -63,7 +63,7 @@ class ViewMoviePage extends React.Component {
                 ) : null}
               </ul>
             </Col>
-            <Col xs="9">
+            <Col>
               <div className="item-info">
                 <h1>{movie.title}</h1>
                 <p>{movie.description}</p>

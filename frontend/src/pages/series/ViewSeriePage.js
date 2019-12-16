@@ -1,21 +1,21 @@
-import React from "react";
 import axios from "axios";
+import dateFormat from "dateformat";
+import React from "react";
 import {
-  Container,
-  Row,
-  Col,
+  Button,
+  ButtonGroup,
   Card,
-  CardHeader,
-  Collapse,
   CardBody,
+  CardHeader,
+  Col,
+  Collapse,
+  Container,
   ListGroup,
   ListGroupItem,
   ListGroupItemHeading,
   ListGroupItemText,
-  ButtonGroup,
-  Button,
+  Row,
 } from "reactstrap";
-import dateFormat from "dateformat";
 
 import Loading from "./../../components/Loading";
 
@@ -81,7 +81,7 @@ class ViewSeriePage extends React.Component {
       return (
         <Container>
           <Row>
-            <Col xs="3">
+            <Col md="3">
               <img
                 src={
                   serie.poster
@@ -103,7 +103,7 @@ class ViewSeriePage extends React.Component {
                 ) : null}
               </ul>
             </Col>
-            <Col xs="9">
+            <Col>
               <div className="item-info">
                 <h1>{serie.name}</h1>
                 <p>{serie.description}</p>
@@ -143,7 +143,7 @@ class ViewSeriePage extends React.Component {
                                       {episode.description}
                                     </ListGroupItemText>
                                   </Col>
-                                  <Col xs="3">
+                                  <Col md="3">
                                     <ButtonGroup vertical>
                                       <Button>View</Button>
                                     </ButtonGroup>

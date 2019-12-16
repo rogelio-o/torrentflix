@@ -98,8 +98,8 @@ export class UpnpMediaRendererService implements IRenderService {
     wrapper.renderization.autoplay = false;
     wrapper.client.stop();
 
-    delete this.data[renderizationID];
     this.stopUpdatingPosition(renderizationID);
+    delete this.data[renderizationID];
 
     return Promise.resolve();
   }

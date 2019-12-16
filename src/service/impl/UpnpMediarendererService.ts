@@ -99,6 +99,7 @@ export class UpnpMediaRendererService implements IRenderService {
     wrapper.client.stop();
 
     delete this.data[renderizationID];
+    this.stopUpdatingPosition(renderizationID);
 
     return Promise.resolve();
   }

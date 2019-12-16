@@ -86,7 +86,6 @@ const seriesService: ISeriesService = new SeriesServiceImpl(
 app.use(bodyParser.json({ type: "application/json" }));
 
 const deviceHandler = new DevicesHandler(devicesService, playerService);
-app.post("/api/devices/refresh", deviceHandler.load.bind(deviceHandler));
 app.get("/api/devices", deviceHandler.findAll.bind(deviceHandler));
 app.put(
   "/api/devices/:deviceID/torrents/:torrentID/videos/:videoID",
@@ -180,7 +179,7 @@ app.use((req, res) => {
   res.sendFile(path.resolve("frontend/build/index.html"));
 });
 
-devicesService.loadDevices().then(async () => {
+devicesService.startWatchingDevices().then(async () => {
   // LOAD saved torrents
   console.log("Loading torrents...");
   const savedTorrents = await torrentsRepository.findAll();

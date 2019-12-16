@@ -13,16 +13,6 @@ export class DevicesHandler {
     this.playerService = playerService;
   }
 
-  public load(req: express.Request, res: express.Response) {
-    this.devicesService
-      .loadDevices()
-      .then(() => res.sendStatus(204))
-      .catch((e) => {
-        console.error(e);
-        res.sendStatus(500);
-      });
-  }
-
   public findAll(req: express.Request, res: express.Response) {
     this.devicesService
       .getDevices()

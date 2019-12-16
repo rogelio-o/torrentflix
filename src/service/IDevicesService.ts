@@ -1,7 +1,7 @@
 import { IDevice } from "../entity/IDevice";
 
 export interface IDevicesService {
-  loadDevices(): Promise<void>;
+  startWatchingDevices(): Promise<void>;
 
   getDevices(): Promise<IDevice[]>;
 

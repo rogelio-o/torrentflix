@@ -1,13 +1,13 @@
 import axios from "axios";
 import React from "react";
 import {
+  Button,
+  ButtonGroup,
   ListGroup,
   ListGroupItem,
   ListGroupItemHeading,
   ListGroupItemText,
   Progress,
-  Button,
-  ButtonGroup,
 } from "reactstrap";
 
 import Loading from "../../components/Loading";
@@ -98,7 +98,7 @@ class ListRenderizationsPage extends React.Component {
                 </Progress>
 
                 <ButtonGroup className="mt-3">
-                  {item.status === 0 ? (
+                  {item.status !== 2 ? (
                     <Button
                       color="warning"
                       onClick={() => this._pause(item.id)}
@@ -106,12 +106,12 @@ class ListRenderizationsPage extends React.Component {
                       Pause
                     </Button>
                   ) : null}
-                  {item.status !== 2 ? (
+                  {item.status !== 1 ? (
                     <Button color="danger" onClick={() => this._stop(item.id)}>
                       Stop
                     </Button>
                   ) : null}
-                  {item.status === 2 ? (
+                  {item.status !== 0 ? (
                     <Button color="success" onClick={() => this._play(item.id)}>
                       Play
                     </Button>

@@ -6,7 +6,6 @@ import Loading from "./../../components/Loading";
 import SearchForm from "./../../components/SearchForm";
 
 const mapItem = (item, imagePrefix, buttons) => {
-  console.log(item);
   return {
     link: item.id ? `/series/${item.id}` : undefined,
     title: item.name,

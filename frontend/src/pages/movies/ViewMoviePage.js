@@ -1,8 +1,13 @@
 import axios from "axios";
 import React from "react";
+import { Link } from "react-router-dom";
 import { Button, Col, Container, Row } from "reactstrap";
 
 import Loading from "./../../components/Loading";
+
+const formatTorrentSearchQuery = (movie) => {
+  return encodeURI(movie.title);
+};
 
 class ViewMoviePage extends React.Component {
   constructor(props) {
@@ -69,7 +74,15 @@ class ViewMoviePage extends React.Component {
                 <p>{movie.description}</p>
               </div>
               <div className="movie-link">
-                <Button>View</Button>
+                <Button
+                  tag={Link}
+                  to={{
+                    pathname: "/torrents",
+                    search: `?search=${formatTorrentSearchQuery(movie)}`,
+                  }}
+                >
+                  View
+                </Button>
               </div>
             </Col>
           </Row>

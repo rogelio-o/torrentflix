@@ -1,6 +1,7 @@
 import axios from "axios";
 import dateFormat from "dateformat";
 import React from "react";
+import { Link } from "react-router-dom";
 import {
   Button,
   ButtonGroup,
@@ -30,6 +31,10 @@ const formatEpisodeCode = (season, episode) => {
     "E" +
     formatEpisodeNumber(episode.number)
   );
+};
+
+const formatTorrentSearchQuery = (serie, season, episode) => {
+  return encodeURI(serie.name + " " + formatEpisodeCode(season, episode));
 };
 
 class ViewSeriePage extends React.Component {
@@ -145,7 +150,19 @@ class ViewSeriePage extends React.Component {
                                   </Col>
                                   <Col md="3">
                                     <ButtonGroup vertical>
-                                      <Button>View</Button>
+                                      <Button
+                                        tag={Link}
+                                        to={{
+                                          pathname: "/torrents",
+                                          search: `?search=${formatTorrentSearchQuery(
+                                            serie,
+                                            season,
+                                            episode,
+                                          )}`,
+                                        }}
+                                      >
+                                        View
+                                      </Button>
                                     </ButtonGroup>
                                   </Col>
                                 </Row>

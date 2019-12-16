@@ -1,6 +1,7 @@
 import "video.js/dist/video-js.css";
 
 import axios from "axios";
+import qs from "query-string";
 import React from "react";
 import {
   Button,
@@ -30,12 +31,14 @@ class ListTorrentsPage extends React.Component {
 
   constructor(props) {
     super(props);
+
     this.state = {
       loading: false,
       items: [],
       searchItems: null,
       devices: [],
       loadingDevices: false,
+      searchQ: "",
     };
   }
 
@@ -43,6 +46,14 @@ class ListTorrentsPage extends React.Component {
     this._load();
 
     this._loadDevices();
+
+    const query = qs.parse(this.props.location.search, {
+      ignoreQueryPrefix: true,
+    });
+    if (query.search) {
+      this.setState({ searchQ: query.search });
+      this._search(query.search);
+    }
   }
 
   _cancelRequest() {
@@ -168,7 +179,12 @@ class ListTorrentsPage extends React.Component {
 
   _onChangeSearch(e) {
     const value = e.target.value;
+    this.setState({ searchQ: value });
 
+    this._search(value);
+  }
+
+  _search(value) {
     this._cancelRequest();
 
     if (value.length > 2) {
@@ -389,10 +405,20 @@ class ListTorrentsPage extends React.Component {
   }
 
   render() {
-    const { loading, items, searchItems, viewItem, playerVideo } = this.state;
+    const {
+      loading,
+      items,
+      searchItems,
+      viewItem,
+      playerVideo,
+      searchQ,
+    } = this.state;
     return (
       <div>
-        <SearchForm onChangeSearch={this._onChangeSearch.bind(this)} />
+        <SearchForm
+          value={searchQ}
+          onChangeSearch={this._onChangeSearch.bind(this)}
+        />
         {loading ? (
           <Loading />
         ) : searchItems ? (

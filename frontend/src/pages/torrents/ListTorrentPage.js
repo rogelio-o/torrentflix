@@ -27,6 +27,7 @@ import VideoPlayer from "./../../components/VideoPlayer";
 
 class ListTorrentsPage extends React.Component {
   _source = axios.CancelToken.source();
+  _sourceSearch = axios.CancelToken.source();
   _sourceDevices = axios.CancelToken.source();
 
   constructor(props) {
@@ -35,6 +36,7 @@ class ListTorrentsPage extends React.Component {
     this.state = {
       loading: false,
       items: [],
+      loadingSearch: false,
       searchItems: null,
       devices: [],
       loadingDevices: false,
@@ -59,6 +61,11 @@ class ListTorrentsPage extends React.Component {
   _cancelRequest() {
     this._source.cancel();
     this._source = axios.CancelToken.source();
+  }
+
+  _cancelRequestSearch() {
+    this._sourceSearch.cancel();
+    this._sourceSearch = axios.CancelToken.source();
   }
 
   _cancelRequestDevices() {
@@ -137,27 +144,6 @@ class ListTorrentsPage extends React.Component {
       });
   }
 
-  _refreshDevices() {
-    this.setState({ loadingDevices: true });
-
-    axios
-      .post(
-        "/api/devices/refresh",
-        {},
-        {
-          cancelToken: this._sourceDevices.token,
-        },
-      )
-      .then(() => this._loadDevices())
-      .catch((error) => {
-        if (!axios.isCancel(error)) {
-          alert(error.message);
-          console.error(error);
-          this.setState({ loadingDevices: false });
-        }
-      });
-  }
-
   _loadVideos(torrentId) {
     this.setState({ loadingVideos: true });
     axios
@@ -185,18 +171,18 @@ class ListTorrentsPage extends React.Component {
   }
 
   _search(value) {
-    this._cancelRequest();
+    this._cancelRequestSearch();
 
     if (value.length > 2) {
-      this.setState({ loading: true });
+      this.setState({ loadingSearch: true });
       this._request = axios
         .get("/api/torrents/search", {
           params: { q: value },
-          cancelToken: this._source.token,
+          cancelToken: this._sourceSearch.token,
         })
         .then((response) => {
           this.setState({
-            loading: false,
+            loadingSearch: false,
             searchItems: response.data,
           });
         })
@@ -204,11 +190,11 @@ class ListTorrentsPage extends React.Component {
           if (!axios.isCancel(error)) {
             alert(error.message);
             console.error(error);
-            this.setState({ loading: false, searchItems: null });
+            this.setState({ loadingSearch: false, searchItems: null });
           }
         });
     } else {
-      this.setState({ searchItems: null });
+      this.setState({ searchItems: null, loadingSearch: false });
     }
   }
 
@@ -332,7 +318,7 @@ class ListTorrentsPage extends React.Component {
                 )}{" "}
                 <Button
                   color="warning"
-                  onClick={() => this._refreshDevices()}
+                  onClick={() => this._loadDevices()}
                   disabled={loadingDevices}
                 >
                   Refresh
@@ -408,6 +394,7 @@ class ListTorrentsPage extends React.Component {
     const {
       loading,
       items,
+      loadingSearch,
       searchItems,
       viewItem,
       playerVideo,
@@ -419,7 +406,7 @@ class ListTorrentsPage extends React.Component {
           value={searchQ}
           onChangeSearch={this._onChangeSearch.bind(this)}
         />
-        {loading ? (
+        {loading || loadingSearch ? (
           <Loading />
         ) : searchItems ? (
           this._renderSearchItems(searchItems)

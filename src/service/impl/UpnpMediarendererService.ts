@@ -58,9 +58,9 @@ export class UpnpMediaRendererService implements IRenderService {
           client.on("paused", () => {
             renderization.status = RenderizationStatus.PAUSED;
 
-            this.stopUpdatingPosition(renderizationID);
-
             this.runCallbacks(renderizationID, RenderAction.PAUSED);
+
+            this.stopUpdatingPosition(renderizationID);
           });
           client.on("stopped", () => {
             renderization.status = RenderizationStatus.STOPPED;
@@ -97,9 +97,6 @@ export class UpnpMediaRendererService implements IRenderService {
     const wrapper = this.data[renderizationID];
     wrapper.renderization.autoplay = false;
     wrapper.client.stop();
-
-    this.stopUpdatingPosition(renderizationID);
-    delete this.data[renderizationID];
 
     return Promise.resolve();
   }

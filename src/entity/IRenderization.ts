@@ -21,4 +21,5 @@ export enum RenderizationStatus {
   STOPPED,
   PAUSED,
   LOADING,
+  ERROR,
 }

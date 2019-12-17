@@ -72,6 +72,8 @@ export class UpnpMediaRendererService implements IRenderService {
             delete this.data[renderizationID];
           });
           client.on("error", () => {
+            renderization.status = RenderizationStatus.ERROR;
+
             this.stopUpdatingPosition(renderizationID);
 
             this.runCallbacks(renderizationID, RenderAction.STOPPED);

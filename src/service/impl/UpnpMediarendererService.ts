@@ -67,9 +67,16 @@ export class UpnpMediaRendererService implements IRenderService {
 
             this.stopUpdatingPosition(renderizationID);
 
+            this.runCallbacks(renderizationID, RenderAction.STOPPED);
+
             delete this.data[renderizationID];
+          });
+          client.on("error", () => {
+            this.stopUpdatingPosition(renderizationID);
 
             this.runCallbacks(renderizationID, RenderAction.STOPPED);
+
+            delete this.data[renderizationID];
           });
           client.on("speedChanged", () =>
             this.runCallbacks(renderizationID, RenderAction.SPEED_CHANGED),

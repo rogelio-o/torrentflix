@@ -28,4 +28,5 @@ export enum RenderAction {
   PAUSED,
   STOPPED,
   SPEED_CHANGED,
+  ERROR,
 }

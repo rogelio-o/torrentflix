@@ -32,8 +32,20 @@ export class SspdDevicesService implements IDevicesService {
 
     this.server = new Sspd.Server();
     this.server.addUSN(MEDIA_RENDERER_TYPE);
-
     this.data = {};
+
+    const client = new Sspd.Client();
+    client.on("response", (headers: { [key: string]: string }) => {
+      checkDevice(headers, (deviceId) => {
+        this.data[deviceId] = {
+          id: deviceId,
+          name: headers.SERVER,
+          xmlUrl: headers.LOCATION,
+        };
+      });
+    });
+    client.search(MEDIA_RENDERER_TYPE);
+
     this.server.on("advertise-alive", (headers: { [key: string]: string }) => {
       checkDevice(headers, (deviceId) => {
         this.data[deviceId] = {

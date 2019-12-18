@@ -143,27 +143,29 @@ export class UpnpMediaRendererService implements IRenderService {
   }
 
   private startUpdatingPosition(renderizationID: string) {
-    this.data[renderizationID].interval = setInterval(() => {
-      const renderizationWrapper = this.data[renderizationID];
-      const client = renderizationWrapper.client;
-      const renderization = renderizationWrapper.renderization;
+    if (this.data[renderizationID]) {
+      this.data[renderizationID].interval = setInterval(() => {
+        const renderizationWrapper = this.data[renderizationID];
+        const client = renderizationWrapper.client;
+        const renderization = renderizationWrapper.renderization;
 
-      client.getPosition((err: Error, position: number) => {
-        if (err) {
-          console.error(err);
-        } else {
-          renderization.position = position;
-        }
-      });
+        client.getPosition((err: Error, position: number) => {
+          if (err) {
+            console.error(err);
+          } else {
+            renderization.position = position;
+          }
+        });
 
-      client.getDuration((err: Error, duration: number) => {
-        if (err) {
-          console.error(err);
-        } else {
-          renderization.duration = duration;
-        }
-      });
-    }, 1000);
+        client.getDuration((err: Error, duration: number) => {
+          if (err) {
+            console.error(err);
+          } else {
+            renderization.duration = duration;
+          }
+        });
+      }, 1000);
+    }
   }
 
   private removeRenderization(renderizationID: string) {

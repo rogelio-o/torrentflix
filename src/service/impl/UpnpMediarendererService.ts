@@ -31,7 +31,6 @@ export class UpnpMediaRendererService implements IRenderService {
         } else {
           const renderizationID = uuidv4();
           const renderization: IRenderization = {
-            autoplay: true,
             deviceID: device.id,
             id: renderizationID,
             status: RenderizationStatus.PLAYING,
@@ -100,7 +99,6 @@ export class UpnpMediaRendererService implements IRenderService {
 
   public stop(renderizationID: string): Promise<void> {
     const wrapper = this.data[renderizationID];
-    wrapper.renderization.autoplay = false;
     wrapper.client.stop();
 
     this.removeRenderization(renderizationID);
@@ -134,12 +132,6 @@ export class UpnpMediaRendererService implements IRenderService {
 
   public findById(renderizationID: string): Promise<IRenderization> {
     return Promise.resolve(this.data[renderizationID].renderization);
-  }
-
-  public autoplay(renderizationID: string, autoplay: boolean): Promise<void> {
-    this.data[renderizationID].renderization.autoplay = autoplay;
-
-    return Promise.resolve();
   }
 
   private startUpdatingPosition(renderizationID: string) {

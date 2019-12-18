@@ -9,8 +9,6 @@ export interface IRenderization {
 
   videoID: string;
 
-  autoplay: boolean;
-
   position?: number;
 
   duration?: number;

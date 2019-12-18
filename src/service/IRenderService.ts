@@ -18,8 +18,6 @@ export interface IRenderService {
   findAll(): Promise<IRenderization[]>;
 
   findById(renderizationID: string): Promise<IRenderization>;
-
-  autoplay(renderizationID: string, autoplay: boolean): Promise<void>;
 }
 
 export enum RenderAction {

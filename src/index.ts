@@ -144,10 +144,6 @@ app.put(
   renderizationsHandler.pause.bind(renderizationsHandler),
 );
 app.put(
-  "/api/renderizations/:renderizationID/autoplay",
-  renderizationsHandler.autoplay.bind(renderizationsHandler),
-);
-app.put(
   "/api/renderizations/:renderizationID/seek",
   renderizationsHandler.seek.bind(renderizationsHandler),
 );

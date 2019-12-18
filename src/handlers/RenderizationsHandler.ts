@@ -59,18 +59,6 @@ export class RenderizationsHandler {
       });
   }
 
-  public autoplay(req: express.Request, res: express.Response) {
-    const body = req.body;
-
-    this.renderService
-      .autoplay(req.params.renderizationID, body.autoplay)
-      .then(() => res.sendStatus(204))
-      .catch((e) => {
-        console.error(e);
-        res.sendStatus(500);
-      });
-  }
-
   public seek(req: express.Request, res: express.Response) {
     const body = req.body;
 

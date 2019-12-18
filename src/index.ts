@@ -150,7 +150,7 @@ app.put(
 
 const moviesHandler: MoviesHandler = new MoviesHandler(moviesService);
 app.get("/api/movies/search", moviesHandler.search.bind(moviesHandler));
-app.get("/api/movies", moviesHandler.findAll.bind(moviesHandler));
+app.get("/api/movies", moviesHandler.findPage.bind(moviesHandler));
 app.get("/api/movies/:movieId", moviesHandler.findById.bind(moviesHandler));
 app.post("/api/movies", moviesHandler.create.bind(moviesHandler));
 app.put(
@@ -161,7 +161,7 @@ app.delete("/api/movies/:movieId", moviesHandler.delete.bind(moviesHandler));
 
 const seriesHandler: SeriesHandler = new SeriesHandler(seriesService);
 app.get("/api/series/search", seriesHandler.search.bind(seriesHandler));
-app.get("/api/series", seriesHandler.findAll.bind(seriesHandler));
+app.get("/api/series", seriesHandler.findPage.bind(seriesHandler));
 app.get("/api/series/:serieId", seriesHandler.findById.bind(seriesHandler));
 app.post("/api/series", seriesHandler.create.bind(seriesHandler));
 app.put(

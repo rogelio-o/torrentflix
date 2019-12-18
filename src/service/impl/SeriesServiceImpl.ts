@@ -1,4 +1,5 @@
 import { IApiSerieSearchResult } from "../../entity/IApiSerieSearchResult";
+import { IPage } from "../../entity/IPage";
 import { ISerie } from "../../entity/ISerie";
 import { ISerieWithSeasons } from "../../entity/ISerieWithSeasons";
 import { ISeriesRepository } from "../../repositories/ISeriesRepository";
@@ -45,7 +46,23 @@ export class SeriesServiceImpl implements ISeriesService {
     return this.repository.findById(serieId);
   }
 
-  public findAll(): Promise<ISerie[]> {
-    return this.repository.findAll();
+  public async findPage(
+    page: number,
+    itemsPerPage: number,
+  ): Promise<IPage<ISerie>> {
+    const offset = page * itemsPerPage;
+
+    const [items, total] = await Promise.all([
+      this.repository.findAll(offset, itemsPerPage),
+      this.repository.count(),
+    ]);
+
+    return {
+      currentPage: page,
+      items,
+      itemsPerPage,
+      numItems: total,
+      totalPages: Math.ceil(total / itemsPerPage),
+    };
   }
 }

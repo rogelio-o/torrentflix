@@ -1,5 +1,6 @@
 import { IApiMovieSearchResult } from "../../entity/IApiMovieSearchResult";
 import { IMovie } from "../../entity/IMovie";
+import { IPage } from "../../entity/IPage";
 import { IMoviesRepository } from "../../repositories/IMoviesRepository";
 import { IApiMoviesService } from "../IApiMoviesService";
 import { IMoviesService } from "../IMoviesService";
@@ -47,7 +48,23 @@ export class MoviesServiceImpl implements IMoviesService {
     return this.moviesRepository.findById(movieId);
   }
 
-  public findAll(): Promise<IMovie[]> {
-    return this.moviesRepository.findAll();
+  public async findPage(
+    page: number,
+    itemsPerPage: number,
+  ): Promise<IPage<IMovie>> {
+    const offset = page * itemsPerPage;
+
+    const [items, total] = await Promise.all([
+      this.moviesRepository.findAll(offset, itemsPerPage),
+      this.moviesRepository.count(),
+    ]);
+
+    return {
+      currentPage: page,
+      items,
+      itemsPerPage,
+      numItems: total,
+      totalPages: Math.ceil(total / itemsPerPage),
+    };
   }
 }

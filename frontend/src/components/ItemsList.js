@@ -1,15 +1,7 @@
 import React from "react";
-import {
-  Card,
-  CardBody,
-  CardDeck,
-  CardImg,
-  CardSubtitle,
-  CardText,
-  CardTitle,
-} from "reactstrap";
-import Button from "reactstrap-button-loader";
 import { Link } from "react-router-dom";
+import { Card, CardBody, CardDeck, CardImg, CardSubtitle, CardText, CardTitle } from "reactstrap";
+import Button from "reactstrap-button-loader";
 
 const groupByN = (n, data) => {
   let result = [];
@@ -21,7 +13,6 @@ const groupByN = (n, data) => {
 
 const ItemsList = ({ items }) => {
   const groupedItems = groupByN(3, items);
-  console.log(items);
 
   return (
     <div>

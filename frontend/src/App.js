@@ -5,11 +5,11 @@ import { BrowserRouter, Redirect, Switch } from "react-router-dom";
 
 import { LayoutRoute, MainLayout } from "./components/Layout";
 import ListMoviesPage from "./pages/movies/ListMoviesPage";
-import ListSeriesPage from "./pages/series/ListSeriesPage";
-import ListTorrentPage from "./pages/torrents/ListTorrentPage";
-import ListRenderizationsPage from "./pages/renderizations/ListRenderizationsPage";
 import ViewMoviePage from "./pages/movies/ViewMoviePage";
+import ListRenderizationsPage from "./pages/renderizations/ListRenderizationsPage";
+import ListSeriesPage from "./pages/series/ListSeriesPage";
 import ViewSeriePage from "./pages/series/ViewSeriePage";
+import ListTorrentPage from "./pages/torrents/ListTorrentPage";
 
 const getBasename = () => {
   return `/${process.env.PUBLIC_URL.split("/").pop()}`;

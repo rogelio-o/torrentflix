@@ -4,7 +4,9 @@ import { ISerieWithSeasons } from "../entity/ISerieWithSeasons";
 export interface ISeriesRepository {
   findById(serieId: string): Promise<ISerieWithSeasons>;
 
-  findAll(): Promise<ISerie[]>;
+  findAll(offset: number, limit: number): Promise<ISerie[]>;
+
+  count(): Promise<number>;
 
   create(serie: ISerieWithSeasons): Promise<void>;
 

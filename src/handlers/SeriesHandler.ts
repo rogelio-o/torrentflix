@@ -60,9 +60,14 @@ export class SeriesHandler {
       });
   }
 
-  public findAll(req: express.Request, res: express.Response): void {
+  public findPage(req: express.Request, res: express.Response): void {
+    const page = req.query.page ? parseInt(req.query.page, 10) : 0;
+    const itemsPerPage = req.query.itemsPerPage
+      ? parseInt(req.query.itemsPerPage, 10)
+      : 10;
+
     this.seriesService
-      .findAll()
+      .findPage(page, itemsPerPage)
       .then((result) => res.json(result))
       .catch((e) => {
         console.error(e);

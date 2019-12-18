@@ -1,8 +1,10 @@
 import axios from "axios";
+import qs from "query-string";
 import React from "react";
 
 import ItemsList from "./../../components/ItemsList";
 import Loading from "./../../components/Loading";
+import Page from "./../../components/Page";
 import SearchForm from "./../../components/SearchForm";
 
 const mapItem = (item, buttons) => {
@@ -20,11 +22,15 @@ class ListMoviesPage extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = { loading: false, items: [], searchItems: null };
+    this.state = { loading: false, page: { items: [] }, searchItems: null };
   }
 
   componentDidMount() {
-    this._load();
+    const query = qs.parse(this.props.location.search, {
+      ignoreQueryPrefix: true,
+    });
+
+    this._load(query.page || 0);
   }
 
   _cancelRequest() {
@@ -89,18 +95,22 @@ class ListMoviesPage extends React.Component {
       });
   }
 
-  _load() {
+  _load(page) {
     this._cancelRequest();
 
     this.setState({ loading: true });
     axios
       .get("/api/movies", {
         cancelToken: this._source.token,
+        params: {
+          page,
+        },
       })
       .then((response) => {
+        const data = response.data;
         this.setState({
           loading: false,
-          items: response.data.map(this._mapItem.bind(this)),
+          page: { ...data, items: data.items.map(this._mapItem.bind(this)) },
           searchItems: null,
         });
       })
@@ -108,7 +118,7 @@ class ListMoviesPage extends React.Component {
         if (!axios.isCancel(error)) {
           alert(error.message);
           console.error(error);
-          this.setState({ loading: false, items: [] });
+          this.setState({ loading: false, page: { items: [] } });
         }
       });
   }
@@ -144,14 +154,16 @@ class ListMoviesPage extends React.Component {
   }
 
   render() {
-    const { loading, items, searchItems } = this.state;
+    const { loading, page, searchItems } = this.state;
     return (
       <div>
         <SearchForm onChangeSearch={this._onChangeSearch.bind(this)} />
         {loading ? (
           <Loading />
         ) : (
-          <ItemsList items={searchItems ? searchItems : items} />
+          <Page path="/movies" loadPage={this._load.bind(this)} page={page}>
+            <ItemsList items={searchItems ? searchItems : page.items} />
+          </Page>
         )}
       </div>
     );

@@ -25,12 +25,20 @@ export class SqliteSeriesRepository implements ISeriesRepository {
     return this.mapSerieWithSeasonsRow(seriesRows[0], episodesRows);
   }
 
-  public async findAll(): Promise<ISerie[]> {
+  public async findAll(offset: number, limit: number): Promise<ISerie[]> {
     const db = await this.dbPromise;
 
-    const rows = await db.all("SELECT * FROM series");
+    const rows = await db.all(`SELECT * FROM series LIMIT ${offset},${limit}`);
 
     return rows.map((row) => this.mapSerieRow(row));
+  }
+
+  public async count(): Promise<number> {
+    const db = await this.dbPromise;
+
+    const row = await db.get("SELECT count(*) as count FROM series");
+
+    return row.count;
   }
 
   public async create(serie: ISerieWithSeasons): Promise<void> {

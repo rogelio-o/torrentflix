@@ -7,7 +7,9 @@ export interface IMoviesRepository {
 
   delete(movieId: string): Promise<void>;
 
-  findAll(): Promise<IMovie[]>;
+  findAll(offset: number, limit: number): Promise<IMovie[]>;
+
+  count(): Promise<number>;
 
   findById(movieId: string): Promise<IMovie>;
 }

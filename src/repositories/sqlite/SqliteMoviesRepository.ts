@@ -41,12 +41,20 @@ export class SqliteMoviesRepository implements IMoviesRepository {
     await db.run("DELETE FROM movies WHERE id = ?", movieId);
   }
 
-  public async findAll(): Promise<IMovie[]> {
+  public async findAll(offset: number, limit: number): Promise<IMovie[]> {
     const db = await this.dbPromise;
 
-    const rows = await db.all("SELECT * FROM movies");
+    const rows = await db.all(`SELECT * FROM movies LIMIT ${offset},${limit}`);
 
     return rows.map((row) => this.parseRow(row));
+  }
+
+  public async count(): Promise<number> {
+    const db = await this.dbPromise;
+
+    const row = await db.get("SELECT COUNT(*) as count FROM movies");
+
+    return row.count;
   }
 
   public async findById(movieId: string): Promise<IMovie> {

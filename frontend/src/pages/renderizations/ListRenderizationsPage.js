@@ -12,6 +12,21 @@ import {
 
 import Loading from "../../components/Loading";
 
+const formatTime = (seconds) => {
+  let h = 0;
+  let m = 0;
+  let s = 0;
+  h = Math.floor((seconds - h * 0 - m * 0) / 3600);
+  m = Math.floor((seconds - h * 3600 - m * 0) / 60);
+  s = Math.floor(seconds - h * 3600 - m * 60);
+
+  const pad = (v) => {
+    return v < 10 ? "0" + v : v;
+  };
+
+  return [pad(h), pad(m), pad(s)].join(":");
+};
+
 class ListRenderizationsPage extends React.Component {
   _source = axios.CancelToken.source();
 
@@ -119,7 +134,7 @@ class ListRenderizationsPage extends React.Component {
                   value={(item.position / item.duration) * 100}
                   onClick={(e) => this._onTimeBarClick(e, item)}
                 >
-                  {item.position} / {item.duration}
+                  {formatTime(item.position)} / {formatTime(item.duration)}
                 </Progress>
 
                 <ButtonGroup className="mt-3">

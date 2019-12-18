@@ -65,20 +65,16 @@ export class UpnpMediaRendererService implements IRenderService {
           client.on("stopped", () => {
             renderization.status = RenderizationStatus.STOPPED;
 
-            this.stopUpdatingPosition(renderizationID);
-
             this.runCallbacks(renderizationID, RenderAction.STOPPED);
 
-            delete this.data[renderizationID];
+            this.removeRenderization(renderizationID);
           });
           client.on("error", () => {
             renderization.status = RenderizationStatus.ERROR;
 
-            this.stopUpdatingPosition(renderizationID);
-
             this.runCallbacks(renderizationID, RenderAction.STOPPED);
 
-            delete this.data[renderizationID];
+            this.removeRenderization(renderization.id);
           });
           client.on("speedChanged", () =>
             this.runCallbacks(renderizationID, RenderAction.SPEED_CHANGED),
@@ -106,6 +102,8 @@ export class UpnpMediaRendererService implements IRenderService {
     const wrapper = this.data[renderizationID];
     wrapper.renderization.autoplay = false;
     wrapper.client.stop();
+
+    this.removeRenderization(renderizationID);
 
     return Promise.resolve();
   }
@@ -168,8 +166,15 @@ export class UpnpMediaRendererService implements IRenderService {
     }, 1000);
   }
 
+  private removeRenderization(renderizationID: string) {
+    if (this.data[renderizationID]) {
+      this.stopUpdatingPosition(renderizationID);
+      delete this.data[renderizationID];
+    }
+  }
+
   private stopUpdatingPosition(renderizationID: string) {
-    const inverval = this.data[renderizationID].interval;
+    const inverval = (this.data[renderizationID] || {}).interval;
     if (inverval) {
       clearInterval(inverval);
     }

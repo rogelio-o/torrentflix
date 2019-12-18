@@ -79,6 +79,27 @@ class ListRenderizationsPage extends React.Component {
       });
   }
 
+  _onTimeBarClick(e, item) {
+    if (item.duration) {
+      const position =
+        (e.nativeEvent.offsetX - e.target.offsetLeft) / e.target.offsetWidth;
+      const seekSeconds = item.duration * position;
+
+      axios
+        .put(`/api/renderizations/${item.id}/seek`, {
+          seconds: seekSeconds,
+        })
+        .then((response) => {
+          item.position = seekSeconds;
+          this.setState({});
+        })
+        .catch((error) => {
+          alert(error.message);
+          console.error(error);
+        });
+    }
+  }
+
   render() {
     const { loading, items } = this.state;
 
@@ -93,7 +114,11 @@ class ListRenderizationsPage extends React.Component {
                 {item.deviceID} - {item.torrentID} - {item.videoID}
               </ListGroupItemHeading>
               <ListGroupItemText>
-                <Progress striped value={(item.position / item.duration) * 100}>
+                <Progress
+                  striped
+                  value={(item.position / item.duration) * 100}
+                  onClick={(e) => this._onTimeBarClick(e, item)}
+                >
                   {item.position} / {item.duration}
                 </Progress>
 

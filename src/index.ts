@@ -149,7 +149,7 @@ app.put(
 );
 app.put(
   "/api/renderizations/:renderizationID/seek",
-  renderizationsHandler.autoplay.bind(renderizationsHandler),
+  renderizationsHandler.seek.bind(renderizationsHandler),
 );
 
 const moviesHandler: MoviesHandler = new MoviesHandler(moviesService);

@@ -109,7 +109,7 @@ export class UpnpMediaRendererService implements IRenderService {
   }
 
   public seek(renderizationID: string, seconds: number): Promise<void> {
-    this.data[renderizationID].client.seek(seconds);
+    this.data[renderizationID].client.seek(Math.floor(seconds));
 
     return Promise.resolve();
   }

@@ -1,5 +1,6 @@
 import * as express from "express";
 
+import { Direction } from "../entity/IEntityOrder";
 import { IMoviesService } from "../service/IMoviesService";
 
 export class MoviesHandler {
@@ -65,9 +66,13 @@ export class MoviesHandler {
     const itemsPerPage = req.query.itemsPerPage
       ? parseInt(req.query.itemsPerPage, 10)
       : 10;
+    const order = req.query.order && {
+      attribute: req.query.order,
+      direction: req.query.orderDirection || 1 ? Direction.ASC : Direction.DESC,
+    };
 
     this.moviesService
-      .findPage(page, itemsPerPage)
+      .findPage({ page, itemsPerPage, order })
       .then((result) => res.json(result))
       .catch((e) => {
         console.error(e);

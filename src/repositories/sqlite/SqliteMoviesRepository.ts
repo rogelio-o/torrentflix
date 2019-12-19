@@ -1,6 +1,8 @@
 import { Database } from "sqlite";
 
+import { IEntityOrder } from "../../entity/IEntityOrder";
 import { IMovie } from "../../entity/IMovie";
+import { parseSqlOrder } from "../../utils/sqlUtils";
 import { IMoviesRepository } from "../IMoviesRepository";
 
 export class SqliteMoviesRepository implements IMoviesRepository {
@@ -41,10 +43,16 @@ export class SqliteMoviesRepository implements IMoviesRepository {
     await db.run("DELETE FROM movies WHERE id = ?", movieId);
   }
 
-  public async findAll(offset: number, limit: number): Promise<IMovie[]> {
+  public async findAll(
+    offset: number,
+    limit: number,
+    order?: IEntityOrder,
+  ): Promise<IMovie[]> {
     const db = await this.dbPromise;
 
-    const rows = await db.all(`SELECT * FROM movies LIMIT ${offset},${limit}`);
+    const rows = await db.all(
+      `SELECT * FROM movies ${parseSqlOrder(order)} LIMIT ${offset},${limit}`,
+    );
 
     return rows.map((row) => this.parseRow(row));
   }

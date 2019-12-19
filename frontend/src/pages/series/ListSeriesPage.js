@@ -105,6 +105,7 @@ class ListSeriesPage extends React.Component {
         cancelToken: this._source.token,
         params: {
           page,
+          order: "name",
         },
       })
       .then((response) => {

@@ -1,3 +1,4 @@
+import { IEntityOrder } from "../entity/IEntityOrder";
 import { IMovie } from "../entity/IMovie";
 
 export interface IMoviesRepository {
@@ -7,7 +8,11 @@ export interface IMoviesRepository {
 
   delete(movieId: string): Promise<void>;
 
-  findAll(offset: number, limit: number): Promise<IMovie[]>;
+  findAll(
+    offset: number,
+    limit: number,
+    order?: IEntityOrder,
+  ): Promise<IMovie[]>;
 
   count(): Promise<number>;
 

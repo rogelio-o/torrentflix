@@ -1,6 +1,7 @@
 import { IApiMovieSearchResult } from "../entity/IApiMovieSearchResult";
 import { IMovie } from "../entity/IMovie";
 import { IPage } from "../entity/IPage";
+import { IPageRequest } from "../entity/IPageRequest";
 
 export interface IMoviesService {
   search(q: string): Promise<IApiMovieSearchResult[]>;
@@ -13,5 +14,5 @@ export interface IMoviesService {
 
   findById(movieId: string): Promise<IMovie>;
 
-  findPage(page: number, itemsPerPage: number): Promise<IPage<IMovie>>;
+  findPage(request: IPageRequest): Promise<IPage<IMovie>>;
 }

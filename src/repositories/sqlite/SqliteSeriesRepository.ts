@@ -1,10 +1,12 @@
 import { Database } from "sqlite";
 
+import { IEntityOrder } from "../../entity/IEntityOrder";
 import { ISerie } from "../../entity/ISerie";
 import { ISerieEpisode } from "../../entity/ISerieEpisode";
 import { ISerieSeason } from "../../entity/ISerieSeason";
 import { ISerieWithSeasons } from "../../entity/ISerieWithSeasons";
 import { groupBy } from "../../utils/arrayUtils";
+import { parseSqlOrder } from "../../utils/sqlUtils";
 import { ISeriesRepository } from "../ISeriesRepository";
 
 export class SqliteSeriesRepository implements ISeriesRepository {
@@ -25,10 +27,16 @@ export class SqliteSeriesRepository implements ISeriesRepository {
     return this.mapSerieWithSeasonsRow(seriesRows[0], episodesRows);
   }
 
-  public async findAll(offset: number, limit: number): Promise<ISerie[]> {
+  public async findAll(
+    offset: number,
+    limit: number,
+    order?: IEntityOrder,
+  ): Promise<ISerie[]> {
     const db = await this.dbPromise;
 
-    const rows = await db.all(`SELECT * FROM series LIMIT ${offset},${limit}`);
+    const rows = await db.all(
+      `SELECT * FROM series ${parseSqlOrder(order)} LIMIT ${offset},${limit}`,
+    );
 
     return rows.map((row) => this.mapSerieRow(row));
   }

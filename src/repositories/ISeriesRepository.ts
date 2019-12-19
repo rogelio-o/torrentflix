@@ -1,10 +1,15 @@
+import { IEntityOrder } from "../entity/IEntityOrder";
 import { ISerie } from "../entity/ISerie";
 import { ISerieWithSeasons } from "../entity/ISerieWithSeasons";
 
 export interface ISeriesRepository {
   findById(serieId: string): Promise<ISerieWithSeasons>;
 
-  findAll(offset: number, limit: number): Promise<ISerie[]>;
+  findAll(
+    offset: number,
+    limit: number,
+    order?: IEntityOrder,
+  ): Promise<ISerie[]>;
 
   count(): Promise<number>;
 

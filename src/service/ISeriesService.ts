@@ -1,5 +1,6 @@
 import { IApiSerieSearchResult } from "../entity/IApiSerieSearchResult";
 import { IPage } from "../entity/IPage";
+import { IPageRequest } from "../entity/IPageRequest";
 import { ISerie } from "../entity/ISerie";
 import { ISerieWithSeasons } from "../entity/ISerieWithSeasons";
 
@@ -14,5 +15,5 @@ export interface ISeriesService {
 
   findById(serieId: string): Promise<ISerieWithSeasons>;
 
-  findPage(page: number, itemsPerPage: number): Promise<IPage<ISerie>>;
+  findPage(request: IPageRequest): Promise<IPage<ISerie>>;
 }

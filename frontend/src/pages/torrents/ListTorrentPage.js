@@ -3,32 +3,17 @@ import "video.js/dist/video-js.css";
 import axios from "axios";
 import qs from "query-string";
 import React from "react";
-import {
-  Button,
-  ButtonGroup,
-  CustomInput,
-  Form,
-  FormGroup,
-  Label,
-  ListGroup,
-  ListGroupItem,
-  ListGroupItemHeading,
-  ListGroupItemText,
-  Modal,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-  Progress,
-} from "reactstrap";
 
 import Loading from "./../../components/Loading";
 import SearchForm from "./../../components/SearchForm";
-import VideoPlayer from "./../../components/VideoPlayer";
+import BrowserPlayer from "./components/BrowserPlayer";
+import Items from "./components/Items";
+import RenderModal from "./components/RenderModal";
+import SearchItems from "./components/SearchItems";
 
 class ListTorrentsPage extends React.Component {
   _source = axios.CancelToken.source();
   _sourceSearch = axios.CancelToken.source();
-  _sourceDevices = axios.CancelToken.source();
 
   constructor(props) {
     super(props);
@@ -38,16 +23,12 @@ class ListTorrentsPage extends React.Component {
       items: [],
       loadingSearch: false,
       searchItems: null,
-      devices: [],
-      loadingDevices: false,
       searchQ: "",
     };
   }
 
   componentDidMount() {
     this._load();
-
-    this._loadDevices();
 
     const query = qs.parse(this.props.location.search, {
       ignoreQueryPrefix: true,
@@ -66,11 +47,6 @@ class ListTorrentsPage extends React.Component {
   _cancelRequestSearch() {
     this._sourceSearch.cancel();
     this._sourceSearch = axios.CancelToken.source();
-  }
-
-  _cancelRequestDevices() {
-    this._sourceDevices.cancel();
-    this._sourceDevices = axios.CancelToken.source();
   }
 
   _add(magnetURI) {
@@ -121,48 +97,6 @@ class ListTorrentsPage extends React.Component {
       });
   }
 
-  _loadDevices() {
-    this._cancelRequestDevices();
-
-    this.setState({ loadingDevices: true });
-    axios
-      .get("/api/devices", {
-        cancelToken: this._sourceDevices.token,
-      })
-      .then((response) => {
-        this.setState({
-          loadingDevices: false,
-          devices: response.data,
-        });
-      })
-      .catch((error) => {
-        if (!axios.isCancel(error)) {
-          alert(error.message);
-          console.error(error);
-          this.setState({ loadingDevices: false, devices: [] });
-        }
-      });
-  }
-
-  _loadVideos(torrentId) {
-    this.setState({ loadingVideos: true });
-    axios
-      .get(`/api/torrents/${torrentId}/videos`)
-      .then((response) => {
-        this.setState({
-          loadingVideos: false,
-          videos: response.data,
-        });
-      })
-      .catch((error) => {
-        if (!axios.isCancel(error)) {
-          alert(error.message);
-          console.error(error);
-          this.setState({ loadingVideos: false, videos: [] });
-        }
-      });
-  }
-
   _onChangeSearch(e) {
     const value = e.target.value;
     this.setState({ searchQ: value });
@@ -198,15 +132,13 @@ class ListTorrentsPage extends React.Component {
     }
   }
 
-  _renderTorrentsInDevice(deviceId, torrentId, videoId) {
+  _renderTorrentsInDevice(device, torrent, video) {
     this._closeModal();
 
-    if (deviceId === "browser") {
-      this._renderTorrentsInBrowser(
-        this.state.videos.filter((video) => video.id === videoId)[0],
-      );
+    if (device.id === "browser") {
+      this._renderTorrentsInBrowser(video);
     } else {
-      this._renderTorrentsInRemoteDevice(deviceId, torrentId, videoId);
+      this._renderTorrentsInRemoteDevice(device.id, torrent.id, video.id);
     }
   }
 
@@ -215,7 +147,7 @@ class ListTorrentsPage extends React.Component {
 
     axios
       .put(`/api/devices/${deviceId}/torrents/${torrentId}/videos/${videoId}`)
-      .then((response) => {
+      .then(() => {
         this.props.history.push({
           pathname: "/renderizations",
         });
@@ -238,7 +170,6 @@ class ListTorrentsPage extends React.Component {
   }
 
   _openModal(viewItem) {
-    this._loadVideos(viewItem.id);
     this.setState({ viewItem });
   }
 
@@ -246,117 +177,14 @@ class ListTorrentsPage extends React.Component {
     this.setState({ viewItem: undefined });
   }
 
-  _renderTorrents(items) {
-    return (
-      <ListGroup>
-        {items.map((item) => (
-          <ListGroupItem>
-            <ListGroupItemHeading>{item.name}</ListGroupItemHeading>
-            <ListGroupItemText>
-              <Progress striped value={item.downloadedPerentage * 100}>
-                {item.downloaded} ({item.downloadSpeed}b/s)
-              </Progress>
-
-              <ButtonGroup className="mt-3">
-                <Button color="success" onClick={() => this._openModal(item)}>
-                  Render
-                </Button>
-                <Button color="danger" onClick={() => this._remove(item.id)}>
-                  Delete
-                </Button>
-              </ButtonGroup>
-            </ListGroupItemText>
-          </ListGroupItem>
-        ))}
-      </ListGroup>
-    );
-  }
-
-  _renderSearchItems(items) {
-    return (
-      <ListGroup>
-        {items.map((item) => (
-          <ListGroupItem className="justify-content-between">
-            {item.name} ({item.provider} - {item.size})
-            <Button color="success" onClick={() => this._add(item.magnetUri)}>
-              Add
-            </Button>
-          </ListGroupItem>
-        ))}
-      </ListGroup>
-    );
-  }
-
   _renderModal(viewItem) {
     if (viewItem) {
-      const toggle = this._closeModal.bind(this);
-      const { devices, loadingDevices, videos, loadingVideos } = this.state;
-      let deviceId;
-      let videoId;
-
       return (
-        <Modal isOpen={true} fade={false} toggle={toggle}>
-          <ModalHeader toggle={toggle}>View {viewItem.name}</ModalHeader>
-          <ModalBody>
-            <Form>
-              <FormGroup>
-                <Label for="device">Device</Label>
-                {loadingDevices ? (
-                  <div>Loading...</div>
-                ) : (
-                  <CustomInput
-                    type="select"
-                    name="device"
-                    onChange={(e) => (deviceId = e.target.value)}
-                  >
-                    <option>--</option>
-                    {devices.map((device) => (
-                      <option value={device.id}>{device.name}</option>
-                    ))}
-                    <option value="browser">Browser</option>
-                  </CustomInput>
-                )}{" "}
-                <Button
-                  color="warning"
-                  onClick={() => this._loadDevices()}
-                  disabled={loadingDevices}
-                >
-                  Refresh
-                </Button>
-              </FormGroup>
-              <FormGroup>
-                <Label for="video">Video</Label>
-                {loadingVideos ? (
-                  <div>Loading...</div>
-                ) : (
-                  <CustomInput
-                    type="select"
-                    name="video"
-                    onChange={(e) => (videoId = e.target.value)}
-                  >
-                    <option>--</option>
-                    {videos.map((video) => (
-                      <option value={video.id}>{video.name}</option>
-                    ))}
-                  </CustomInput>
-                )}
-              </FormGroup>
-            </Form>
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              color="primary"
-              onClick={() =>
-                this._renderTorrentsInDevice(deviceId, viewItem.id, videoId)
-              }
-            >
-              Render
-            </Button>{" "}
-            <Button color="secondary" onClick={toggle}>
-              Cancel
-            </Button>
-          </ModalFooter>
-        </Modal>
+        <RenderModal
+          torrent={viewItem}
+          toggle={this._closeModal.bind(this)}
+          submit={this._renderTorrentsInDevice.bind(this)}
+        />
       );
     } else {
       return null;
@@ -364,30 +192,16 @@ class ListTorrentsPage extends React.Component {
   }
 
   _renderBrowserPlayer(video) {
-    if (!video) {
+    if (video) {
+      return (
+        <BrowserPlayer
+          video={video}
+          toggle={this._closeBrowserPlayer.bind(this)}
+        />
+      );
+    } else {
       return null;
     }
-
-    const videoJsOptions = {
-      autoplay: true,
-      controls: true,
-      sources: [
-        {
-          src: video.url,
-          type: video.contentType,
-        },
-      ],
-    };
-    const toggle = this._closeBrowserPlayer.bind(this);
-
-    return (
-      <Modal isOpen={true} fade={false} toggle={toggle}>
-        <ModalHeader toggle={toggle}>{video.name}</ModalHeader>
-        <ModalBody>
-          <VideoPlayer {...videoJsOptions} />
-        </ModalBody>
-      </Modal>
-    );
   }
 
   render() {
@@ -409,9 +223,13 @@ class ListTorrentsPage extends React.Component {
         {loading || loadingSearch ? (
           <Loading />
         ) : searchItems ? (
-          this._renderSearchItems(searchItems)
+          <SearchItems items={searchItems} add={this._add.bind(this)} />
         ) : (
-          this._renderTorrents(items)
+          <Items
+            items={items}
+            openModal={this._openModal.bind(this)}
+            remove={this._remove.bind(this)}
+          />
         )}
         {this._renderModal(viewItem)}
         {this._renderBrowserPlayer(playerVideo)}

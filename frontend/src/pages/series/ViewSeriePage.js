@@ -1,41 +1,9 @@
 import axios from "axios";
-import dateFormat from "dateformat";
 import React from "react";
-import { Link } from "react-router-dom";
-import {
-  Button,
-  ButtonGroup,
-  Card,
-  CardBody,
-  CardHeader,
-  Col,
-  Collapse,
-  Container,
-  ListGroup,
-  ListGroupItem,
-  ListGroupItemHeading,
-  ListGroupItemText,
-  Row,
-} from "reactstrap";
+import { Col, Container, Row } from "reactstrap";
 
 import Loading from "./../../components/Loading";
-
-const formatEpisodeNumber = (number) => {
-  return number < 10 ? "0" + number : number;
-};
-
-const formatEpisodeCode = (season, episode) => {
-  return (
-    "S" +
-    formatEpisodeNumber(season.number) +
-    "E" +
-    formatEpisodeNumber(episode.number)
-  );
-};
-
-const formatTorrentSearchQuery = (serie, season, episode) => {
-  return encodeURI(serie.name + " " + formatEpisodeCode(season, episode));
-};
+import Seasons from "./components/Seasons";
 
 class ViewSeriePage extends React.Component {
   constructor(props) {
@@ -66,15 +34,6 @@ class ViewSeriePage extends React.Component {
           this.setState({ loading: false });
         }
       });
-  }
-
-  _toggleSeason(e) {
-    let event = e.target.dataset.event;
-    console.log(event);
-    this.setState({
-      collapseSeason:
-        this.state.collapseSeason === Number(event) ? undefined : Number(event),
-    });
   }
 
   render() {
@@ -113,68 +72,7 @@ class ViewSeriePage extends React.Component {
                 <h1>{serie.name}</h1>
                 <p>{serie.description}</p>
               </div>
-              <div className="serie-seasons">
-                {serie.seasons.map((season, index) => {
-                  return (
-                    <Card key={index}>
-                      <CardHeader
-                        onClick={this._toggleSeason.bind(this)}
-                        data-event={index}
-                      >
-                        Season {season.number}
-                      </CardHeader>
-                      <Collapse isOpen={collapseSeason === index}>
-                        <CardBody>
-                          <ListGroup>
-                            {season.episodes.map((episode) => (
-                              <ListGroupItem>
-                                <Row>
-                                  <Col>
-                                    <ListGroupItemHeading>
-                                      <strong>
-                                        {formatEpisodeCode(season, episode)}:
-                                      </strong>{" "}
-                                      {episode.name}
-                                    </ListGroupItemHeading>
-                                    <ListGroupItemText>
-                                      <span className="text-secondary">
-                                        {episode.date
-                                          ? dateFormat(
-                                              episode.date,
-                                              "dd/mm/yyyy",
-                                            )
-                                          : null}
-                                      </span>{" "}
-                                      {episode.description}
-                                    </ListGroupItemText>
-                                  </Col>
-                                  <Col md="3">
-                                    <ButtonGroup vertical>
-                                      <Button
-                                        tag={Link}
-                                        to={{
-                                          pathname: "/torrents",
-                                          search: `?search=${formatTorrentSearchQuery(
-                                            serie,
-                                            season,
-                                            episode,
-                                          )}`,
-                                        }}
-                                      >
-                                        View
-                                      </Button>
-                                    </ButtonGroup>
-                                  </Col>
-                                </Row>
-                              </ListGroupItem>
-                            ))}
-                          </ListGroup>
-                        </CardBody>
-                      </Collapse>
-                    </Card>
-                  );
-                })}
-              </div>
+              <Seasons serie={serie} />
             </Col>
           </Row>
         </Container>

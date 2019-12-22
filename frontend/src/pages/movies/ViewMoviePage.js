@@ -1,12 +1,26 @@
 import axios from "axios";
 import React from "react";
-import { Link } from "react-router-dom";
-import { Button, Col, Container, Row } from "reactstrap";
 
+import ItemAttributes from "../../components/ItemAttributes";
+import ItemData from "../../components/ItemData";
+import ItemPage from "../../components/ItemPage";
+import ItemPageSection from "../../components/ItemPageSection";
+import ItemPoster from "../../components/ItemPoster";
+import ItemPunctuation from "../../components/ItemPunctuation";
 import Loading from "./../../components/Loading";
+import MovieLink from "./components/MovieLink";
 
 const formatTorrentSearchQuery = (movie) => {
   return encodeURI(movie.title);
+};
+
+const parseMovieAttributes = (movie) => {
+  const attributes = [];
+  if (movie.genres) {
+    attributes.push({ label: "Genres", value: movie.genres });
+  }
+
+  return attributes;
 };
 
 class ViewMoviePage extends React.Component {
@@ -43,50 +57,30 @@ class ViewMoviePage extends React.Component {
   render() {
     const { loading, movie } = this.state;
 
+    const attributes = parseMovieAttributes(movie);
+
     if (loading) {
       return <Loading />;
     } else {
       return (
-        <Container>
-          <Row>
-            <Col md="3">
-              <img
-                src={
-                  movie.poster
-                    ? `https://image.tmdb.org/t/p/original${movie.poster}`
-                    : ""
-                }
-                alt={movie.title}
-                className="img-fluid"
-              />
-              <div className="punctuation">{movie.voteAverage}</div>
-              <ul className="item-properties">
-                {movie.genres ? (
-                  <li>
-                    <strong>Genres:</strong> {movie.genres.join(", ")}
-                  </li>
-                ) : null}
-              </ul>
-            </Col>
-            <Col>
-              <div className="item-info">
-                <h1>{movie.title}</h1>
-                <p>{movie.description}</p>
-              </div>
-              <div className="movie-link">
-                <Button
-                  tag={Link}
-                  to={{
-                    pathname: "/torrents",
-                    search: `?search=${formatTorrentSearchQuery(movie)}`,
-                  }}
-                >
-                  View
-                </Button>
-              </div>
-            </Col>
-          </Row>
-        </Container>
+        <ItemPage>
+          <ItemPageSection section="subdata">
+            <ItemPoster
+              poster={
+                movie.poster
+                  ? `https://image.tmdb.org/t/p/original${movie.poster}`
+                  : ""
+              }
+              alt={movie.name}
+            />
+            <ItemPunctuation punctuation={movie.voteAverage} />
+            <ItemAttributes attributes={attributes} />
+          </ItemPageSection>
+          <ItemPageSection section="data">
+            <ItemData title={movie.title} description={movie.description} />
+            <MovieLink q={formatTorrentSearchQuery(movie)} />
+          </ItemPageSection>
+        </ItemPage>
       );
     }
   }

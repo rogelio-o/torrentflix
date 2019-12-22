@@ -1,31 +1,8 @@
 import axios from "axios";
 import React from "react";
-import {
-  Button,
-  ButtonGroup,
-  ListGroup,
-  ListGroupItem,
-  ListGroupItemHeading,
-  ListGroupItemText,
-  Progress,
-} from "reactstrap";
 
 import Loading from "../../components/Loading";
-
-const formatTime = (seconds) => {
-  let h = 0;
-  let m = 0;
-  let s = 0;
-  h = Math.floor((seconds - h * 0 - m * 0) / 3600);
-  m = Math.floor((seconds - h * 3600 - m * 0) / 60);
-  s = Math.floor(seconds - h * 3600 - m * 60);
-
-  const pad = (v) => {
-    return v < 10 ? "0" + v : v;
-  };
-
-  return [pad(h), pad(m), pad(s)].join(":");
-};
+import Items from "./components/Items";
 
 class ListRenderizationsPage extends React.Component {
   _source = axios.CancelToken.source();
@@ -59,10 +36,16 @@ class ListRenderizationsPage extends React.Component {
     this._action(id, "play");
   }
 
-  _action(id, action) {
+  _seek(id, seconds) {
+    this._action(id, "seek", {
+      seconds,
+    });
+  }
+
+  _action(id, action, body) {
     this.setState({ loading: true });
     axios
-      .put(`/api/renderizations/${id}/${action}`)
+      .put(`/api/renderizations/${id}/${action}`, body)
       .then(() => this._load())
       .catch((error) => {
         alert(error.message);
@@ -94,27 +77,6 @@ class ListRenderizationsPage extends React.Component {
       });
   }
 
-  _onTimeBarClick(e, item) {
-    if (item.duration) {
-      const position =
-        (e.nativeEvent.offsetX - e.target.offsetLeft) / e.target.offsetWidth;
-      const seekSeconds = item.duration * position;
-
-      axios
-        .put(`/api/renderizations/${item.id}/seek`, {
-          seconds: seekSeconds,
-        })
-        .then((response) => {
-          item.position = seekSeconds;
-          this.setState({});
-        })
-        .catch((error) => {
-          alert(error.message);
-          console.error(error);
-        });
-    }
-  }
-
   render() {
     const { loading, items } = this.state;
 
@@ -122,45 +84,13 @@ class ListRenderizationsPage extends React.Component {
       return <Loading />;
     } else {
       return (
-        <ListGroup>
-          {items.map((item) => (
-            <ListGroupItem>
-              <ListGroupItemHeading>
-                {item.deviceID} - {item.torrentID} - {item.videoID}
-              </ListGroupItemHeading>
-              <ListGroupItemText>
-                <Progress
-                  striped
-                  value={(item.position / item.duration) * 100}
-                  onClick={(e) => this._onTimeBarClick(e, item)}
-                >
-                  {formatTime(item.position)} / {formatTime(item.duration)}
-                </Progress>
-
-                <ButtonGroup className="mt-3">
-                  {item.status !== 2 ? (
-                    <Button
-                      color="warning"
-                      onClick={() => this._pause(item.id)}
-                    >
-                      Pause
-                    </Button>
-                  ) : null}
-                  {item.status !== 1 ? (
-                    <Button color="danger" onClick={() => this._stop(item.id)}>
-                      Stop
-                    </Button>
-                  ) : null}
-                  {item.status !== 0 ? (
-                    <Button color="success" onClick={() => this._play(item.id)}>
-                      Play
-                    </Button>
-                  ) : null}
-                </ButtonGroup>
-              </ListGroupItemText>
-            </ListGroupItem>
-          ))}
-        </ListGroup>
+        <Items
+          items={items}
+          stop={this._stop.bind(this)}
+          pause={this._pause.bind(this)}
+          play={this._play.bind(this)}
+          seek={this._seek.bind(this)}
+        />
       );
     }
   }

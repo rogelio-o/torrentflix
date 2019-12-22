@@ -1,9 +1,25 @@
 import axios from "axios";
 import React from "react";
-import { Col, Container, Row } from "reactstrap";
 
+import ItemAttributes from "../../components/ItemAttributes";
+import ItemData from "../../components/ItemData";
+import ItemPage from "../../components/ItemPage";
+import ItemPageSection from "../../components/ItemPageSection";
+import ItemPoster from "../../components/ItemPoster";
+import ItemPunctuation from "../../components/ItemPunctuation";
 import Loading from "./../../components/Loading";
 import Seasons from "./components/Seasons";
+
+const DEFAULT_POSTER = "";
+
+const parseSerieAttributes = (serie) => {
+  const attributes = [{ label: "Network", value: serie.network }];
+  if (serie.genres) {
+    attributes.push({ label: "Genres", value: serie.genres });
+  }
+
+  return attributes;
+};
 
 class ViewSeriePage extends React.Component {
   constructor(props) {
@@ -37,45 +53,32 @@ class ViewSeriePage extends React.Component {
   }
 
   render() {
-    const { loading, serie, collapseSeason } = this.state;
+    const { loading, serie } = this.state;
+
+    const attributes = parseSerieAttributes(serie);
 
     if (loading) {
       return <Loading />;
     } else {
       return (
-        <Container>
-          <Row>
-            <Col md="3">
-              <img
-                src={
-                  serie.poster
-                    ? `https://www.thetvdb.com/banners/${serie.poster}`
-                    : ""
-                }
-                alt={serie.name}
-                className="img-fluid"
-              />
-              <div className="punctuation">{serie.voteAverage}</div>
-              <ul className="item-properties">
-                <li>
-                  <strong>Network:</strong> {serie.network}
-                </li>
-                {serie.genres ? (
-                  <li>
-                    <strong>Genres:</strong> {serie.genres.join(", ")}
-                  </li>
-                ) : null}
-              </ul>
-            </Col>
-            <Col>
-              <div className="item-info">
-                <h1>{serie.name}</h1>
-                <p>{serie.description}</p>
-              </div>
-              <Seasons serie={serie} />
-            </Col>
-          </Row>
-        </Container>
+        <ItemPage>
+          <ItemPageSection section="subdata">
+            <ItemPoster
+              poster={
+                serie.poster
+                  ? `https://www.thetvdb.com/banners/${serie.poster}`
+                  : DEFAULT_POSTER
+              }
+              alt={serie.name}
+            />
+            <ItemPunctuation punctuation={serie.voteAverage} />
+            <ItemAttributes attributes={attributes} />
+          </ItemPageSection>
+          <ItemPageSection section="data">
+            <ItemData title={serie.name} description={serie.description} />
+            <Seasons serie={serie} />
+          </ItemPageSection>
+        </ItemPage>
       );
     }
   }

@@ -5,8 +5,19 @@ import { IRendererClient } from "../../entity/IRendererClient";
 import { IVideo } from "../../entity/IVideo";
 import { IRenderer, IRenderizationCallbacks } from "./IRenderer";
 
-const calcIpFromXmlUrl = (xmlUrl: string): string => {
-  return xmlUrl.replace(/^https?:\/\//, "").replace(/:\d+\/.+/, "");
+const calcConnectOptionsFromXmlUrl = (
+  xmlUrl: string,
+): { [key: string]: any } => {
+  const host = xmlUrl.replace(/^https?:\/\//, "").replace(/:\d+\/.+/, "");
+  const port = parseInt(
+    xmlUrl.replace(/^https?:\/\/.+:/, "").replace(/\/.+/, ""),
+    10,
+  );
+
+  return {
+    host,
+    port,
+  };
 };
 
 export class ChromecastRenderer implements IRenderer {
@@ -20,7 +31,7 @@ export class ChromecastRenderer implements IRenderer {
     let duration = 0;
 
     return new Promise((resolve, reject) => {
-      client.connect(calcIpFromXmlUrl(device.xmlUrl), () => {
+      client.connect(calcConnectOptionsFromXmlUrl(device.xmlUrl), () => {
         client.on("error", () => callbacks.error());
 
         client.launch(

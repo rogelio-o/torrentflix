@@ -1,22 +1,33 @@
 import Sspd from "node-ssdp";
 
-import { IDevice } from "../../entity/IDevice";
+import { DeviceType, IDevice } from "../../entity/IDevice";
 import { IDevicesService } from "../IDevicesService";
 
 const MEDIA_RENDERER_TYPE = "urn:schemas-upnp-org:device:MediaRenderer:1";
+const MEDIA_RENDERER_TYPE_CHROMECAST =
+  "urn:dial-multiscreen-org:service:dial:1";
 const THIS_SSPD_SERVER = "node-ssdp/4.0.0";
 
 const checkDevice = (
   headers: { [key: string]: string },
-  callback: (deviceId: string) => void,
+  callback: (deviceId: string, type: string) => void,
 ) => {
   const parts = headers.USN.split("::");
   if (
-    parts[1] === MEDIA_RENDERER_TYPE &&
+    (parts[1] === MEDIA_RENDERER_TYPE ||
+      parts[1] === MEDIA_RENDERER_TYPE_CHROMECAST) &&
     (!headers.SERVER || headers.SERVER.indexOf(THIS_SSPD_SERVER) === -1)
   ) {
     const deviceId = parts[0].split(":")[1];
-    callback(deviceId);
+    callback(deviceId, parts[1]);
+  }
+};
+
+const parseType = (type: string): DeviceType => {
+  if (type === MEDIA_RENDERER_TYPE_CHROMECAST) {
+    return DeviceType.CHROMECAST;
+  } else {
+    return DeviceType.DLNA;
   }
 };
 
@@ -36,28 +47,30 @@ export class SspdDevicesService implements IDevicesService {
 
     const client = new Sspd.Client();
     client.on("response", (headers: { [key: string]: string }) => {
-      checkDevice(headers, (deviceId) => {
+      checkDevice(headers, (deviceId, type) => {
         this.data[deviceId] = {
           id: deviceId,
           name: headers.SERVER,
+          type: parseType(type),
           xmlUrl: headers.LOCATION,
         };
       });
     });
-    client.search(MEDIA_RENDERER_TYPE);
+    client.search("ssdp:all");
 
     this.server.on("advertise-alive", (headers: { [key: string]: string }) => {
-      checkDevice(headers, (deviceId) => {
+      checkDevice(headers, (deviceId, type) => {
         this.data[deviceId] = {
           id: deviceId,
           name: headers.SERVER,
+          type: parseType(type),
           xmlUrl: headers.LOCATION,
         };
       });
     });
 
     this.server.on("advertise-bye", (headers: { [key: string]: string }) => {
-      checkDevice(headers, (deviceId) => {
+      checkDevice(headers, (deviceId, type) => {
         delete this.data[deviceId];
       });
     });

@@ -1,4 +1,5 @@
 import { IDevice } from "../../entity/IDevice";
+import { IRendererClient } from "../../entity/IRendererClient";
 import { IVideo } from "../../entity/IVideo";
 
 export interface IRenderer {
@@ -6,7 +7,7 @@ export interface IRenderer {
     video: IVideo,
     device: IDevice,
     callbacks: IRenderizationCallbacks,
-  ): Promise<void>;
+  ): Promise<IRendererClient>;
 }
 
 export interface IRenderizationCallbacks {

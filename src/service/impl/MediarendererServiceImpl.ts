@@ -1,11 +1,21 @@
 import uuidv4 from "uuid/v4";
 
-import { IDevice } from "../../entity/IDevice";
+import { DeviceType, IDevice } from "../../entity/IDevice";
+import { IRendererClient } from "../../entity/IRendererClient";
 import { IRenderization, RenderizationStatus } from "../../entity/IRenderization";
 import { IVideo } from "../../entity/IVideo";
 import { IRenderService, RenderAction } from "../IRenderService";
+import { ChromecastRenderer } from "../media-render/ChromecastRenderer";
 import { DlnaRenderer } from "../media-render/DlnaRenderer";
 import { IRenderer } from "../media-render/IRenderer";
+
+const parseRendererKey = (deviceType: DeviceType): string => {
+  if (deviceType === DeviceType.CHROMECAST) {
+    return "chromecast";
+  } else {
+    return "dlna";
+  }
+};
 
 export class MediaRendererServiceImpl implements IRenderService {
   private data: { [id: string]: IRenderizationWrapper } = {};
@@ -15,6 +25,7 @@ export class MediaRendererServiceImpl implements IRenderService {
   } = {};
 
   private renderers: { [type: string]: IRenderer } = {
+    chromecast: new ChromecastRenderer(),
     dlna: new DlnaRenderer(),
   };
 
@@ -28,7 +39,8 @@ export class MediaRendererServiceImpl implements IRenderService {
       videoID: video.id,
     };
 
-    const client = await this.renderers.dlna.play(video, device, {
+    const renderer = this.renderers[parseRendererKey(device.type)];
+    const client = await renderer.play(video, device, {
       error: () => {
         renderization.status = RenderizationStatus.ERROR;
 
@@ -132,21 +144,15 @@ export class MediaRendererServiceImpl implements IRenderService {
           const client = renderizationWrapper.client;
           const renderization = renderizationWrapper.renderization;
 
-          client.getPosition((err: Error, position: number) => {
-            if (err) {
-              console.error(err);
-            } else {
-              renderization.position = position;
-            }
-          });
+          client
+            .getPosition()
+            .then((position) => (renderization.position = position))
+            .catch((err) => console.error(err));
 
-          client.getDuration((err: Error, duration: number) => {
-            if (err) {
-              console.error(err);
-            } else {
-              renderization.duration = duration;
-            }
-          });
+          client
+            .getDuration()
+            .then((duration) => (renderization.duration = duration))
+            .catch((err) => console.error(err));
         } else {
           clearInterval(interval);
         }
@@ -181,7 +187,7 @@ export class MediaRendererServiceImpl implements IRenderService {
 interface IRenderizationWrapper {
   renderization: IRenderization;
 
-  client: any;
+  client: IRendererClient;
 
   interval?: any;
 }

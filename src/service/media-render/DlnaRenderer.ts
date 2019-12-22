@@ -1,6 +1,7 @@
 import MediaRendererClient from "upnp-mediarenderer-client";
 
 import { IDevice } from "../../entity/IDevice";
+import { IRendererClient } from "../../entity/IRendererClient";
 import { IVideo } from "../../entity/IVideo";
 import { IRenderer, IRenderizationCallbacks } from "./IRenderer";
 
@@ -9,7 +10,7 @@ export class DlnaRenderer implements IRenderer {
     video: IVideo,
     device: IDevice,
     callbacks: IRenderizationCallbacks,
-  ): Promise<any> {
+  ): Promise<IRendererClient> {
     const client = new MediaRendererClient(device.xmlUrl);
     const options = {
       autoplay: false,
@@ -32,7 +33,34 @@ export class DlnaRenderer implements IRenderer {
           client.on("error", () => callbacks.error());
           client.on("speedChanged", () => callbacks.speedChanged());
 
-          resolve(client);
+          resolve({
+            getDuration: (): Promise<number> => {
+              return new Promise((resolve2, reject2) => {
+                client.getDuration((err2: Error, duration: number) => {
+                  if (err2) {
+                    reject2(err2);
+                  } else {
+                    resolve2(duration);
+                  }
+                });
+              });
+            },
+            getPosition: () => {
+              return new Promise((resolve2, reject2) => {
+                client.getPosition((err2: Error, position: number) => {
+                  if (err2) {
+                    reject2(err2);
+                  } else {
+                    resolve2(position);
+                  }
+                });
+              });
+            },
+            pause: () => client.pause(),
+            play: () => client.play(),
+            seek: (seconds) => client.seek(seconds),
+            stop: () => client.stop(),
+          });
         }
       });
     });

@@ -21,13 +21,13 @@ import { IApiSeriesService } from "./service/IApiSeriesService";
 import { IDevicesService } from "./service/IDevicesService";
 import { IMoviesService } from "./service/IMoviesService";
 import { ApiTorrentSearchService } from "./service/impl/ApiTorrentSearchService";
+import { MediaRendererServiceImpl } from "./service/impl/MediarendererServiceImpl";
 import { MoviesServiceImpl } from "./service/impl/MoviesServiceImpl";
 import { PlayerServiceImpl } from "./service/impl/PlayerServiceImpl";
 import { SeriesServiceImpl } from "./service/impl/SeriesServiceImpl";
 import { SspdDevicesService } from "./service/impl/SspdDevicesService";
 import { TMDBApiMoviesService } from "./service/impl/TMDBApiMoviesService";
 import { TTVDBApiSeriesService } from "./service/impl/TTVDBApiSeriesService";
-import { UpnpMediaRendererService } from "./service/impl/UpnpMediarendererService";
 import { WebTorrentService } from "./service/impl/WebTorrentService";
 import { IPlayerService } from "./service/IPlayerService";
 import { IRenderService } from "./service/IRenderService";
@@ -61,7 +61,7 @@ const torrentService: ITorrentService = new WebTorrentService(
   process.env.HOST || "http://192.168.0.15:9090",
   app,
 );
-const renderService: IRenderService = new UpnpMediaRendererService();
+const renderService: IRenderService = new MediaRendererServiceImpl();
 const playerService: IPlayerService = new PlayerServiceImpl(
   devicesService,
   torrentService,

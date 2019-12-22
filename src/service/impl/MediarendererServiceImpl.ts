@@ -1,88 +1,78 @@
-import MediaRendererClient from "upnp-mediarenderer-client";
 import uuidv4 from "uuid/v4";
 
 import { IDevice } from "../../entity/IDevice";
 import { IRenderization, RenderizationStatus } from "../../entity/IRenderization";
 import { IVideo } from "../../entity/IVideo";
 import { IRenderService, RenderAction } from "../IRenderService";
+import { DlnaRenderer } from "../media-render/DlnaRenderer";
+import { IRenderer } from "../media-render/IRenderer";
 
-export class UpnpMediaRendererService implements IRenderService {
+export class MediaRendererServiceImpl implements IRenderService {
   private data: { [id: string]: IRenderizationWrapper } = {};
 
   private callbacks: {
     [id: string]: IRenderCallback[];
   } = {};
 
-  public load(video: IVideo, device: IDevice): Promise<IRenderization> {
-    const client = new MediaRendererClient(device.xmlUrl);
-    const options = {
-      autoplay: false,
-      contentType: video.contentType,
-      metadata: {
-        title: video.name,
-        type: "video",
-      },
+  private renderers: { [type: string]: IRenderer } = {
+    dlna: new DlnaRenderer(),
+  };
+
+  public async load(video: IVideo, device: IDevice): Promise<IRenderization> {
+    const renderizationID = uuidv4();
+    const renderization: IRenderization = {
+      deviceID: device.id,
+      id: renderizationID,
+      status: RenderizationStatus.PLAYING,
+      torrentID: video.torrentID,
+      videoID: video.id,
     };
 
-    return new Promise((resolve, reject) => {
-      client.load(video.url, options, (err: Error) => {
-        if (err) {
-          reject(err);
-        } else {
-          const renderizationID = uuidv4();
-          const renderization: IRenderization = {
-            deviceID: device.id,
-            id: renderizationID,
-            status: RenderizationStatus.PLAYING,
-            torrentID: video.torrentID,
-            videoID: video.id,
-          };
-          this.data[renderizationID] = {
-            client,
-            renderization,
-          };
+    const client = await this.renderers.dlna.play(video, device, {
+      error: () => {
+        renderization.status = RenderizationStatus.ERROR;
 
-          client.on("loading", () => {
-            renderization.status = RenderizationStatus.LOADING;
+        this.runCallbacks(renderizationID, RenderAction.STOPPED);
 
-            this.runCallbacks(renderizationID, RenderAction.LOADING);
-          });
-          client.on("playing", () => {
-            renderization.status = RenderizationStatus.PLAYING;
+        this.removeRenderization(renderization.id);
+      },
+      loading: () => {
+        renderization.status = RenderizationStatus.LOADING;
 
-            this.startUpdatingPosition(renderizationID);
+        this.runCallbacks(renderizationID, RenderAction.LOADING);
+      },
+      paused: () => {
+        renderization.status = RenderizationStatus.PAUSED;
 
-            this.runCallbacks(renderizationID, RenderAction.PLAYING);
-          });
-          client.on("paused", () => {
-            renderization.status = RenderizationStatus.PAUSED;
+        this.runCallbacks(renderizationID, RenderAction.PAUSED);
 
-            this.runCallbacks(renderizationID, RenderAction.PAUSED);
+        this.stopUpdatingPosition(renderizationID);
+      },
+      playing: () => {
+        renderization.status = RenderizationStatus.PLAYING;
 
-            this.stopUpdatingPosition(renderizationID);
-          });
-          client.on("stopped", () => {
-            renderization.status = RenderizationStatus.STOPPED;
+        this.startUpdatingPosition(renderizationID);
 
-            this.runCallbacks(renderizationID, RenderAction.STOPPED);
+        this.runCallbacks(renderizationID, RenderAction.PLAYING);
+      },
+      speedChanged: () => {
+        this.runCallbacks(renderizationID, RenderAction.SPEED_CHANGED);
+      },
+      stopped: () => {
+        renderization.status = RenderizationStatus.STOPPED;
 
-            this.removeRenderization(renderizationID);
-          });
-          client.on("error", () => {
-            renderization.status = RenderizationStatus.ERROR;
+        this.runCallbacks(renderizationID, RenderAction.STOPPED);
 
-            this.runCallbacks(renderizationID, RenderAction.STOPPED);
-
-            this.removeRenderization(renderization.id);
-          });
-          client.on("speedChanged", () =>
-            this.runCallbacks(renderizationID, RenderAction.SPEED_CHANGED),
-          );
-
-          resolve(renderization);
-        }
-      });
+        this.removeRenderization(renderizationID);
+      },
     });
+
+    this.data[renderizationID] = {
+      client,
+      renderization,
+    };
+
+    return renderization;
   }
 
   public play(renderizationID: string): Promise<void> {

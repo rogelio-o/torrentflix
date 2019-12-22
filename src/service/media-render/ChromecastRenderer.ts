@@ -21,6 +21,8 @@ export class ChromecastRenderer implements IRenderer {
 
     return new Promise((resolve, reject) => {
       client.connect(calcIpFromXmlUrl(device.xmlUrl), () => {
+        client.on("error", () => callbacks.error());
+
         client.launch(
           castv2.DefaultMediaReceiver,
           (err: Error, player: any) => {

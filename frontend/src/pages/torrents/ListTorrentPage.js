@@ -8,6 +8,7 @@ import Loading from "./../../components/Loading";
 import BrowserPlayer from "./components/BrowserPlayer";
 import Header from "./components/Header";
 import Items from "./components/Items";
+import MagnetModal from "./components/MagnetModal";
 import RenderModal from "./components/RenderModal";
 import SearchItems from "./components/SearchItems";
 
@@ -24,6 +25,7 @@ class ListTorrentsPage extends React.Component {
       loadingSearch: false,
       searchItems: null,
       searchQ: "",
+      magnetModalOpen: false,
     };
   }
 
@@ -177,6 +179,14 @@ class ListTorrentsPage extends React.Component {
     this.setState({ viewItem: undefined });
   }
 
+  _openMagnetModal() {
+    this.setState({ magnetModalOpen: true });
+  }
+
+  _closeMagnetModal() {
+    this.setState({ magnetModalOpen: false });
+  }
+
   _renderModal(viewItem) {
     if (viewItem) {
       return (
@@ -204,6 +214,19 @@ class ListTorrentsPage extends React.Component {
     }
   }
 
+  _renderMagnetModal(magnetModalOpen) {
+    if (magnetModalOpen) {
+      return (
+        <MagnetModal
+          add={this._add.bind(this)}
+          toggle={this._closeMagnetModal.bind(this)}
+        />
+      );
+    } else {
+      return null;
+    }
+  }
+
   render() {
     const {
       loading,
@@ -213,12 +236,14 @@ class ListTorrentsPage extends React.Component {
       viewItem,
       playerVideo,
       searchQ,
+      magnetModalOpen,
     } = this.state;
     return (
       <div>
         <Header
           searchValue={searchQ}
           onSearchChange={this._onChangeSearch.bind(this)}
+          onAddClick={this._openMagnetModal.bind(this)}
         />
         {loading || loadingSearch ? (
           <Loading />
@@ -233,6 +258,7 @@ class ListTorrentsPage extends React.Component {
         )}
         {this._renderModal(viewItem)}
         {this._renderBrowserPlayer(playerVideo)}
+        {this._renderMagnetModal(magnetModalOpen)}
       </div>
     );
   }

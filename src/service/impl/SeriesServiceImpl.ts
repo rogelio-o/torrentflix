@@ -50,10 +50,26 @@ export class SeriesServiceImpl implements ISeriesService {
   public async findPage(request: IPageRequest): Promise<IPage<ISerie>> {
     const offset = request.page * request.itemsPerPage;
 
-    const [items, total] = await Promise.all([
-      this.repository.findAll(offset, request.itemsPerPage, request.order),
-      this.repository.count(),
-    ]);
+    const [items, total] = await Promise.all(
+      request.q
+        ? [
+            this.repository.findAllWithNameLike(
+              request.q,
+              offset,
+              request.itemsPerPage,
+              request.order,
+            ),
+            this.repository.countWithNameLike(request.q),
+          ]
+        : [
+            this.repository.findAll(
+              offset,
+              request.itemsPerPage,
+              request.order,
+            ),
+            this.repository.count(),
+          ],
+    );
 
     return {
       currentPage: request.page,

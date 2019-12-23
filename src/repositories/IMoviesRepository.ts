@@ -14,7 +14,16 @@ export interface IMoviesRepository {
     order?: IEntityOrder,
   ): Promise<IMovie[]>;
 
+  findAllWithTitleLike(
+    q: string,
+    offset: number,
+    limit: number,
+    order?: IEntityOrder,
+  ): Promise<IMovie[]>;
+
   count(): Promise<number>;
+
+  countWithTitleLike(q: string): Promise<number>;
 
   findById(movieId: string): Promise<IMovie>;
 }

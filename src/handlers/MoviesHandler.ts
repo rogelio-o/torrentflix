@@ -70,9 +70,10 @@ export class MoviesHandler {
       attribute: req.query.order,
       direction: req.query.orderDirection || 1 ? Direction.ASC : Direction.DESC,
     };
+    const q = req.query.q;
 
     this.moviesService
-      .findPage({ page, itemsPerPage, order })
+      .findPage({ page, itemsPerPage, order, q })
       .then((result) => res.json(result))
       .catch((e) => {
         console.error(e);

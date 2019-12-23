@@ -6,4 +6,6 @@ export interface IPageRequest {
   itemsPerPage: number;
 
   order?: IEntityOrder;
+
+  q?: string;
 }

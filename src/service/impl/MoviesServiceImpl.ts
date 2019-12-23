@@ -52,14 +52,26 @@ export class MoviesServiceImpl implements IMoviesService {
   public async findPage(request: IPageRequest): Promise<IPage<IMovie>> {
     const offset = request.page * request.itemsPerPage;
 
-    const [items, total] = await Promise.all([
-      this.moviesRepository.findAll(
-        offset,
-        request.itemsPerPage,
-        request.order,
-      ),
-      this.moviesRepository.count(),
-    ]);
+    const [items, total] = await Promise.all(
+      request.q
+        ? [
+            this.moviesRepository.findAllWithTitleLike(
+              request.q,
+              offset,
+              request.itemsPerPage,
+              request.order,
+            ),
+            this.moviesRepository.countWithTitleLike(request.q),
+          ]
+        : [
+            this.moviesRepository.findAll(
+              offset,
+              request.itemsPerPage,
+              request.order,
+            ),
+            this.moviesRepository.count(),
+          ],
+    );
 
     return {
       currentPage: request.page,

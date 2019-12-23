@@ -57,10 +57,38 @@ export class SqliteMoviesRepository implements IMoviesRepository {
     return rows.map((row) => this.parseRow(row));
   }
 
+  public async findAllWithTitleLike(
+    q: string,
+    offset: number,
+    limit: number,
+    order?: IEntityOrder,
+  ): Promise<IMovie[]> {
+    const db = await this.dbPromise;
+
+    const rows = await db.all(
+      "SELECT * FROM movies WHERE title LIKE $q " +
+        `${parseSqlOrder(order)} LIMIT ${offset},${limit}`,
+      { $q: `%${q}%` },
+    );
+
+    return rows.map((row) => this.parseRow(row));
+  }
+
   public async count(): Promise<number> {
     const db = await this.dbPromise;
 
     const row = await db.get("SELECT COUNT(*) as count FROM movies");
+
+    return row.count;
+  }
+
+  public async countWithTitleLike(q: string): Promise<number> {
+    const db = await this.dbPromise;
+
+    const row = await db.get(
+      "SELECT COUNT(*) as count FROM movies WHERE title LIKE $q",
+      { $q: `%${q}%` },
+    );
 
     return row.count;
   }

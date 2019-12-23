@@ -41,10 +41,39 @@ export class SqliteSeriesRepository implements ISeriesRepository {
     return rows.map((row) => this.mapSerieRow(row));
   }
 
+  public async findAllWithNameLike(
+    q: string,
+    offset: number,
+    limit: number,
+    order?: IEntityOrder,
+  ): Promise<ISerie[]> {
+    const db = await this.dbPromise;
+
+    const rows = await db.all(
+      `SELECT * FROM series WHERE name LIKE $q ${parseSqlOrder(
+        order,
+      )} LIMIT ${offset},${limit}`,
+      { $q: `%${q}%` },
+    );
+
+    return rows.map((row) => this.mapSerieRow(row));
+  }
+
   public async count(): Promise<number> {
     const db = await this.dbPromise;
 
     const row = await db.get("SELECT count(*) as count FROM series");
+
+    return row.count;
+  }
+
+  public async countWithNameLike(q: string): Promise<number> {
+    const db = await this.dbPromise;
+
+    const row = await db.get(
+      "SELECT count(*) as count FROM series WHERE name LIKE $q",
+      { $q: `%${q}%` },
+    );
 
     return row.count;
   }

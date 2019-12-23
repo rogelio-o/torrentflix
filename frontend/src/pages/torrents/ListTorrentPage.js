@@ -5,8 +5,8 @@ import qs from "query-string";
 import React from "react";
 
 import Loading from "./../../components/Loading";
-import SearchForm from "./../../components/SearchForm";
 import BrowserPlayer from "./components/BrowserPlayer";
+import Header from "./components/Header";
 import Items from "./components/Items";
 import RenderModal from "./components/RenderModal";
 import SearchItems from "./components/SearchItems";
@@ -216,9 +216,9 @@ class ListTorrentsPage extends React.Component {
     } = this.state;
     return (
       <div>
-        <SearchForm
-          value={searchQ}
-          onChangeSearch={this._onChangeSearch.bind(this)}
+        <Header
+          searchValue={searchQ}
+          onSearchChange={this._onChangeSearch.bind(this)}
         />
         {loading || loadingSearch ? (
           <Loading />

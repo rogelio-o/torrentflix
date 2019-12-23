@@ -23,7 +23,7 @@ class ListSeriesPage extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = { loading: false, page: { items: [] }, searchItems: null };
+    this.state = { loading: false, page: { items: [], currentPage: 0 } };
   }
 
   componentDidMount() {
@@ -50,28 +50,6 @@ class ListSeriesPage extends React.Component {
     ]);
   }
 
-  _mapSearchItem(item) {
-    return mapItem(item, "", [
-      {
-        onClick: () => this._add(item.externalReferenceId),
-        text: "Add",
-        color: "success",
-      },
-    ]);
-  }
-
-  _add(externalReferenceId) {
-    this.setState({ loading: true });
-    axios
-      .post("/api/series", { externalReferenceId })
-      .then(() => this._load())
-      .catch((error) => {
-        alert(error.message);
-        console.error(error);
-        this.setState({ loading: false });
-      });
-  }
-
   _refresh(id) {
     this.setState({ loading: true });
     axios
@@ -96,7 +74,7 @@ class ListSeriesPage extends React.Component {
       });
   }
 
-  _load(page) {
+  _load(page, q) {
     this._cancelRequest();
 
     this.setState({ loading: true });
@@ -106,6 +84,7 @@ class ListSeriesPage extends React.Component {
         params: {
           page,
           order: "name",
+          q,
         },
       })
       .then((response) => {
@@ -113,7 +92,6 @@ class ListSeriesPage extends React.Component {
         this.setState({
           loading: false,
           page: { ...data, items: data.items.map(this._mapItem.bind(this)) },
-          searchItems: null,
         });
       })
       .catch((error) => {
@@ -129,34 +107,14 @@ class ListSeriesPage extends React.Component {
     const value = e.target.value;
 
     if (value.length > 2) {
-      this._cancelRequest();
-
-      this.setState({ loading: true });
-      this._request = axios
-        .get("/api/series/search", {
-          params: { q: value },
-          cancelToken: this._source.token,
-        })
-        .then((response) => {
-          this.setState({
-            loading: false,
-            searchItems: response.data.map(this._mapSearchItem.bind(this)),
-          });
-        })
-        .catch((error) => {
-          if (!axios.isCancel(error)) {
-            alert(error.message);
-            console.error(error);
-            this.setState({ loading: false, searchItems: null });
-          }
-        });
+      this._load(this.state.page.currentPage, value);
     } else {
-      this.setState({ searchItems: null });
+      this._load(this.state.page.currentPage);
     }
   }
 
   render() {
-    const { loading, page, searchItems } = this.state;
+    const { loading, page } = this.state;
     return (
       <div>
         <SearchForm onChangeSearch={this._onChangeSearch.bind(this)} />
@@ -164,7 +122,7 @@ class ListSeriesPage extends React.Component {
           <Loading />
         ) : (
           <Page path="/series" loadPage={this._load.bind(this)} page={page}>
-            <ItemsList items={searchItems ? searchItems : page.items} />
+            <ItemsList items={page.items} />
           </Page>
         )}
       </div>

@@ -2,10 +2,11 @@ import axios from "axios";
 import qs from "query-string";
 import React from "react";
 
+import ItemCreateModal from "../../components/ItemCreateModal";
+import ItemsListHeader from "../../components/ItemsListHeader";
 import ItemsList from "./../../components/ItemsList";
 import Loading from "./../../components/Loading";
 import Page from "./../../components/Page";
-import SearchForm from "./../../components/SearchForm";
 
 const mapItem = (item, imagePrefix, buttons) => {
   return {
@@ -23,7 +24,11 @@ class ListSeriesPage extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = { loading: false, page: { items: [], currentPage: 0 } };
+    this.state = {
+      loading: false,
+      page: { items: [], currentPage: 0 },
+      addModalOpen: false,
+    };
   }
 
   componentDidMount() {
@@ -74,6 +79,20 @@ class ListSeriesPage extends React.Component {
       });
   }
 
+  _add(externalReferenceId) {
+    this._closeAddModal();
+
+    this.setState({ loading: true });
+    axios
+      .post("/api/series", { externalReferenceId })
+      .then(() => this._load())
+      .catch((error) => {
+        alert(error.message);
+        console.error(error);
+        this.setState({ loading: false });
+      });
+  }
+
   _load(page, q) {
     this._cancelRequest();
 
@@ -113,11 +132,37 @@ class ListSeriesPage extends React.Component {
     }
   }
 
+  _openAddModal() {
+    this.setState({ addModalOpen: true });
+  }
+
+  _closeAddModal() {
+    this.setState({ addModalOpen: false });
+  }
+
+  _renderAddModal(addModalOpen) {
+    if (addModalOpen) {
+      return (
+        <ItemCreateModal
+          toggle={this._closeAddModal.bind(this)}
+          mapItem={(item, buttons) => mapItem(item, "", buttons)}
+          searchPath="/api/series/search"
+          add={this._add.bind(this)}
+        />
+      );
+    } else {
+      return null;
+    }
+  }
+
   render() {
-    const { loading, page } = this.state;
+    const { loading, page, addModalOpen } = this.state;
     return (
       <div>
-        <SearchForm onChangeSearch={this._onChangeSearch.bind(this)} />
+        <ItemsListHeader
+          onSearchChange={this._onChangeSearch.bind(this)}
+          onAddClick={this._openAddModal.bind(this)}
+        />
         {loading ? (
           <Loading />
         ) : (
@@ -125,6 +170,7 @@ class ListSeriesPage extends React.Component {
             <ItemsList items={page.items} />
           </Page>
         )}
+        {this._renderAddModal(addModalOpen)}
       </div>
     );
   }

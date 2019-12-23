@@ -2,10 +2,11 @@ import axios from "axios";
 import qs from "query-string";
 import React from "react";
 
+import ItemCreateModal from "../../components/ItemCreateModal";
 import ItemsList from "./../../components/ItemsList";
+import ItemsListHeader from "./../../components/ItemsListHeader";
 import Loading from "./../../components/Loading";
 import Page from "./../../components/Page";
-import SearchForm from "./../../components/SearchForm";
 
 const mapItem = (item, buttons) => {
   return {
@@ -50,6 +51,8 @@ class ListMoviesPage extends React.Component {
   }
 
   _add(externalReferenceId) {
+    this._closeAddModal();
+
     this.setState({ loading: true });
     axios
       .post("/api/movies", { externalReferenceId })
@@ -124,11 +127,37 @@ class ListMoviesPage extends React.Component {
     }
   }
 
+  _openAddModal() {
+    this.setState({ addModalOpen: true });
+  }
+
+  _closeAddModal() {
+    this.setState({ addModalOpen: false });
+  }
+
+  _renderAddModal(addModalOpen) {
+    if (addModalOpen) {
+      return (
+        <ItemCreateModal
+          toggle={this._closeAddModal.bind(this)}
+          mapItem={mapItem}
+          searchPath="/api/movies/search"
+          add={this._add.bind(this)}
+        />
+      );
+    } else {
+      return null;
+    }
+  }
+
   render() {
-    const { loading, page } = this.state;
+    const { loading, page, addModalOpen } = this.state;
     return (
       <div>
-        <SearchForm onChangeSearch={this._onChangeSearch.bind(this)} />
+        <ItemsListHeader
+          onSearchChange={this._onChangeSearch.bind(this)}
+          onAddClick={this._openAddModal.bind(this)}
+        />
         {loading ? (
           <Loading />
         ) : (
@@ -136,6 +165,7 @@ class ListMoviesPage extends React.Component {
             <ItemsList items={page.items} />
           </Page>
         )}
+        {this._renderAddModal(addModalOpen)}
       </div>
     );
   }

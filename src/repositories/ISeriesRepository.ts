@@ -18,9 +18,28 @@ export interface ISeriesRepository {
     order?: IEntityOrder,
   ): Promise<ISerie[]>;
 
+  findAllByWatched(
+    watched: boolean,
+    offset: number,
+    limit: number,
+    order?: IEntityOrder,
+  ): Promise<ISerie[]>;
+
+  findAllByWatchedWithNameLike(
+    watched: boolean,
+    q: string,
+    offset: number,
+    limit: number,
+    order?: IEntityOrder,
+  ): Promise<ISerie[]>;
+
   count(): Promise<number>;
 
   countWithNameLike(q: string): Promise<number>;
+
+  countByWatched(watched: boolean): Promise<number>;
+
+  countByWatchedWithNameLike(watched: boolean, q: string): Promise<number>;
 
   create(serie: ISerieWithSeasons): Promise<void>;
 

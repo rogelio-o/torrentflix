@@ -8,4 +8,6 @@ export interface IPageRequest {
   order?: IEntityOrder;
 
   q?: string;
+
+  filterWatched?: boolean;
 }

@@ -170,7 +170,7 @@ export class TTVDBApiSeriesService implements IApiSeriesService {
 
   private mapEpisode(episode: any): ISerieEpisode {
     return {
-      date: new Date(episode.firstAired),
+      date: episode.firstAired ? new Date(episode.firstAired) : undefined,
       description: episode.overview,
       name: episode.episodeName,
       number: episode.airedEpisodeNumber,

@@ -71,9 +71,12 @@ export class SeriesHandler {
       direction: req.query.orderDirection || 1 ? Direction.ASC : Direction.DESC,
     };
     const q = req.query.q;
+    const filterWatched = req.query.filter_watched
+      ? req.query.filter_watched === "true"
+      : undefined;
 
     this.seriesService
-      .findPage({ page, itemsPerPage, order, q })
+      .findPage({ page, itemsPerPage, order, q, filterWatched })
       .then((result) => res.json(result))
       .catch((e) => {
         console.error(e);

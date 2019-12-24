@@ -3,7 +3,7 @@ export interface ISerieEpisode {
 
   name: string;
 
-  date: Date;
+  date?: Date;
 
   description: string;
 

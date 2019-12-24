@@ -59,6 +59,44 @@ export class SqliteSeriesRepository implements ISeriesRepository {
     return rows.map((row) => this.mapSerieRow(row));
   }
 
+  public async findAllByWatched(
+    watched: boolean,
+    offset: number,
+    limit: number,
+    order?: IEntityOrder,
+  ): Promise<ISerie[]> {
+    const db = await this.dbPromise;
+
+    const rows = await db.all(
+      "SELECT * FROM series AS s JOIN series_episodes AS e ON s.id = e.serie_id WHERE e.watched = $watched " +
+        `AND e.date < date('now') GROUP BY s.id ${parseSqlOrder(
+          order,
+        )} LIMIT ${offset},${limit}`,
+      { $watched: watched },
+    );
+
+    return rows.map((row) => this.mapSerieRow(row));
+  }
+
+  public async findAllByWatchedWithNameLike(
+    watched: boolean,
+    q: string,
+    offset: number,
+    limit: number,
+    order?: IEntityOrder,
+  ): Promise<ISerie[]> {
+    const db = await this.dbPromise;
+
+    const rows = await db.all(
+      "SELECT * FROM series AS s JOIN series_episodes AS e ON s.id = e.serie_id WHERE s.name LIKE $q" +
+        " AND e.watched = $watched AND e.date < date('now')" +
+        ` GROUP BY s.id ${parseSqlOrder(order, "s.")} LIMIT ${offset},${limit}`,
+      { $q: `%${q}%`, $watched: watched },
+    );
+
+    return rows.map((row) => this.mapSerieRow(row));
+  }
+
   public async count(): Promise<number> {
     const db = await this.dbPromise;
 
@@ -73,6 +111,33 @@ export class SqliteSeriesRepository implements ISeriesRepository {
     const row = await db.get(
       "SELECT count(*) as count FROM series WHERE name LIKE $q",
       { $q: `%${q}%` },
+    );
+
+    return row.count;
+  }
+
+  public async countByWatched(watched: boolean): Promise<number> {
+    const db = await this.dbPromise;
+
+    const row = await db.get(
+      "SELECT count(*) as count FROM series AS s JOIN series_episodes AS e WHERE e.watched = $watched " +
+        "AND e.date < date('now') GROUP BY s.id",
+      { $watched: watched },
+    );
+
+    return row.count;
+  }
+
+  public async countByWatchedWithNameLike(
+    watched: boolean,
+    q: string,
+  ): Promise<number> {
+    const db = await this.dbPromise;
+
+    const row = await db.get(
+      "SELECT count(*) as count FROM series AS s JOIN series_episodes AS e WHERE e.watched = $watched " +
+        "AND name LIKE $q AND e.date < date('now') GROUP BY s.id",
+      { $q: `%${q}%`, $watched: watched },
     );
 
     return row.count;
@@ -186,7 +251,7 @@ export class SqliteSeriesRepository implements ISeriesRepository {
     episode: ISerieEpisode,
   ): any {
     return {
-      $date: episode.date.toUTCString(),
+      $date: episode.date ? episode.date.toISOString() : null,
       $description: episode.description,
       $name: episode.name,
       $number: episode.number,

@@ -9,14 +9,9 @@ const calcConnectOptionsFromXmlUrl = (
   xmlUrl: string,
 ): { [key: string]: any } => {
   const host = xmlUrl.replace(/^https?:\/\//, "").replace(/:\d+\/.+/, "");
-  const port = parseInt(
-    xmlUrl.replace(/^https?:\/\/.+:/, "").replace(/\/.+/, ""),
-    10,
-  );
 
   return {
     host,
-    port,
   };
 };
 

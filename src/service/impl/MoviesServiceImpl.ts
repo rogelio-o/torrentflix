@@ -36,6 +36,8 @@ export class MoviesServiceImpl implements IMoviesService {
       movie.externalReferenceId,
     );
     newMovie.id = movie.id;
+    newMovie.watched = movie.watched;
+
     await this.moviesRepository.update(newMovie);
 
     return newMovie;
@@ -80,5 +82,9 @@ export class MoviesServiceImpl implements IMoviesService {
       numItems: total,
       totalPages: Math.ceil(total / request.itemsPerPage),
     };
+  }
+
+  public updateWatched(movieId: string, watched: boolean): Promise<void> {
+    return this.moviesRepository.updateWatched(movieId, watched);
   }
 }

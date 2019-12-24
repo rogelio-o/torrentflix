@@ -27,4 +27,11 @@ export interface ISeriesRepository {
   update(serie: ISerieWithSeasons): Promise<void>;
 
   delete(serieId: string): Promise<void>;
+
+  updateEpisodeWatched(
+    serieId: string,
+    seasonNumber: number,
+    episodeNumber: number,
+    watched: boolean,
+  ): Promise<void>;
 }

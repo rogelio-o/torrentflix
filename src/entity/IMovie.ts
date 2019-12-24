@@ -24,4 +24,6 @@ export interface IMovie {
   releaseDate: Date;
 
   duration: number;
+
+  watched: boolean;
 }

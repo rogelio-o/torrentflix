@@ -154,6 +154,10 @@ app.get("/api/movies", moviesHandler.findPage.bind(moviesHandler));
 app.get("/api/movies/:movieId", moviesHandler.findById.bind(moviesHandler));
 app.post("/api/movies", moviesHandler.create.bind(moviesHandler));
 app.put(
+  "/api/movies/:movieId/watched",
+  moviesHandler.updateWatched.bind(moviesHandler),
+);
+app.put(
   "/api/movies/:movieId/refresh",
   moviesHandler.refresh.bind(moviesHandler),
 );
@@ -164,6 +168,10 @@ app.get("/api/series/search", seriesHandler.search.bind(seriesHandler));
 app.get("/api/series", seriesHandler.findPage.bind(seriesHandler));
 app.get("/api/series/:serieId", seriesHandler.findById.bind(seriesHandler));
 app.post("/api/series", seriesHandler.create.bind(seriesHandler));
+app.put(
+  "/api/series/:serieId/S:seasonNumber-E:episodeNumber/watched",
+  seriesHandler.updateEpisodeWatched.bind(seriesHandler),
+);
 app.put(
   "/api/series/:serieId/refresh",
   seriesHandler.refresh.bind(seriesHandler),

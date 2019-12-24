@@ -12,4 +12,6 @@ export interface ISerieEpisode {
   voteCount: number;
 
   poster: string;
+
+  watched: boolean;
 }

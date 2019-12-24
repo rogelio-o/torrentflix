@@ -2,6 +2,8 @@ import { IApiSerieSearchResult } from "../../entity/IApiSerieSearchResult";
 import { IPage } from "../../entity/IPage";
 import { IPageRequest } from "../../entity/IPageRequest";
 import { ISerie } from "../../entity/ISerie";
+import { ISerieEpisode } from "../../entity/ISerieEpisode";
+import { ISerieSeason } from "../../entity/ISerieSeason";
 import { ISerieWithSeasons } from "../../entity/ISerieWithSeasons";
 import { ISeriesRepository } from "../../repositories/ISeriesRepository";
 import { IApiSeriesService } from "../IApiSeriesService";
@@ -34,6 +36,7 @@ export class SeriesServiceImpl implements ISeriesService {
       oldSerie.externalReferenceId,
     );
     newSerie.id = oldSerie.id;
+    this._addOldWatched(oldSerie, newSerie);
     await this.repository.update(newSerie);
 
     return newSerie;
@@ -78,5 +81,42 @@ export class SeriesServiceImpl implements ISeriesService {
       numItems: total,
       totalPages: Math.ceil(total / request.itemsPerPage),
     };
+  }
+
+  public updateEpisodeWatched(
+    serieId: string,
+    seasonNumber: number,
+    episodeNumber: number,
+    watched: boolean,
+  ): Promise<void> {
+    return this.repository.updateEpisodeWatched(
+      serieId,
+      seasonNumber,
+      episodeNumber,
+      watched,
+    );
+  }
+
+  private _addOldWatched(
+    oldSerie: ISerieWithSeasons,
+    newSerie: ISerieWithSeasons,
+  ): void {
+    const keyGenerator = (
+      season: ISerieSeason,
+      episode: ISerieEpisode,
+    ): string => `S${season.number}E${episode.number}`;
+
+    const watchedMap: { [key: string]: boolean } = {};
+    oldSerie.seasons.forEach((season) => {
+      season.episodes.forEach((episode) => {
+        watchedMap[keyGenerator(season, episode)] = episode.watched;
+      });
+    });
+
+    newSerie.seasons.forEach((season) => {
+      season.episodes.forEach((episode) => {
+        episode.watched = watchedMap[keyGenerator(season, episode)] || false;
+      });
+    });
   }
 }

@@ -80,4 +80,22 @@ export class SeriesHandler {
         res.sendStatus(500);
       });
   }
+
+  public updateEpisodeWatched(
+    req: express.Request,
+    res: express.Response,
+  ): void {
+    const serieId = req.params.serieId;
+    const seasonNumber = parseInt(req.params.seasonNumber, 10);
+    const episodeNumber = parseInt(req.params.episodeNumber, 10);
+    const body = req.body;
+
+    this.seriesService
+      .updateEpisodeWatched(serieId, seasonNumber, episodeNumber, body.watched)
+      .then(() => res.sendStatus(204))
+      .catch((e) => {
+        console.error(e);
+        res.sendStatus(500);
+      });
+  }
 }

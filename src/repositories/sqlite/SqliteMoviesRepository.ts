@@ -17,9 +17,9 @@ export class SqliteMoviesRepository implements IMoviesRepository {
 
     const statement = await db.run(
       "INSERT INTO movies (external_reference_id, title, genres, popularity, vote_average, vote_count, " +
-        "original_language, description, poster, backdrop, release_date, duration) VALUES ($externalReferenceId, " +
+        "original_language, description, poster, backdrop, release_date, duration, watched) VALUES ($externalReferenceId, " +
         "$title, $genres, $popularity, $voteAverage, $voteCount, $originalLanguage, $description, $poster, " +
-        "$backdrop, $releaseDate, $duration)",
+        "$backdrop, $releaseDate, $duration, $watched)",
       this.parseParams(movie),
     );
     movie.id = statement.lastID.toString();
@@ -32,7 +32,7 @@ export class SqliteMoviesRepository implements IMoviesRepository {
       "UPDATE movies SET external_reference_id = $externalReferenceId, title = $title, genres = $genres, " +
         "popularity = $popularity, vote_average = $voteAverage, vote_count = $voteCount, " +
         "original_language = $originalLanguage, description = $description, poster = $poster, backdrop = $backdrop, " +
-        "release_date = $releaseDate, duration = $duration WHERE id = $id",
+        "release_date = $releaseDate, duration = $duration, watched = $watched WHERE id = $id",
       this.parseParams(movie),
     );
   }
@@ -101,6 +101,15 @@ export class SqliteMoviesRepository implements IMoviesRepository {
     return this.parseRow(rows[0]);
   }
 
+  public async updateWatched(movieId: string, watched: boolean): Promise<void> {
+    const db = await this.dbPromise;
+
+    await db.run("UPDATE movies SET watched = $watched WHERE id = $id", {
+      $id: movieId,
+      $watched: watched ? 1 : 0,
+    });
+  }
+
   private parseRow(row: any): IMovie {
     return {
       backdrop: row.backdrop,
@@ -116,6 +125,7 @@ export class SqliteMoviesRepository implements IMoviesRepository {
       title: row.title,
       voteAverage: row.vote_average,
       voteCount: row.vote_count,
+      watched: row.watched === 1,
     };
   }
 
@@ -134,6 +144,7 @@ export class SqliteMoviesRepository implements IMoviesRepository {
       $title: movie.title,
       $voteAverage: movie.voteAverage,
       $voteCount: movie.voteCount,
+      $watched: movie.watched,
     };
   }
 }

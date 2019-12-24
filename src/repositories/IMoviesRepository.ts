@@ -26,4 +26,6 @@ export interface IMoviesRepository {
   countWithTitleLike(q: string): Promise<number>;
 
   findById(movieId: string): Promise<IMovie>;
+
+  updateWatched(movieId: string, watched: boolean): Promise<void>;
 }

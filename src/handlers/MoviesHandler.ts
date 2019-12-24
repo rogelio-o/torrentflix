@@ -80,4 +80,17 @@ export class MoviesHandler {
         res.sendStatus(500);
       });
   }
+
+  public updateWatched(req: express.Request, res: express.Response): void {
+    const movieId = req.params.movieId;
+    const body = req.body;
+
+    this.moviesService
+      .updateWatched(movieId, body.watched)
+      .then(() => res.sendStatus(204))
+      .catch((e) => {
+        console.error(e);
+        res.sendStatus(500);
+      });
+  }
 }

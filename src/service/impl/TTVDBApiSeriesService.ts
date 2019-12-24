@@ -177,6 +177,7 @@ export class TTVDBApiSeriesService implements IApiSeriesService {
       poster: episode.filename,
       voteAverage: episode.siteRating,
       voteCount: episode.siteRatingCount,
+      watched: false,
     };
   }
 }

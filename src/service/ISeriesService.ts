@@ -16,4 +16,11 @@ export interface ISeriesService {
   findById(serieId: string): Promise<ISerieWithSeasons>;
 
   findPage(request: IPageRequest): Promise<IPage<ISerie>>;
+
+  updateEpisodeWatched(
+    serieId: string,
+    seasonNumber: number,
+    episodeNumber: number,
+    watched: boolean,
+  ): Promise<void>;
 }

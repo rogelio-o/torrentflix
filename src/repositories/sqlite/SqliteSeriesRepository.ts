@@ -95,13 +95,12 @@ export class SqliteSeriesRepository implements ISeriesRepository {
   public async update(serie: ISerieWithSeasons): Promise<void> {
     const db = await this.dbPromise;
 
-    const statement = await db.run(
+    await db.run(
       "UPDATE series SET external_reference_id = $externalReferenceId, name = $name, poster = $poster, " +
         "backdrop = $backdrop, status = $status, network = $network, genres = $genres, description = $description, " +
         "vote_average = $voteAverage, vote_count = $voteCount WHERE id = $id",
       this.parseParams(serie),
     );
-    serie.id = statement.lastID.toString();
 
     await this.updateEpisodes(serie);
   }
@@ -110,6 +109,26 @@ export class SqliteSeriesRepository implements ISeriesRepository {
     const db = await this.dbPromise;
 
     await db.run("DELETE FROM series WHERE id = ?", serieId);
+  }
+
+  public async updateEpisodeWatched(
+    serieId: string,
+    seasonNumber: number,
+    episodeNumber: number,
+    watched: boolean,
+  ): Promise<void> {
+    const db = await this.dbPromise;
+
+    await db.run(
+      "UPDATE series_episodes SET watched = $watched WHERE serie_id = $serieId AND season = $season " +
+        "AND number = $episode",
+      {
+        $episode: episodeNumber,
+        $season: seasonNumber,
+        $serieId: serieId,
+        $watched: watched ? 1 : 0,
+      },
+    );
   }
 
   private parseParams(serie: ISerieWithSeasons): any {
@@ -138,8 +157,8 @@ export class SqliteSeriesRepository implements ISeriesRepository {
         promises.push(
           db.run(
             "INSERT INTO series_episodes (serie_id, season, number, name, date, description, vote_average, " +
-              "vote_count, poster) VALUES ($serieId, $season, $number, $name, $date, $description, $voteAverage, " +
-              "$voteCount, $poster)",
+              "vote_count, poster, watched) VALUES ($serieId, $season, $number, $name, $date, $description, $voteAverage, " +
+              "$voteCount, $poster, $watched)",
             this.parseEpisodeParams(serie, season, episode),
           ),
         );
@@ -176,6 +195,7 @@ export class SqliteSeriesRepository implements ISeriesRepository {
       $serieId: serie.id,
       $voteAverage: episode.voteAverage,
       $voteCount: episode.voteCount,
+      $watched: episode.watched ? 1 : 0,
     };
   }
 
@@ -233,6 +253,7 @@ export class SqliteSeriesRepository implements ISeriesRepository {
       poster: row.poster,
       voteAverage: row.vote_average,
       voteCount: row.vote_count,
+      watched: row.watched === 1,
     };
   }
 }

@@ -15,4 +15,6 @@ export interface IMoviesService {
   findById(movieId: string): Promise<IMovie>;
 
   findPage(request: IPageRequest): Promise<IPage<IMovie>>;
+
+  updateWatched(movieId: string, watched: boolean): Promise<void>;
 }

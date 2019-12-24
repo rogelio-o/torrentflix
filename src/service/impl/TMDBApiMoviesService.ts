@@ -71,6 +71,7 @@ export class TMDBApiMoviesService implements IApiMoviesService {
       title: movie.title,
       voteAverage: movie.vote_average,
       voteCount: movie.vote_count,
+      watched: false,
     };
   }
 }

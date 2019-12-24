@@ -1,15 +1,27 @@
-import React from "react";
-import { Button, Input, InputGroup, InputGroupAddon } from "reactstrap";
+import React, { useState } from "react";
+import { DropdownItem, DropdownMenu, DropdownToggle, Input, InputGroup, InputGroupButtonDropdown } from "reactstrap";
 
 const Header = ({ searchValue, onSearchChange, onAddClick }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const toggle = () => setIsOpen(!isOpen);
+
   return (
     <InputGroup>
-      <Input onChange={onSearchChange} value={searchValue} />
-      <InputGroupAddon addonType="append">
-        <Button onClick={onAddClick} color="success">
-          Add from magnet
-        </Button>
-      </InputGroupAddon>
+      <Input
+        onChange={onSearchChange}
+        value={searchValue}
+        placeholder="Search torrent..."
+      />
+      <InputGroupButtonDropdown
+        addonType="append"
+        isOpen={isOpen}
+        toggle={toggle}
+      >
+        <DropdownToggle caret>Add from</DropdownToggle>
+        <DropdownMenu>
+          <DropdownItem onClick={onAddClick}>Magnet URI</DropdownItem>
+        </DropdownMenu>
+      </InputGroupButtonDropdown>
     </InputGroup>
   );
 };

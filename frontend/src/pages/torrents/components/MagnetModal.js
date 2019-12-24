@@ -10,7 +10,10 @@ const MagnetModal = ({ toggle, add }) => {
       <ModalBody>
         <Form>
           <FormGroup>
-            <Input onChange={(e) => (magnetURI = e.target.value)} />
+            <Input
+              onChange={(e) => (magnetURI = e.target.value)}
+              placeholder="magnet://..."
+            />
           </FormGroup>
         </Form>
       </ModalBody>

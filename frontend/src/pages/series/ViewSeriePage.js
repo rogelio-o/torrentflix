@@ -24,13 +24,21 @@ const parseSerieAttributes = (serie) => {
 class ViewSeriePage extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { loading: false, serie: { seasons: [] } };
+    this.state = {
+      loading: false,
+      serie: { seasons: [] },
+      collapsedSeason: -1,
+    };
   }
 
   componentDidMount() {
     const id = this.props.match.params.id;
 
     this._load(id);
+  }
+
+  _setCollapsedSeason(collapsedSeason) {
+    this.setState({ collapsedSeason });
   }
 
   _load(id) {
@@ -52,8 +60,40 @@ class ViewSeriePage extends React.Component {
       });
   }
 
+  _updateWatched(season, episode, watched) {
+    const pageXOffset = window.pageXOffset;
+    const pageYOffset = window.pageYOffset;
+    const serie = this.state.serie;
+
+    this.setState({ loading: true });
+    axios
+      .put(
+        `/api/series/${serie.id}/S${season.number}-E${episode.number}/watched`,
+        { watched },
+      )
+      .then(() => {
+        episode.watched = watched;
+
+        this.setState(
+          {
+            loading: false,
+          },
+          () => {
+            window.scrollTo(pageXOffset, pageYOffset);
+          },
+        );
+      })
+      .catch((error) => {
+        if (!axios.isCancel(error)) {
+          alert(error.message);
+          console.error(error);
+          this.setState({ loading: false });
+        }
+      });
+  }
+
   render() {
-    const { loading, serie } = this.state;
+    const { loading, serie, collapsedSeason } = this.state;
 
     const attributes = parseSerieAttributes(serie);
 
@@ -76,7 +116,12 @@ class ViewSeriePage extends React.Component {
           </ItemPageSection>
           <ItemPageSection section="data">
             <ItemData title={serie.name} description={serie.description} />
-            <Seasons serie={serie} />
+            <Seasons
+              serie={serie}
+              updateWatched={this._updateWatched.bind(this)}
+              collapsedSeason={collapsedSeason}
+              setCollapsedSeason={this._setCollapsedSeason.bind(this)}
+            />
           </ItemPageSection>
         </ItemPage>
       );

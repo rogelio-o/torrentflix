@@ -9,9 +9,12 @@ const toggleSeason = (e, collapsedSeason, setCollapsedSeason) => {
   );
 };
 
-const Seasons = ({ serie }) => {
-  const [collapsedSeason, setCollapsedSeason] = useState(-1);
-
+const Seasons = ({
+  serie,
+  updateWatched,
+  collapsedSeason,
+  setCollapsedSeason,
+}) => {
   return (
     <div className="serie-seasons">
       {serie.seasons.map((season, index) => (
@@ -24,6 +27,7 @@ const Seasons = ({ serie }) => {
           toggleSeason={(e) =>
             toggleSeason(e, collapsedSeason, setCollapsedSeason)
           }
+          updateWatched={updateWatched}
         />
       ))}
     </div>

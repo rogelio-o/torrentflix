@@ -5,7 +5,7 @@ import { Button, ButtonGroup, Col, ListGroupItem, ListGroupItemHeading, ListGrou
 
 import { formatEpisodeCode, formatTorrentSearchQuery } from "./../../../utils/episodesUtils";
 
-const Episode = ({ serie, season, episode }) => {
+const Episode = ({ serie, season, episode, updateWatched }) => {
   return (
     <ListGroupItem>
       <Row>
@@ -23,6 +23,21 @@ const Episode = ({ serie, season, episode }) => {
         </Col>
         <Col md="3">
           <ButtonGroup vertical>
+            {episode.watched ? (
+              <Button
+                color="primary"
+                onClick={() => updateWatched(season, episode, false)}
+              >
+                Mark as NOT watched
+              </Button>
+            ) : (
+              <Button
+                color="warning"
+                onClick={() => updateWatched(season, episode, true)}
+              >
+                Mark as watched
+              </Button>
+            )}
             <Button
               tag={Link}
               to={{

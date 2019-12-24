@@ -3,7 +3,14 @@ import { Card, CardBody, CardHeader, Collapse } from "reactstrap";
 
 import Episodes from "./Episodes";
 
-const Season = ({ collapsedSeason, index, serie, season, toggleSeason }) => {
+const Season = ({
+  collapsedSeason,
+  index,
+  serie,
+  season,
+  toggleSeason,
+  updateWatched,
+}) => {
   return (
     <Card key={index}>
       <CardHeader onClick={toggleSeason} data-event={index}>
@@ -11,7 +18,11 @@ const Season = ({ collapsedSeason, index, serie, season, toggleSeason }) => {
       </CardHeader>
       <Collapse isOpen={collapsedSeason === index}>
         <CardBody>
-          <Episodes serie={serie} season={season} />
+          <Episodes
+            serie={serie}
+            season={season}
+            updateWatched={updateWatched}
+          />
         </CardBody>
       </Collapse>
     </Card>

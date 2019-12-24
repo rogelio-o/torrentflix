@@ -3,11 +3,16 @@ import { ListGroup } from "reactstrap";
 
 import Episode from "./Episode";
 
-const Episodes = ({ serie, season }) => {
+const Episodes = ({ serie, season, updateWatched }) => {
   return (
     <ListGroup>
       {season.episodes.map((episode) => (
-        <Episode serie={serie} season={season} episode={episode} />
+        <Episode
+          serie={serie}
+          season={season}
+          episode={episode}
+          updateWatched={updateWatched}
+        />
       ))}
     </ListGroup>
   );

@@ -54,6 +54,26 @@ class ViewMoviePage extends React.Component {
       });
   }
 
+  _updateWatched(watched) {
+    this.setState({ loading: true });
+    const movie = this.state.movie;
+    axios
+      .put(`/api/movies/${movie.id}/watched`, { watched })
+      .then(() => {
+        this.setState({
+          loading: false,
+          movie: { ...movie, watched },
+        });
+      })
+      .catch((error) => {
+        if (!axios.isCancel(error)) {
+          alert(error.message);
+          console.error(error);
+          this.setState({ loading: false });
+        }
+      });
+  }
+
   render() {
     const { loading, movie } = this.state;
 
@@ -78,7 +98,11 @@ class ViewMoviePage extends React.Component {
           </ItemPageSection>
           <ItemPageSection section="data">
             <ItemData title={movie.title} description={movie.description} />
-            <MovieLink q={formatTorrentSearchQuery(movie)} />
+            <MovieLink
+              q={formatTorrentSearchQuery(movie)}
+              watched={movie.watched}
+              updateWatched={this._updateWatched.bind(this)}
+            />
           </ItemPageSection>
         </ItemPage>
       );

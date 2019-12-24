@@ -3,11 +3,16 @@ import { ListGroup } from "reactstrap";
 
 import Item from "./Item";
 
-const Items = ({ items, openModal, remove }) => {
+const Items = ({ items, openModal, openCopyModal, remove }) => {
   return (
     <ListGroup>
       {items.map((item) => (
-        <Item item={item} openModal={openModal} remove={remove} />
+        <Item
+          item={item}
+          openModal={openModal}
+          openCopyModal={openCopyModal}
+          remove={remove}
+        />
       ))}
     </ListGroup>
   );

@@ -4,6 +4,7 @@ import React from "react";
 
 import Loading from "./../../components/Loading";
 import BrowserPlayer from "./components/BrowserPlayer";
+import CopyModal from "./components/CopyModal";
 import Header from "./components/Header";
 import Items from "./components/Items";
 import MagnetModal from "./components/MagnetModal";
@@ -24,6 +25,7 @@ class ListTorrentsPage extends React.Component {
       searchItems: null,
       searchQ: "",
       magnetModalOpen: false,
+      copyItem: undefined,
     };
   }
 
@@ -185,6 +187,14 @@ class ListTorrentsPage extends React.Component {
     this.setState({ magnetModalOpen: false });
   }
 
+  _openCopyModal(copyItem) {
+    this.setState({ copyItem });
+  }
+
+  _closeCopyModal() {
+    this.setState({ copyItem: undefined });
+  }
+
   _renderModal(viewItem) {
     if (viewItem) {
       return (
@@ -225,6 +235,19 @@ class ListTorrentsPage extends React.Component {
     }
   }
 
+  _renderCopyModal(copyItem) {
+    if (copyItem) {
+      return (
+        <CopyModal
+          torrent={copyItem}
+          toggle={this._closeCopyModal.bind(this)}
+        />
+      );
+    } else {
+      return null;
+    }
+  }
+
   render() {
     const {
       loading,
@@ -235,6 +258,7 @@ class ListTorrentsPage extends React.Component {
       playerVideo,
       searchQ,
       magnetModalOpen,
+      copyItem,
     } = this.state;
     return (
       <div>
@@ -251,12 +275,14 @@ class ListTorrentsPage extends React.Component {
           <Items
             items={items}
             openModal={this._openModal.bind(this)}
+            openCopyModal={this._openCopyModal.bind(this)}
             remove={this._remove.bind(this)}
           />
         )}
         {this._renderModal(viewItem)}
         {this._renderBrowserPlayer(playerVideo)}
         {this._renderMagnetModal(magnetModalOpen)}
+        {this._renderCopyModal(copyItem)}
       </div>
     );
   }

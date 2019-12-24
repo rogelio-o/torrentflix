@@ -1,5 +1,3 @@
-import "video.js/dist/video-js.css";
-
 import axios from "axios";
 import qs from "query-string";
 import React from "react";

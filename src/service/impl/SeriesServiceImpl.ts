@@ -56,7 +56,24 @@ export class SeriesServiceImpl implements ISeriesService {
     let items;
     let total;
 
-    if (request.filterWatched) {
+    if (request.filterWatched === undefined) {
+      if (request.q) {
+        [items, total] = await Promise.all([
+          this.repository.findAllWithNameLike(
+            request.q,
+            offset,
+            request.itemsPerPage,
+            request.order,
+          ),
+          this.repository.countWithNameLike(request.q),
+        ]);
+      } else {
+        [items, total] = await Promise.all([
+          this.repository.findAll(offset, request.itemsPerPage, request.order),
+          this.repository.count(),
+        ]);
+      }
+    } else {
       if (request.q) {
         [items, total] = await Promise.all([
           this.repository.findAllByWatchedWithNameLike(
@@ -80,23 +97,6 @@ export class SeriesServiceImpl implements ISeriesService {
             request.order,
           ),
           this.repository.countByWatched(request.filterWatched),
-        ]);
-      }
-    } else {
-      if (request.q) {
-        [items, total] = await Promise.all([
-          this.repository.findAllWithNameLike(
-            request.q,
-            offset,
-            request.itemsPerPage,
-            request.order,
-          ),
-          this.repository.countWithNameLike(request.q),
-        ]);
-      } else {
-        [items, total] = await Promise.all([
-          this.repository.findAll(offset, request.itemsPerPage, request.order),
-          this.repository.count(),
         ]);
       }
     }

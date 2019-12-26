@@ -21,9 +21,28 @@ export interface IMoviesRepository {
     order?: IEntityOrder,
   ): Promise<IMovie[]>;
 
+  findAllByWatched(
+    watched: boolean,
+    offset: number,
+    limit: number,
+    order?: IEntityOrder,
+  ): Promise<IMovie[]>;
+
+  findAllByWatchedWithTitleLike(
+    watched: boolean,
+    q: string,
+    offset: number,
+    limit: number,
+    order?: IEntityOrder,
+  ): Promise<IMovie[]>;
+
   count(): Promise<number>;
 
   countWithTitleLike(q: string): Promise<number>;
+
+  countByWatched(watched: boolean): Promise<number>;
+
+  countByWatchedWithTitleLike(watched: boolean, q: string): Promise<number>;
 
   findById(movieId: string): Promise<IMovie>;
 

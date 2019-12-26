@@ -74,6 +74,42 @@ export class SqliteMoviesRepository implements IMoviesRepository {
     return rows.map((row) => this.parseRow(row));
   }
 
+  public async findAllByWatched(
+    watched: boolean,
+    offset: number,
+    limit: number,
+    order?: IEntityOrder,
+  ): Promise<IMovie[]> {
+    const db = await this.dbPromise;
+
+    const rows = await db.all(
+      `SELECT * FROM movies WHERE watched = $watched ${parseSqlOrder(
+        order,
+      )} LIMIT ${offset},${limit}`,
+      { $watched: watched ? 1 : 0 },
+    );
+
+    return rows.map((row) => this.parseRow(row));
+  }
+
+  public async findAllByWatchedWithTitleLike(
+    watched: boolean,
+    q: string,
+    offset: number,
+    limit: number,
+    order?: IEntityOrder,
+  ): Promise<IMovie[]> {
+    const db = await this.dbPromise;
+
+    const rows = await db.all(
+      "SELECT * FROM movies WHERE watched = $watched AND title LIKE $q " +
+        `${parseSqlOrder(order)} LIMIT ${offset},${limit}`,
+      { $watched: watched ? 1 : 0, $q: `%${q}%` },
+    );
+
+    return rows.map((row) => this.parseRow(row));
+  }
+
   public async count(): Promise<number> {
     const db = await this.dbPromise;
 
@@ -88,6 +124,33 @@ export class SqliteMoviesRepository implements IMoviesRepository {
     const row = await db.get(
       "SELECT COUNT(*) as count FROM movies WHERE title LIKE $q",
       { $q: `%${q}%` },
+    );
+
+    return row.count;
+  }
+
+  public async countByWatched(watched: boolean): Promise<number> {
+    const db = await this.dbPromise;
+
+    const row = await db.get(
+      "SELECT COUNT(*) as count FROM movies WHERE watched = $watched",
+      {
+        $watched: watched ? 1 : 0,
+      },
+    );
+
+    return row.count;
+  }
+
+  public async countByWatchedWithTitleLike(
+    watched: boolean,
+    q: string,
+  ): Promise<number> {
+    const db = await this.dbPromise;
+
+    const row = await db.get(
+      "SELECT COUNT(*) as count FROM movies WHERE watched = $watched AND title LIKE $q",
+      { $watched: watched ? 1 : 0, $q: `%${q}%` },
     );
 
     return row.count;

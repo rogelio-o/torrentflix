@@ -6,7 +6,7 @@ import { ISerieEpisode } from "../../entity/ISerieEpisode";
 import { ISerieSeason } from "../../entity/ISerieSeason";
 import { ISerieWithSeasons } from "../../entity/ISerieWithSeasons";
 import { groupBy } from "../../utils/arrayUtils";
-import { parseSqlOrder } from "../../utils/sqlUtils";
+import { parseSqlLimit, parseSqlOrder } from "../../utils/sqlUtils";
 import { ISeriesRepository } from "../ISeriesRepository";
 
 export class SqliteSeriesRepository implements ISeriesRepository {
@@ -28,14 +28,17 @@ export class SqliteSeriesRepository implements ISeriesRepository {
   }
 
   public async findAll(
-    offset: number,
-    limit: number,
+    offset?: number,
+    limit?: number,
     order?: IEntityOrder,
   ): Promise<ISerie[]> {
     const db = await this.dbPromise;
 
     const rows = await db.all(
-      `SELECT * FROM series ${parseSqlOrder(order)} LIMIT ${offset},${limit}`,
+      `SELECT * FROM series ${parseSqlOrder(order)} ${parseSqlLimit(
+        offset,
+        limit,
+      )}`,
     );
 
     return rows.map((row) => this.mapSerieRow(row));
@@ -43,8 +46,8 @@ export class SqliteSeriesRepository implements ISeriesRepository {
 
   public async findAllWithNameLike(
     q: string,
-    offset: number,
-    limit: number,
+    offset?: number,
+    limit?: number,
     order?: IEntityOrder,
   ): Promise<ISerie[]> {
     const db = await this.dbPromise;
@@ -52,7 +55,7 @@ export class SqliteSeriesRepository implements ISeriesRepository {
     const rows = await db.all(
       `SELECT * FROM series WHERE name LIKE $q ${parseSqlOrder(
         order,
-      )} LIMIT ${offset},${limit}`,
+      )} ${parseSqlLimit(offset, limit)}`,
       { $q: `%${q}%` },
     );
 
@@ -61,8 +64,8 @@ export class SqliteSeriesRepository implements ISeriesRepository {
 
   public async findAllByWatched(
     watched: boolean,
-    offset: number,
-    limit: number,
+    offset?: number,
+    limit?: number,
     order?: IEntityOrder,
   ): Promise<ISerie[]> {
     const db = await this.dbPromise;
@@ -71,7 +74,7 @@ export class SqliteSeriesRepository implements ISeriesRepository {
       "SELECT * FROM series AS s JOIN series_episodes AS e ON s.id = e.serie_id WHERE e.watched = $watched " +
         `AND e.date < date('now') GROUP BY s.id ${parseSqlOrder(
           order,
-        )} LIMIT ${offset},${limit}`,
+        )} ${parseSqlLimit(offset, limit)}`,
       { $watched: watched },
     );
 
@@ -81,8 +84,8 @@ export class SqliteSeriesRepository implements ISeriesRepository {
   public async findAllByWatchedWithNameLike(
     watched: boolean,
     q: string,
-    offset: number,
-    limit: number,
+    offset?: number,
+    limit?: number,
     order?: IEntityOrder,
   ): Promise<ISerie[]> {
     const db = await this.dbPromise;
@@ -90,7 +93,10 @@ export class SqliteSeriesRepository implements ISeriesRepository {
     const rows = await db.all(
       "SELECT * FROM series AS s JOIN series_episodes AS e ON s.id = e.serie_id WHERE s.name LIKE $q" +
         " AND e.watched = $watched AND e.date < date('now')" +
-        ` GROUP BY s.id ${parseSqlOrder(order, "s.")} LIMIT ${offset},${limit}`,
+        ` GROUP BY s.id ${parseSqlOrder(order, "s.")} ${parseSqlLimit(
+          offset,
+          limit,
+        )}`,
       { $q: `%${q}%`, $watched: watched },
     );
 

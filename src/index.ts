@@ -19,9 +19,11 @@ import { SqliteSeriesRepository } from "./repositories/sqlite/SqliteSeriesReposi
 import { SqliteTorrentRepository } from "./repositories/sqlite/SqliteTorrentRepository";
 import { IApiMoviesService } from "./service/IApiMoviesService";
 import { IApiSeriesService } from "./service/IApiSeriesService";
+import { IAutoRefreshDataService } from "./service/IAutoRefreshDataService";
 import { IDevicesService } from "./service/IDevicesService";
 import { IMoviesService } from "./service/IMoviesService";
 import { ApiTorrentSearchService } from "./service/impl/ApiTorrentSearchService";
+import { AutoRefreshDataServiceImpl } from "./service/impl/AutoRefreshDataServiceImpl";
 import { MediaRendererServiceImpl } from "./service/impl/MediarendererServiceImpl";
 import { MoviesServiceImpl } from "./service/impl/MoviesServiceImpl";
 import { PlayerServiceImpl } from "./service/impl/PlayerServiceImpl";
@@ -82,6 +84,10 @@ const apiSeriesService: IApiSeriesService = new TTVDBApiSeriesService(
 const seriesService: ISeriesService = new SeriesServiceImpl(
   apiSeriesService,
   seriesRepository,
+);
+const autoRefreshDataSerivce: IAutoRefreshDataService = new AutoRefreshDataServiceImpl(
+  seriesRepository,
+  seriesService,
 );
 
 app.use(bodyParser.json({ type: "application/json" }));
@@ -184,6 +190,7 @@ app.use((req, res) => {
   res.sendFile(path.resolve("frontend/build/index.html"));
 });
 
+autoRefreshDataSerivce.start();
 devicesService.startWatchingDevices().then(async () => {
   // LOAD saved torrents
   logger.info("Loading torrents...");

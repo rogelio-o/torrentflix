@@ -2,7 +2,7 @@ import { Database } from "sqlite";
 
 import { IEntityOrder } from "../../entity/IEntityOrder";
 import { IMovie } from "../../entity/IMovie";
-import { parseSqlOrder } from "../../utils/sqlUtils";
+import { parseSqlLimit, parseSqlOrder } from "../../utils/sqlUtils";
 import { IMoviesRepository } from "../IMoviesRepository";
 
 export class SqliteMoviesRepository implements IMoviesRepository {
@@ -44,14 +44,17 @@ export class SqliteMoviesRepository implements IMoviesRepository {
   }
 
   public async findAll(
-    offset: number,
-    limit: number,
+    offset?: number,
+    limit?: number,
     order?: IEntityOrder,
   ): Promise<IMovie[]> {
     const db = await this.dbPromise;
 
     const rows = await db.all(
-      `SELECT * FROM movies ${parseSqlOrder(order)} LIMIT ${offset},${limit}`,
+      `SELECT * FROM movies ${parseSqlOrder(order)} ${parseSqlLimit(
+        offset,
+        limit,
+      )}`,
     );
 
     return rows.map((row) => this.parseRow(row));
@@ -59,15 +62,15 @@ export class SqliteMoviesRepository implements IMoviesRepository {
 
   public async findAllWithTitleLike(
     q: string,
-    offset: number,
-    limit: number,
+    offset?: number,
+    limit?: number,
     order?: IEntityOrder,
   ): Promise<IMovie[]> {
     const db = await this.dbPromise;
 
     const rows = await db.all(
       "SELECT * FROM movies WHERE title LIKE $q " +
-        `${parseSqlOrder(order)} LIMIT ${offset},${limit}`,
+        `${parseSqlOrder(order)} ${parseSqlLimit(offset, limit)}`,
       { $q: `%${q}%` },
     );
 
@@ -76,8 +79,8 @@ export class SqliteMoviesRepository implements IMoviesRepository {
 
   public async findAllByWatched(
     watched: boolean,
-    offset: number,
-    limit: number,
+    offset?: number,
+    limit?: number,
     order?: IEntityOrder,
   ): Promise<IMovie[]> {
     const db = await this.dbPromise;
@@ -85,7 +88,7 @@ export class SqliteMoviesRepository implements IMoviesRepository {
     const rows = await db.all(
       `SELECT * FROM movies WHERE watched = $watched ${parseSqlOrder(
         order,
-      )} LIMIT ${offset},${limit}`,
+      )} ${parseSqlLimit(offset, limit)}`,
       { $watched: watched ? 1 : 0 },
     );
 
@@ -95,15 +98,15 @@ export class SqliteMoviesRepository implements IMoviesRepository {
   public async findAllByWatchedWithTitleLike(
     watched: boolean,
     q: string,
-    offset: number,
-    limit: number,
+    offset?: number,
+    limit?: number,
     order?: IEntityOrder,
   ): Promise<IMovie[]> {
     const db = await this.dbPromise;
 
     const rows = await db.all(
       "SELECT * FROM movies WHERE watched = $watched AND title LIKE $q " +
-        `${parseSqlOrder(order)} LIMIT ${offset},${limit}`,
+        `${parseSqlOrder(order)} ${parseSqlLimit(offset, limit)}`,
       { $watched: watched ? 1 : 0, $q: `%${q}%` },
     );
 

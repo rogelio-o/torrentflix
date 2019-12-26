@@ -6,30 +6,30 @@ export interface ISeriesRepository {
   findById(serieId: string): Promise<ISerieWithSeasons>;
 
   findAll(
-    offset: number,
-    limit: number,
+    offset?: number,
+    limit?: number,
     order?: IEntityOrder,
   ): Promise<ISerie[]>;
 
   findAllWithNameLike(
     q: string,
-    offset: number,
-    limit: number,
+    offset?: number,
+    limit?: number,
     order?: IEntityOrder,
   ): Promise<ISerie[]>;
 
   findAllByWatched(
     watched: boolean,
-    offset: number,
-    limit: number,
+    offset?: number,
+    limit?: number,
     order?: IEntityOrder,
   ): Promise<ISerie[]>;
 
   findAllByWatchedWithNameLike(
     watched: boolean,
     q: string,
-    offset: number,
-    limit: number,
+    offset?: number,
+    limit?: number,
     order?: IEntityOrder,
   ): Promise<ISerie[]>;
 

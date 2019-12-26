@@ -13,3 +13,13 @@ export const parseSqlOrder = (
     return "";
   }
 };
+
+export const parseSqlLimit = (offset?: number, limit?: number): string => {
+  if (offset && limit) {
+    return ` LIMIT ${offset},${limit}`;
+  } else if (limit) {
+    return ` LIMIT 0,${limit}`;
+  } else {
+    return "";
+  }
+};

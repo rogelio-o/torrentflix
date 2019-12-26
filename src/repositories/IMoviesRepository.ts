@@ -9,30 +9,30 @@ export interface IMoviesRepository {
   delete(movieId: string): Promise<void>;
 
   findAll(
-    offset: number,
-    limit: number,
+    offset?: number,
+    limit?: number,
     order?: IEntityOrder,
   ): Promise<IMovie[]>;
 
   findAllWithTitleLike(
     q: string,
-    offset: number,
-    limit: number,
+    offset?: number,
+    limit?: number,
     order?: IEntityOrder,
   ): Promise<IMovie[]>;
 
   findAllByWatched(
     watched: boolean,
-    offset: number,
-    limit: number,
+    offset?: number,
+    limit?: number,
     order?: IEntityOrder,
   ): Promise<IMovie[]>;
 
   findAllByWatchedWithTitleLike(
     watched: boolean,
     q: string,
-    offset: number,
-    limit: number,
+    offset?: number,
+    limit?: number,
     order?: IEntityOrder,
   ): Promise<IMovie[]>;
 

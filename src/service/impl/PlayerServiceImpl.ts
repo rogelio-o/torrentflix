@@ -1,4 +1,5 @@
 import { IRenderization } from "../../entity/IRenderization";
+import { IEventEmitterInstance } from "../events/IEventEmitter";
 import { IDevicesService } from "../IDevicesService";
 import { IPlayerService } from "../IPlayerService";
 import { IRenderService } from "../IRenderService";
@@ -20,6 +21,7 @@ export class PlayerServiceImpl implements IPlayerService {
   }
 
   public attach(
+    eventEmitterInstance: IEventEmitterInstance,
     deviceID: string,
     torrentID: string,
     videoID: string,
@@ -29,7 +31,7 @@ export class PlayerServiceImpl implements IPlayerService {
         .findVideoById(torrentID, videoID)
         .then((video) => {
           return this.rendererService
-            .load(video, device)
+            .load(eventEmitterInstance, video, device)
             .then((renderization) => {
               this.rendererService.play(renderization.id);
 

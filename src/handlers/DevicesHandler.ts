@@ -1,15 +1,23 @@
 import * as express from "express";
 
 import { logger } from "../config/logger";
+import { IEventEmitter } from "../service/events/IEventEmitter";
 import { IDevicesService } from "../service/IDevicesService";
 import { IPlayerService } from "../service/IPlayerService";
 
 export class DevicesHandler {
+  private eventEmitter: IEventEmitter;
+
   private devicesService: IDevicesService;
 
   private playerService: IPlayerService;
 
-  constructor(devicesService: IDevicesService, playerService: IPlayerService) {
+  constructor(
+    eventEmitter: IEventEmitter,
+    devicesService: IDevicesService,
+    playerService: IPlayerService,
+  ) {
+    this.eventEmitter = eventEmitter;
     this.devicesService = devicesService;
     this.playerService = playerService;
   }
@@ -25,9 +33,19 @@ export class DevicesHandler {
   }
 
   public attach(req: express.Request, res: express.Response) {
+    const eventEmitterInstance = this.eventEmitter.instance();
     this.playerService
-      .attach(req.params.deviceID, req.params.torrentID, req.params.videoID)
-      .then(() => res.sendStatus(204))
+      .attach(
+        eventEmitterInstance,
+        req.params.deviceID,
+        req.params.torrentID,
+        req.params.videoID,
+      )
+      .then(() => {
+        eventEmitterInstance.emit();
+
+        res.sendStatus(204);
+      })
       .catch((e) => {
         logger.error(e);
         res.sendStatus(500);

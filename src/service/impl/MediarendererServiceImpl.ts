@@ -1,10 +1,14 @@
 import uuidv4 from "uuid/v4";
 
 import { logger } from "../../config/logger";
+import { IRenderizationLoaded } from "../../entity/events/IRenderizationLoaded";
+import { IRenderizationPositionUpdated } from "../../entity/events/IRenderizationPositionUpdated";
+import { IRenderizationStatusUpdated } from "../../entity/events/IRenderizationStatusUpdated";
 import { DeviceType, IDevice } from "../../entity/IDevice";
 import { IRendererClient } from "../../entity/IRendererClient";
 import { IRenderization, RenderizationStatus } from "../../entity/IRenderization";
 import { IVideo } from "../../entity/IVideo";
+import { IEventEmitterInstance } from "../events/IEventEmitter";
 import { IRenderService, RenderAction } from "../IRenderService";
 import { ChromecastRenderer } from "../media-render/ChromecastRenderer";
 import { DlnaRenderer } from "../media-render/DlnaRenderer";
@@ -30,7 +34,11 @@ export class MediaRendererServiceImpl implements IRenderService {
     dlna: new DlnaRenderer(),
   };
 
-  public async load(video: IVideo, device: IDevice): Promise<IRenderization> {
+  public async load(
+    eventEmitterInstance: IEventEmitterInstance,
+    video: IVideo,
+    device: IDevice,
+  ): Promise<IRenderization> {
     const renderizationID = uuidv4();
     const renderization: IRenderization = {
       deviceID: device.id,
@@ -43,28 +51,44 @@ export class MediaRendererServiceImpl implements IRenderService {
     const renderer = this.renderers[parseRendererKey(device.type)];
     const client = await renderer.play(video, device, {
       error: () => {
+        const oldStatus = renderization.status;
         renderization.status = RenderizationStatus.ERROR;
+        eventEmitterInstance.addAndEmit(
+          this.buildRenderizationStatusUpdated(renderization, oldStatus),
+        );
 
         this.runCallbacks(renderizationID, RenderAction.STOPPED);
 
         this.removeRenderization(renderization.id);
       },
       loading: () => {
+        const oldStatus = renderization.status;
         renderization.status = RenderizationStatus.LOADING;
+        eventEmitterInstance.addAndEmit(
+          this.buildRenderizationStatusUpdated(renderization, oldStatus),
+        );
 
         this.runCallbacks(renderizationID, RenderAction.LOADING);
       },
       paused: () => {
+        const oldStatus = renderization.status;
         renderization.status = RenderizationStatus.PAUSED;
+        eventEmitterInstance.addAndEmit(
+          this.buildRenderizationStatusUpdated(renderization, oldStatus),
+        );
 
         this.runCallbacks(renderizationID, RenderAction.PAUSED);
 
         this.stopUpdatingPosition(renderizationID);
       },
       playing: () => {
+        const oldStatus = renderization.status;
         renderization.status = RenderizationStatus.PLAYING;
+        eventEmitterInstance.addAndEmit(
+          this.buildRenderizationStatusUpdated(renderization, oldStatus),
+        );
 
-        this.startUpdatingPosition(renderizationID);
+        this.startUpdatingPosition(eventEmitterInstance, renderizationID);
 
         this.runCallbacks(renderizationID, RenderAction.PLAYING);
       },
@@ -72,7 +96,11 @@ export class MediaRendererServiceImpl implements IRenderService {
         this.runCallbacks(renderizationID, RenderAction.SPEED_CHANGED);
       },
       stopped: () => {
+        const oldStatus = renderization.status;
         renderization.status = RenderizationStatus.STOPPED;
+        eventEmitterInstance.addAndEmit(
+          this.buildRenderizationStatusUpdated(renderization, oldStatus),
+        );
 
         this.runCallbacks(renderizationID, RenderAction.STOPPED);
 
@@ -84,6 +112,13 @@ export class MediaRendererServiceImpl implements IRenderService {
       client,
       renderization,
     };
+
+    const loadedEvent: IRenderizationLoaded = {
+      emittedOn: new Date(),
+      event: "renderization-loaded",
+      renderizationId: renderization.id,
+    };
+    eventEmitterInstance.add(loadedEvent);
 
     return renderization;
   }
@@ -137,23 +172,32 @@ export class MediaRendererServiceImpl implements IRenderService {
     return Promise.resolve(this.data[renderizationID].renderization);
   }
 
-  private startUpdatingPosition(renderizationID: string) {
+  private startUpdatingPosition(
+    eventEmitterInstance: IEventEmitterInstance,
+    renderizationID: string,
+  ) {
     if (this.data[renderizationID]) {
-      const interval = setInterval(() => {
+      const interval = setInterval(async () => {
         if (this.data[renderizationID]) {
           const renderizationWrapper = this.data[renderizationID];
           const client = renderizationWrapper.client;
           const renderization = renderizationWrapper.renderization;
 
-          client
-            .getPosition()
-            .then((position) => (renderization.position = position))
-            .catch((err) => logger.error(err));
+          try {
+            const [position, duration] = await Promise.all([
+              client.getPosition(),
+              client.getDuration(),
+            ]);
 
-          client
-            .getDuration()
-            .then((duration) => (renderization.duration = duration))
-            .catch((err) => logger.error(err));
+            renderization.position = position;
+            renderization.duration = duration;
+
+            eventEmitterInstance.addAndEmit(
+              this.buildRenderizationPositionUpdated(renderization),
+            );
+          } catch (e) {
+            logger.error(e);
+          }
         } else {
           clearInterval(interval);
         }
@@ -182,6 +226,31 @@ export class MediaRendererServiceImpl implements IRenderService {
         .filter((c) => c.action === action)
         .forEach((c) => c.callback());
     }
+  }
+
+  private buildRenderizationStatusUpdated(
+    renderization: IRenderization,
+    oldStatus: RenderizationStatus,
+  ): IRenderizationStatusUpdated {
+    return {
+      emittedOn: new Date(),
+      event: "renderization-status-updated",
+      newStatus: renderization.status,
+      oldStatus,
+      renderizationId: renderization.id,
+    };
+  }
+
+  private buildRenderizationPositionUpdated(
+    renderization: IRenderization,
+  ): IRenderizationPositionUpdated {
+    return {
+      duration: renderization.duration || 0,
+      emittedOn: new Date(),
+      event: "renderization-position-updated",
+      position: renderization.position || 0,
+      renderizationId: renderization.id,
+    };
   }
 }
 

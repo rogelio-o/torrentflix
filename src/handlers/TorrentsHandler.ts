@@ -1,21 +1,29 @@
 import * as express from "express";
 
 import { logger } from "../config/logger";
+import { IEventEmitter } from "../service/events/IEventEmitter";
 import { ITorrentService } from "../service/ITorrentService";
 
 export class TorrentsHandler {
+  private eventEmitter: IEventEmitter;
+
   private torrentService: ITorrentService;
 
-  constructor(torrentService: ITorrentService) {
+  constructor(eventEmitter: IEventEmitter, torrentService: ITorrentService) {
+    this.eventEmitter = eventEmitter;
     this.torrentService = torrentService;
   }
 
   public add(req: express.Request, res: express.Response) {
     const body = req.body;
+    const eventEmitterInstance = this.eventEmitter.instance();
 
     this.torrentService
-      .createFromMagnet(body.magnet_uri)
-      .then(() => res.sendStatus(201))
+      .createFromMagnet(eventEmitterInstance, body.magnet_uri)
+      .then(() => {
+        eventEmitterInstance.emit();
+        res.sendStatus(201);
+      })
       .catch((e) => {
         logger.error(e);
         res.sendStatus(500);
@@ -23,9 +31,14 @@ export class TorrentsHandler {
   }
 
   public remove(req: express.Request, res: express.Response) {
+    const eventEmitterInstance = this.eventEmitter.instance();
+
     this.torrentService
-      .remove(req.params.torrentID)
-      .then(() => res.sendStatus(204))
+      .remove(eventEmitterInstance, req.params.torrentID)
+      .then(() => {
+        eventEmitterInstance.emit();
+        res.sendStatus(204);
+      })
       .catch((e) => {
         logger.error(e);
         res.sendStatus(500);

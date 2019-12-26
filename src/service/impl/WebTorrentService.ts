@@ -7,11 +7,17 @@ import uuidv4 from "uuid/v4";
 import WebTorrent, { Instance, Torrent, TorrentFile } from "webtorrent";
 
 import { logger } from "../../config/logger";
+import { ITorrentAdded } from "../../entity/events/ITorrentAdded";
+import { ITorrentDownloadDataUpdated } from "../../entity/events/ITorrentDownloadDataUpdated";
+import { ITorrentDownloaded } from "../../entity/events/ITorrentDownloaded";
+import { ITorrentGetNoPeers } from "../../entity/events/ITorrentGetNoPeers";
+import { ITorrentRemoved } from "../../entity/events/ITorrentRemoved";
 import { ITorrent } from "../../entity/ITorren";
 import { ITorrentCallback } from "../../entity/ITorrentCallback";
 import { ITorrentRow } from "../../entity/ITorrentRow";
 import { IVideo } from "../../entity/IVideo";
 import { ITorrentRepository } from "../../repositories/ITorrentRepository";
+import { IEventEmitterInstance } from "../events/IEventEmitter";
 import { ITorrentService, TorrentAction } from "../ITorrentService";
 
 const isVideoFilename = (filename: string): boolean => {
@@ -69,11 +75,17 @@ export class WebTorrentService implements ITorrentService {
     this.createHandler(app);
   }
 
-  public createFromMagnet(magnetUri: string): Promise<ITorrent> {
-    return this.createFromRow({ magnetUri });
+  public createFromMagnet(
+    eventEmitterInstance: IEventEmitterInstance,
+    magnetUri: string,
+  ): Promise<ITorrent> {
+    return this.createFromRow(eventEmitterInstance, { magnetUri });
   }
 
-  public async createFromRow(torrentRow: ITorrentRow): Promise<ITorrent> {
+  public async createFromRow(
+    eventEmitterInstance: IEventEmitterInstance,
+    torrentRow: ITorrentRow,
+  ): Promise<ITorrent> {
     const torrent = await this.createWebTorrentFromMagnet(torrentRow.magnetUri);
 
     if (!torrentRow.id) {
@@ -86,24 +98,43 @@ export class WebTorrentService implements ITorrentService {
       torrent,
     };
 
-    this.webTorrent.addListener("download", () =>
-      this.runCallbacks(torrentID, TorrentAction.DOWNLOAD),
-    );
-    this.webTorrent.addListener("done", () =>
-      this.runCallbacks(torrentID, TorrentAction.DONE),
-    );
-    this.webTorrent.addListener("noPeers", () =>
-      this.runCallbacks(torrentID, TorrentAction.NO_PEERS),
-    );
+    this.webTorrent.addListener("download", () => {
+      eventEmitterInstance.addAndEmit(
+        this.buildTorrentDownloadDataUpdated(
+          this.parseTorrent(torrentID, torrent),
+        ),
+      );
+      this.runCallbacks(torrentID, TorrentAction.DOWNLOAD);
+    });
+    this.webTorrent.addListener("done", () => {
+      eventEmitterInstance.addAndEmit(
+        this.buildTorrentDownloaded(this.parseTorrent(torrentID, torrent)),
+      );
+      this.runCallbacks(torrentID, TorrentAction.DONE);
+    });
+    this.webTorrent.addListener("noPeers", () => {
+      eventEmitterInstance.addAndEmit(
+        this.buildTorrentGetNoPeers(this.parseTorrent(torrentID, torrent)),
+      );
+      this.runCallbacks(torrentID, TorrentAction.NO_PEERS);
+    });
 
-    return this.parseTorrent(torrentID, torrent);
+    const parsedTorrent: ITorrent = this.parseTorrent(torrentID, torrent);
+    eventEmitterInstance.add(this.buildTorrentAdded(parsedTorrent));
+    return parsedTorrent;
   }
 
-  public async remove(torrentID: string): Promise<void> {
+  public async remove(
+    eventEmitterInstance: IEventEmitterInstance,
+    torrentID: string,
+  ): Promise<void> {
     await this.torrentsRepository.delete(torrentID);
 
     const { torrent } = this.data[torrentID];
     delete this.data[torrentID];
+    eventEmitterInstance.add(
+      this.buildTorrentRemoved(this.parseTorrent(torrentID, torrent)),
+    );
 
     return new Promise((resolve, reject) => {
       this.webTorrent.remove(torrent, (err?) => {
@@ -331,6 +362,51 @@ export class WebTorrentService implements ITorrentService {
         }
       },
     );
+  }
+
+  private buildTorrentAdded(torrent: ITorrent): ITorrentAdded {
+    return {
+      emittedOn: new Date(),
+      event: "torrent-added",
+      torrentId: torrent.id,
+    };
+  }
+
+  private buildTorrentDownloadDataUpdated(
+    torrent: ITorrent,
+  ): ITorrentDownloadDataUpdated {
+    return {
+      downloadSpeed: torrent.downloadSpeed,
+      downloaded: torrent.downloaded,
+      downloadedPerentage: torrent.downloadedPerentage,
+      emittedOn: new Date(),
+      event: "torrent-download-data-updated",
+      torrentId: torrent.id,
+    };
+  }
+
+  private buildTorrentDownloaded(torrent: ITorrent): ITorrentDownloaded {
+    return {
+      emittedOn: new Date(),
+      event: "torrent-downloaded",
+      torrentId: torrent.id,
+    };
+  }
+
+  private buildTorrentGetNoPeers(torrent: ITorrent): ITorrentGetNoPeers {
+    return {
+      emittedOn: new Date(),
+      event: "torrent-get-no-peers",
+      torrentId: torrent.id,
+    };
+  }
+
+  private buildTorrentRemoved(torrent: ITorrent): ITorrentRemoved {
+    return {
+      emittedOn: new Date(),
+      event: "torrent-removed",
+      torrentId: torrent.id,
+    };
   }
 }
 

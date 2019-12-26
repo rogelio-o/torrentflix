@@ -1,7 +1,9 @@
 import bodyParser from "body-parser";
 import express from "express";
+import * as http from "http";
 import path from "path";
 import sqlite from "sqlite";
+import * as WebSocket from "ws";
 
 import { logger } from "./config/logger";
 import { DevicesHandler } from "./handlers/DevicesHandler";
@@ -17,6 +19,8 @@ import { ITorrentRepository } from "./repositories/ITorrentRepository";
 import { SqliteMoviesRepository } from "./repositories/sqlite/SqliteMoviesRepository";
 import { SqliteSeriesRepository } from "./repositories/sqlite/SqliteSeriesRepository";
 import { SqliteTorrentRepository } from "./repositories/sqlite/SqliteTorrentRepository";
+import { IEventEmitter } from "./service/events/IEventEmitter";
+import { WsEventEmitter } from "./service/events/impl/WsEventEmitter";
 import { IApiMoviesService } from "./service/IApiMoviesService";
 import { IApiSeriesService } from "./service/IApiSeriesService";
 import { IAutoRefreshDataService } from "./service/IAutoRefreshDataService";
@@ -46,6 +50,8 @@ const dbPromise = Promise.resolve()
   .then((db) => db.migrate({}));
 
 const app = express();
+const server = http.createServer(app);
+const wsServer = new WebSocket.Server({ server });
 
 const torrentsRepository: ITorrentRepository = new SqliteTorrentRepository(
   dbPromise,
@@ -57,6 +63,7 @@ const seriesRepository: ISeriesRepository = new SqliteSeriesRepository(
   dbPromise,
 );
 
+const eventEmitter: IEventEmitter = new WsEventEmitter(wsServer);
 const devicesService: IDevicesService = new SspdDevicesService();
 const torrentService: ITorrentService = new WebTorrentService(
   torrentsRepository,
@@ -92,7 +99,11 @@ const autoRefreshDataSerivce: IAutoRefreshDataService = new AutoRefreshDataServi
 
 app.use(bodyParser.json({ type: "application/json" }));
 
-const deviceHandler = new DevicesHandler(devicesService, playerService);
+const deviceHandler = new DevicesHandler(
+  eventEmitter,
+  devicesService,
+  playerService,
+);
 app.get("/api/devices", deviceHandler.findAll.bind(deviceHandler));
 app.put(
   "/api/devices/:deviceID/torrents/:torrentID/videos/:videoID",
@@ -107,7 +118,7 @@ app.get(
   torrentsSearchHandler.search.bind(torrentsSearchHandler),
 );
 
-const torrentsHandler = new TorrentsHandler(torrentService);
+const torrentsHandler = new TorrentsHandler(eventEmitter, torrentService);
 app.post("/api/torrents", torrentsHandler.add.bind(torrentsHandler));
 app.get("/api/torrents", torrentsHandler.findAll.bind(torrentsHandler));
 app.get(
@@ -195,14 +206,16 @@ devicesService.startWatchingDevices().then(async () => {
   // LOAD saved torrents
   logger.info("Loading torrents...");
   const savedTorrents = await torrentsRepository.findAll();
+  const eventEmitterInstance = eventEmitter.instance();
   await Promise.all(
     savedTorrents.map((savedTorrent) =>
-      torrentService.createFromRow(savedTorrent),
+      torrentService.createFromRow(eventEmitterInstance, savedTorrent),
     ),
   );
+  eventEmitterInstance.emit();
 
   // LOAD server
-  const server = app.listen(9090, () =>
+  server.listen(9090, () =>
     logger.info(`Torrentflix listening on port ${9090}!`),
   );
   const sockets: any[] = [];

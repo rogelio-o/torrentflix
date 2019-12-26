@@ -1,9 +1,14 @@
 import { IDevice } from "../entity/IDevice";
 import { IRenderization } from "../entity/IRenderization";
 import { IVideo } from "../entity/IVideo";
+import { IEventEmitterInstance } from "./events/IEventEmitter";
 
 export interface IRenderService {
-  load(video: IVideo, device: IDevice): Promise<IRenderization>;
+  load(
+    eventEmitterInstance: IEventEmitterInstance,
+    video: IVideo,
+    device: IDevice,
+  ): Promise<IRenderization>;
 
   play(renderizationID: string): Promise<void>;
 

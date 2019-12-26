@@ -1,13 +1,23 @@
 import { ITorrent } from "../entity/ITorren";
 import { ITorrentRow } from "../entity/ITorrentRow";
 import { IVideo } from "../entity/IVideo";
+import { IEventEmitterInstance } from "./events/IEventEmitter";
 
 export interface ITorrentService {
-  createFromMagnet(magnetURI: string): Promise<ITorrent>;
+  createFromMagnet(
+    eventEmitterInstance: IEventEmitterInstance,
+    magnetURI: string,
+  ): Promise<ITorrent>;
 
-  createFromRow(torrentRow: ITorrentRow): Promise<ITorrent>;
+  createFromRow(
+    eventEmitterInstance: IEventEmitterInstance,
+    torrentRow: ITorrentRow,
+  ): Promise<ITorrent>;
 
-  remove(torrentID: string): Promise<void>;
+  remove(
+    eventEmitterInstance: IEventEmitterInstance,
+    torrentID: string,
+  ): Promise<void>;
 
   findAllVideos(torrentID: string): Promise<IVideo[]>;
 

@@ -1,5 +1,6 @@
 import * as express from "express";
 
+import { logger } from "../config/logger";
 import { Direction } from "../entity/IEntityOrder";
 import { IMoviesService } from "../service/IMoviesService";
 
@@ -15,7 +16,7 @@ export class MoviesHandler {
       .search(req.query.q)
       .then((result) => res.json(result))
       .catch((e) => {
-        console.error(e);
+        logger.error(e);
         res.sendStatus(500);
       });
   }
@@ -26,7 +27,7 @@ export class MoviesHandler {
       .create(body.externalReferenceId)
       .then((result) => res.json(result))
       .catch((e) => {
-        console.error(e);
+        logger.error(e);
         res.sendStatus(500);
       });
   }
@@ -36,7 +37,7 @@ export class MoviesHandler {
       .refresh(req.params.movieId)
       .then((result) => res.json(result))
       .catch((e) => {
-        console.error(e);
+        logger.error(e);
         res.sendStatus(500);
       });
   }
@@ -46,7 +47,7 @@ export class MoviesHandler {
       .delete(req.params.movieId)
       .then(() => res.end())
       .catch((e) => {
-        console.error(e);
+        logger.error(e);
         res.sendStatus(500);
       });
   }
@@ -56,7 +57,7 @@ export class MoviesHandler {
       .findById(req.params.movieId)
       .then((result) => res.json(result))
       .catch((e) => {
-        console.error(e);
+        logger.error(e);
         res.sendStatus(500);
       });
   }
@@ -79,7 +80,7 @@ export class MoviesHandler {
       .findPage({ page, itemsPerPage, order, q, filterWatched })
       .then((result) => res.json(result))
       .catch((e) => {
-        console.error(e);
+        logger.error(e);
         res.sendStatus(500);
       });
   }
@@ -92,7 +93,7 @@ export class MoviesHandler {
       .updateWatched(movieId, body.watched)
       .then(() => res.sendStatus(204))
       .catch((e) => {
-        console.error(e);
+        logger.error(e);
         res.sendStatus(500);
       });
   }

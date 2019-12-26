@@ -6,6 +6,7 @@ import { pipeline } from "stream";
 import uuidv4 from "uuid/v4";
 import WebTorrent, { Instance, Torrent, TorrentFile } from "webtorrent";
 
+import { logger } from "../../config/logger";
 import { ITorrent } from "../../entity/ITorren";
 import { ITorrentCallback } from "../../entity/ITorrentCallback";
 import { ITorrentRow } from "../../entity/ITorrentRow";
@@ -321,7 +322,7 @@ export class WebTorrentService implements ITorrentService {
 
             pipeline(stream, res, (err) => {
               if (err && err.code !== "ERR_STREAM_PREMATURE_CLOSE") {
-                console.error("Pipeline failed.", err);
+                logger.error("Pipeline failed.", err);
               }
             });
           } else {

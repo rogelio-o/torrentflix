@@ -1,5 +1,6 @@
 import * as express from "express";
 
+import { logger } from "../config/logger";
 import { IRenderService } from "../service/IRenderService";
 
 export class RenderizationsHandler {
@@ -14,7 +15,7 @@ export class RenderizationsHandler {
       .findAll()
       .then((renderization) => res.json(renderization))
       .catch((e) => {
-        console.error(e);
+        logger.error(e);
         res.sendStatus(500);
       });
   }
@@ -24,7 +25,7 @@ export class RenderizationsHandler {
       .findById(req.params.renderizationID)
       .then((renderization) => res.json(renderization))
       .catch((e) => {
-        console.error(e);
+        logger.error(e);
         res.sendStatus(500);
       });
   }
@@ -34,7 +35,7 @@ export class RenderizationsHandler {
       .stop(req.params.renderizationID)
       .then(() => res.sendStatus(204))
       .catch((e) => {
-        console.error(e);
+        logger.error(e);
         res.sendStatus(500);
       });
   }
@@ -44,7 +45,7 @@ export class RenderizationsHandler {
       .play(req.params.renderizationID)
       .then(() => res.sendStatus(204))
       .catch((e) => {
-        console.error(e);
+        logger.error(e);
         res.sendStatus(500);
       });
   }
@@ -54,7 +55,7 @@ export class RenderizationsHandler {
       .pause(req.params.renderizationID)
       .then(() => res.sendStatus(204))
       .catch((e) => {
-        console.error(e);
+        logger.error(e);
         res.sendStatus(500);
       });
   }
@@ -66,7 +67,7 @@ export class RenderizationsHandler {
       .seek(req.params.renderizationID, body.seconds)
       .then(() => res.sendStatus(204))
       .catch((e) => {
-        console.error(e);
+        logger.error(e);
         res.sendStatus(500);
       });
   }

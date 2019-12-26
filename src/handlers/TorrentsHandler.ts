@@ -1,5 +1,6 @@
 import * as express from "express";
 
+import { logger } from "../config/logger";
 import { ITorrentService } from "../service/ITorrentService";
 
 export class TorrentsHandler {
@@ -16,7 +17,7 @@ export class TorrentsHandler {
       .createFromMagnet(body.magnet_uri)
       .then(() => res.sendStatus(201))
       .catch((e) => {
-        console.error(e);
+        logger.error(e);
         res.sendStatus(500);
       });
   }
@@ -26,7 +27,7 @@ export class TorrentsHandler {
       .remove(req.params.torrentID)
       .then(() => res.sendStatus(204))
       .catch((e) => {
-        console.error(e);
+        logger.error(e);
         res.sendStatus(500);
       });
   }
@@ -36,7 +37,7 @@ export class TorrentsHandler {
       .findAll()
       .then((torrents) => res.json(torrents))
       .catch((e) => {
-        console.error(e);
+        logger.error(e);
         res.sendStatus(500);
       });
   }
@@ -46,7 +47,7 @@ export class TorrentsHandler {
       .findById(req.params.torrentID)
       .then((torrent) => res.json(torrent))
       .catch((e) => {
-        console.error(e);
+        logger.error(e);
         res.sendStatus(500);
       });
   }

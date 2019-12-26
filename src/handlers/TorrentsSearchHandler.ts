@@ -1,5 +1,6 @@
 import * as express from "express";
 
+import { logger } from "../config/logger";
 import { ITorrentSearchService, TorrentSearchCategory } from "../service/ITorrentSearchService";
 
 export class TorrentsSearchHandler {
@@ -17,7 +18,7 @@ export class TorrentsSearchHandler {
       .search(q, this.mapCategory(category), 10)
       .then((results) => res.json(results))
       .catch((e) => {
-        console.error(e);
+        logger.error(e);
         res.sendStatus(500);
       });
   }

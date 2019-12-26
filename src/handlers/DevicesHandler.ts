@@ -1,5 +1,6 @@
 import * as express from "express";
 
+import { logger } from "../config/logger";
 import { IDevicesService } from "../service/IDevicesService";
 import { IPlayerService } from "../service/IPlayerService";
 
@@ -18,7 +19,7 @@ export class DevicesHandler {
       .getDevices()
       .then((devices) => res.json(devices))
       .catch((e) => {
-        console.error(e);
+        logger.error(e);
         res.sendStatus(500);
       });
   }
@@ -28,7 +29,7 @@ export class DevicesHandler {
       .attach(req.params.deviceID, req.params.torrentID, req.params.videoID)
       .then(() => res.sendStatus(204))
       .catch((e) => {
-        console.error(e);
+        logger.error(e);
         res.sendStatus(500);
       });
   }

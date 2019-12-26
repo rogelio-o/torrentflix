@@ -1,5 +1,6 @@
 import uuidv4 from "uuid/v4";
 
+import { logger } from "../../config/logger";
 import { DeviceType, IDevice } from "../../entity/IDevice";
 import { IRendererClient } from "../../entity/IRendererClient";
 import { IRenderization, RenderizationStatus } from "../../entity/IRenderization";
@@ -147,12 +148,12 @@ export class MediaRendererServiceImpl implements IRenderService {
           client
             .getPosition()
             .then((position) => (renderization.position = position))
-            .catch((err) => console.error(err));
+            .catch((err) => logger.error(err));
 
           client
             .getDuration()
             .then((duration) => (renderization.duration = duration))
-            .catch((err) => console.error(err));
+            .catch((err) => logger.error(err));
         } else {
           clearInterval(interval);
         }

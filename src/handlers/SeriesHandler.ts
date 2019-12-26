@@ -1,5 +1,6 @@
 import * as express from "express";
 
+import { logger } from "../config/logger";
 import { Direction } from "../entity/IEntityOrder";
 import { ISeriesService } from "../service/ISeriesService";
 
@@ -15,7 +16,7 @@ export class SeriesHandler {
       .search(req.query.q)
       .then((result) => res.json(result))
       .catch((e) => {
-        console.error(e);
+        logger.error(e);
         res.sendStatus(500);
       });
   }
@@ -26,7 +27,7 @@ export class SeriesHandler {
       .create(body.externalReferenceId)
       .then((result) => res.json(result))
       .catch((e) => {
-        console.error(e);
+        logger.error(e);
         res.sendStatus(500);
       });
   }
@@ -36,7 +37,7 @@ export class SeriesHandler {
       .refresh(req.params.serieId)
       .then((result) => res.json(result))
       .catch((e) => {
-        console.error(e);
+        logger.error(e);
         res.sendStatus(500);
       });
   }
@@ -46,7 +47,7 @@ export class SeriesHandler {
       .delete(req.params.serieId)
       .then(() => res.end())
       .catch((e) => {
-        console.error(e);
+        logger.error(e);
         res.sendStatus(500);
       });
   }
@@ -56,7 +57,7 @@ export class SeriesHandler {
       .findById(req.params.serieId)
       .then((result) => res.json(result))
       .catch((e) => {
-        console.error(e);
+        logger.error(e);
         res.sendStatus(500);
       });
   }
@@ -79,7 +80,7 @@ export class SeriesHandler {
       .findPage({ page, itemsPerPage, order, q, filterWatched })
       .then((result) => res.json(result))
       .catch((e) => {
-        console.error(e);
+        logger.error(e);
         res.sendStatus(500);
       });
   }
@@ -97,7 +98,7 @@ export class SeriesHandler {
       .updateEpisodeWatched(serieId, seasonNumber, episodeNumber, body.watched)
       .then(() => res.sendStatus(204))
       .catch((e) => {
-        console.error(e);
+        logger.error(e);
         res.sendStatus(500);
       });
   }

@@ -3,6 +3,7 @@ import express from "express";
 import path from "path";
 import sqlite from "sqlite";
 
+import { logger } from "./config/logger";
 import { DevicesHandler } from "./handlers/DevicesHandler";
 import { MoviesHandler } from "./handlers/MoviesHandler";
 import { RenderizationsHandler } from "./handlers/RenderizationsHandler";
@@ -185,7 +186,7 @@ app.use((req, res) => {
 
 devicesService.startWatchingDevices().then(async () => {
   // LOAD saved torrents
-  console.log("Loading torrents...");
+  logger.info("Loading torrents...");
   const savedTorrents = await torrentsRepository.findAll();
   await Promise.all(
     savedTorrents.map((savedTorrent) =>
@@ -195,7 +196,7 @@ devicesService.startWatchingDevices().then(async () => {
 
   // LOAD server
   const server = app.listen(9090, () =>
-    console.log(`Torrentflix listening on port ${9090}!`),
+    logger.info(`Torrentflix listening on port ${9090}!`),
   );
   const sockets: any[] = [];
   server.on("connection", (socket) => {

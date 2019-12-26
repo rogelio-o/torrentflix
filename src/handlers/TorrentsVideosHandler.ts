@@ -1,5 +1,6 @@
 import * as express from "express";
 
+import { logger } from "../config/logger";
 import { ITorrentService } from "../service/ITorrentService";
 
 export class TorrentsVideosHandler {
@@ -14,7 +15,7 @@ export class TorrentsVideosHandler {
       .findAllVideos(req.params.torrentID)
       .then((videos) => res.json(videos))
       .catch((e) => {
-        console.error(e);
+        logger.error(e);
         res.sendStatus(500);
       });
   }
@@ -24,7 +25,7 @@ export class TorrentsVideosHandler {
       .findVideoById(req.params.torrentID, req.params.videoID)
       .then((video) => res.json(video))
       .catch((e) => {
-        console.error(e);
+        logger.error(e);
         res.sendStatus(500);
       });
   }

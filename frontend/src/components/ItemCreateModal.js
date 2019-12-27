@@ -1,6 +1,6 @@
 import axios from "axios";
 import React from "react";
-import { Modal, ModalBody, ModalHeader } from "reactstrap";
+import { Input, Modal, ModalBody, ModalHeader } from "reactstrap";
 
 import ItemsList from "./ItemsList";
 import Loading from "./Loading";
@@ -84,7 +84,7 @@ class ItemCreateModal extends React.Component {
     return (
       <Modal isOpen={true} fade={false} toggle={toggle} size="lg">
         <ModalHeader toggle={toggle}>
-          <input onChange={this._onChangeSearch.bind(this)} />
+          <Input onChange={this._onChangeSearch.bind(this)} />
         </ModalHeader>
         <ModalBody>
           {loading ? <Loading /> : <ItemsList items={items} />}

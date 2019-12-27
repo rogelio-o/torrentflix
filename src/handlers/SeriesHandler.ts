@@ -2,12 +2,16 @@ import * as express from "express";
 
 import { logger } from "../config/logger";
 import { Direction } from "../entity/IEntityOrder";
+import { IEventEmitter } from "../service/events/IEventEmitter";
 import { ISeriesService } from "../service/ISeriesService";
 
 export class SeriesHandler {
+  private eventEmitter: IEventEmitter;
+
   private seriesService: ISeriesService;
 
-  constructor(seriesService: ISeriesService) {
+  constructor(eventEmitter: IEventEmitter, seriesService: ISeriesService) {
+    this.eventEmitter = eventEmitter;
     this.seriesService = seriesService;
   }
 
@@ -22,10 +26,15 @@ export class SeriesHandler {
   }
 
   public create(req: express.Request, res: express.Response): void {
+    const eventEmitterInstance = this.eventEmitter.instance();
     const body = req.body;
+
     this.seriesService
-      .create(body.externalReferenceId)
-      .then((result) => res.json(result))
+      .create(eventEmitterInstance, body.externalReferenceId)
+      .then((result) => {
+        eventEmitterInstance.emit();
+        res.json(result);
+      })
       .catch((e) => {
         logger.error(e);
         res.sendStatus(500);
@@ -33,9 +42,14 @@ export class SeriesHandler {
   }
 
   public refresh(req: express.Request, res: express.Response): void {
+    const eventEmitterInstance = this.eventEmitter.instance();
+
     this.seriesService
-      .refresh(req.params.serieId)
-      .then((result) => res.json(result))
+      .refresh(eventEmitterInstance, req.params.serieId)
+      .then((result) => {
+        eventEmitterInstance.emit();
+        res.json(result);
+      })
       .catch((e) => {
         logger.error(e);
         res.sendStatus(500);
@@ -43,9 +57,14 @@ export class SeriesHandler {
   }
 
   public delete(req: express.Request, res: express.Response): void {
+    const eventEmitterInstance = this.eventEmitter.instance();
+
     this.seriesService
-      .delete(req.params.serieId)
-      .then(() => res.end())
+      .delete(eventEmitterInstance, req.params.serieId)
+      .then(() => {
+        eventEmitterInstance.emit();
+        res.end();
+      })
       .catch((e) => {
         logger.error(e);
         res.sendStatus(500);
@@ -89,14 +108,24 @@ export class SeriesHandler {
     req: express.Request,
     res: express.Response,
   ): void {
+    const eventEmitterInstance = this.eventEmitter.instance();
     const serieId = req.params.serieId;
     const seasonNumber = parseInt(req.params.seasonNumber, 10);
     const episodeNumber = parseInt(req.params.episodeNumber, 10);
     const body = req.body;
 
     this.seriesService
-      .updateEpisodeWatched(serieId, seasonNumber, episodeNumber, body.watched)
-      .then(() => res.sendStatus(204))
+      .updateEpisodeWatched(
+        eventEmitterInstance,
+        serieId,
+        seasonNumber,
+        episodeNumber,
+        body.watched,
+      )
+      .then(() => {
+        eventEmitterInstance.emit();
+        res.sendStatus(204);
+      })
       .catch((e) => {
         logger.error(e);
         res.sendStatus(500);

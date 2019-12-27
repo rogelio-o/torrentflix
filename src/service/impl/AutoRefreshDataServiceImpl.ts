@@ -2,6 +2,7 @@ import * as cron from "cron";
 
 import { logger } from "../../config/logger";
 import { ISeriesRepository } from "../../repositories/ISeriesRepository";
+import { IEventEmitterInstance } from "../events/IEventEmitter";
 import { IAutoRefreshDataService } from "../IAutoRefreshDataService";
 import { ISeriesService } from "../ISeriesService";
 
@@ -20,10 +21,10 @@ export class AutoRefreshDataServiceImpl implements IAutoRefreshDataService {
     this.seriesService = seriesService;
   }
 
-  public start(): void {
+  public start(eventEmitterInstance: IEventEmitterInstance): void {
     this.cronTask = new cron.CronJob(
       "0 0 1 * * *",
-      this.refreshSeriesData.bind(this),
+      () => this.refreshSeriesData(eventEmitterInstance),
       undefined,
       true,
       "Europe/Madrid",
@@ -32,7 +33,7 @@ export class AutoRefreshDataServiceImpl implements IAutoRefreshDataService {
     );
   }
 
-  private refreshSeriesData() {
+  private refreshSeriesData(eventEmitterInstance: IEventEmitterInstance) {
     logger.info("Starting refresh series task.");
 
     this.seriesRepository
@@ -40,7 +41,7 @@ export class AutoRefreshDataServiceImpl implements IAutoRefreshDataService {
       .then((series) => {
         series.forEach((serie) =>
           this.seriesService
-            .refresh(serie.id as string)
+            .refresh(eventEmitterInstance, serie.id || "")
             .catch((e) => logger.error(e)),
         );
       })

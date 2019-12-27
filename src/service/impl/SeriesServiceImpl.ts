@@ -1,3 +1,7 @@
+import { ISerieAdded } from "../../entity/events/ISerieAdded";
+import { ISerieEpisodeWatchedUpdated } from "../../entity/events/ISerieEpisodeWatchedUpdated";
+import { ISerieRefreshed } from "../../entity/events/ISerieRefreshed";
+import { ISerieRemoved } from "../../entity/events/ISerieRemoved";
 import { IApiSerieSearchResult } from "../../entity/IApiSerieSearchResult";
 import { IPage } from "../../entity/IPage";
 import { IPageRequest } from "../../entity/IPageRequest";
@@ -6,6 +10,7 @@ import { ISerieEpisode } from "../../entity/ISerieEpisode";
 import { ISerieSeason } from "../../entity/ISerieSeason";
 import { ISerieWithSeasons } from "../../entity/ISerieWithSeasons";
 import { ISeriesRepository } from "../../repositories/ISeriesRepository";
+import { IEventEmitterInstance } from "../events/IEventEmitter";
 import { IApiSeriesService } from "../IApiSeriesService";
 import { ISeriesService } from "../ISeriesService";
 
@@ -23,14 +28,21 @@ export class SeriesServiceImpl implements ISeriesService {
     return this.apiService.search(q);
   }
 
-  public async create(externalReferenceId: string): Promise<ISerieWithSeasons> {
+  public async create(
+    eventEmitterInstance: IEventEmitterInstance,
+    externalReferenceId: string,
+  ): Promise<ISerieWithSeasons> {
     const serie = await this.apiService.findById(externalReferenceId);
     await this.repository.create(serie);
+    eventEmitterInstance.add(this.buildSerieAdded(serie));
 
     return serie;
   }
 
-  public async refresh(serieId: string): Promise<ISerieWithSeasons> {
+  public async refresh(
+    eventEmitterInstance: IEventEmitterInstance,
+    serieId: string,
+  ): Promise<ISerieWithSeasons> {
     const oldSerie = await this.repository.findById(serieId);
     const newSerie = await this.apiService.findById(
       oldSerie.externalReferenceId,
@@ -38,12 +50,17 @@ export class SeriesServiceImpl implements ISeriesService {
     newSerie.id = oldSerie.id;
     this._addOldWatched(oldSerie, newSerie);
     await this.repository.update(newSerie);
+    eventEmitterInstance.add(this.buildSerieRefreshed(newSerie));
 
     return newSerie;
   }
 
-  public delete(serieId: string): Promise<void> {
-    return this.repository.delete(serieId);
+  public async delete(
+    eventEmitterInstance: IEventEmitterInstance,
+    serieId: string,
+  ): Promise<void> {
+    await this.repository.delete(serieId);
+    eventEmitterInstance.add(this.buildSerieRemoved(serieId));
   }
 
   public findById(serieId: string): Promise<ISerieWithSeasons> {
@@ -110,17 +127,26 @@ export class SeriesServiceImpl implements ISeriesService {
     };
   }
 
-  public updateEpisodeWatched(
+  public async updateEpisodeWatched(
+    eventEmitterInstance: IEventEmitterInstance,
     serieId: string,
     seasonNumber: number,
     episodeNumber: number,
     watched: boolean,
   ): Promise<void> {
-    return this.repository.updateEpisodeWatched(
+    await this.repository.updateEpisodeWatched(
       serieId,
       seasonNumber,
       episodeNumber,
       watched,
+    );
+    eventEmitterInstance.add(
+      this.buildSerieEpisodeWatchedUpdated(
+        serieId,
+        seasonNumber,
+        episodeNumber,
+        watched,
+      ),
     );
   }
 
@@ -145,5 +171,45 @@ export class SeriesServiceImpl implements ISeriesService {
         episode.watched = watchedMap[keyGenerator(season, episode)] || false;
       });
     });
+  }
+
+  private buildSerieAdded(serie: ISerie): ISerieAdded {
+    return {
+      emittedOn: new Date(),
+      event: "serie-added",
+      serieId: serie.id || "",
+    };
+  }
+
+  private buildSerieEpisodeWatchedUpdated(
+    serieId: string,
+    seasonNumber: number,
+    episodeNumber: number,
+    watched: boolean,
+  ): ISerieEpisodeWatchedUpdated {
+    return {
+      emittedOn: new Date(),
+      episodeNumber,
+      event: "serie-episode-watched-updated",
+      seasonNumber,
+      serieId,
+      watched,
+    };
+  }
+
+  private buildSerieRefreshed(serie: ISerie): ISerieRefreshed {
+    return {
+      emittedOn: new Date(),
+      event: "serie-refreshed",
+      serieId: serie.id || "",
+    };
+  }
+
+  private buildSerieRemoved(serieId: string): ISerieRemoved {
+    return {
+      emittedOn: new Date(),
+      event: "serie-removed",
+      serieId,
+    };
   }
 }

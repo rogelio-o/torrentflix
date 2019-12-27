@@ -166,7 +166,10 @@ app.put(
   renderizationsHandler.seek.bind(renderizationsHandler),
 );
 
-const moviesHandler: MoviesHandler = new MoviesHandler(moviesService);
+const moviesHandler: MoviesHandler = new MoviesHandler(
+  eventEmitter,
+  moviesService,
+);
 app.get("/api/movies/search", moviesHandler.search.bind(moviesHandler));
 app.get("/api/movies", moviesHandler.findPage.bind(moviesHandler));
 app.get("/api/movies/:movieId", moviesHandler.findById.bind(moviesHandler));
@@ -181,7 +184,10 @@ app.put(
 );
 app.delete("/api/movies/:movieId", moviesHandler.delete.bind(moviesHandler));
 
-const seriesHandler: SeriesHandler = new SeriesHandler(seriesService);
+const seriesHandler: SeriesHandler = new SeriesHandler(
+  eventEmitter,
+  seriesService,
+);
 app.get("/api/series/search", seriesHandler.search.bind(seriesHandler));
 app.get("/api/series", seriesHandler.findPage.bind(seriesHandler));
 app.get("/api/series/:serieId", seriesHandler.findById.bind(seriesHandler));
@@ -201,12 +207,12 @@ app.use((req, res) => {
   res.sendFile(path.resolve("frontend/build/index.html"));
 });
 
-autoRefreshDataSerivce.start();
-devicesService.startWatchingDevices().then(async () => {
+const eventEmitterInstance = eventEmitter.instance();
+autoRefreshDataSerivce.start(eventEmitterInstance);
+devicesService.startWatchingDevices(eventEmitterInstance).then(async () => {
   // LOAD saved torrents
   logger.info("Loading torrents...");
   const savedTorrents = await torrentsRepository.findAll();
-  const eventEmitterInstance = eventEmitter.instance();
   await Promise.all(
     savedTorrents.map((savedTorrent) =>
       torrentService.createFromRow(eventEmitterInstance, savedTorrent),

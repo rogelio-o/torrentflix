@@ -2,12 +2,16 @@ import * as express from "express";
 
 import { logger } from "../config/logger";
 import { Direction } from "../entity/IEntityOrder";
+import { IEventEmitter } from "../service/events/IEventEmitter";
 import { IMoviesService } from "../service/IMoviesService";
 
 export class MoviesHandler {
+  private eventEmitter: IEventEmitter;
+
   private moviesService: IMoviesService;
 
-  constructor(moviesService: IMoviesService) {
+  constructor(eventEmitter: IEventEmitter, moviesService: IMoviesService) {
+    this.eventEmitter = eventEmitter;
     this.moviesService = moviesService;
   }
 
@@ -22,10 +26,15 @@ export class MoviesHandler {
   }
 
   public create(req: express.Request, res: express.Response): void {
+    const eventEmitterInstance = this.eventEmitter.instance();
     const body = req.body;
+
     this.moviesService
-      .create(body.externalReferenceId)
-      .then((result) => res.json(result))
+      .create(eventEmitterInstance, body.externalReferenceId)
+      .then((result) => {
+        eventEmitterInstance.emit();
+        res.json(result);
+      })
       .catch((e) => {
         logger.error(e);
         res.sendStatus(500);
@@ -33,9 +42,14 @@ export class MoviesHandler {
   }
 
   public refresh(req: express.Request, res: express.Response): void {
+    const eventEmitterInstance = this.eventEmitter.instance();
+
     this.moviesService
-      .refresh(req.params.movieId)
-      .then((result) => res.json(result))
+      .refresh(eventEmitterInstance, req.params.movieId)
+      .then((result) => {
+        eventEmitterInstance.emit();
+        res.json(result);
+      })
       .catch((e) => {
         logger.error(e);
         res.sendStatus(500);
@@ -43,9 +57,14 @@ export class MoviesHandler {
   }
 
   public delete(req: express.Request, res: express.Response): void {
+    const eventEmitterInstance = this.eventEmitter.instance();
+
     this.moviesService
-      .delete(req.params.movieId)
-      .then(() => res.end())
+      .delete(eventEmitterInstance, req.params.movieId)
+      .then(() => {
+        eventEmitterInstance.emit();
+        res.end();
+      })
       .catch((e) => {
         logger.error(e);
         res.sendStatus(500);
@@ -86,12 +105,16 @@ export class MoviesHandler {
   }
 
   public updateWatched(req: express.Request, res: express.Response): void {
+    const eventEmitterInstance = this.eventEmitter.instance();
     const movieId = req.params.movieId;
     const body = req.body;
 
     this.moviesService
-      .updateWatched(movieId, body.watched)
-      .then(() => res.sendStatus(204))
+      .updateWatched(eventEmitterInstance, movieId, body.watched)
+      .then(() => {
+        eventEmitterInstance.emit();
+        res.sendStatus(204);
+      })
       .catch((e) => {
         logger.error(e);
         res.sendStatus(500);

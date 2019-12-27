@@ -1,3 +1,5 @@
+import { IEventEmitterInstance } from "./events/IEventEmitter";
+
 export interface IAutoRefreshDataService {
-  start(): void;
+  start(eventEmitterInstance: IEventEmitterInstance): void;
 }

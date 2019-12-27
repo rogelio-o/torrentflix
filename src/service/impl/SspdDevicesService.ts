@@ -1,6 +1,9 @@
 import Sspd from "node-ssdp";
 
+import { IDeviceAdded } from "../../entity/events/IDeviceAdded";
+import { IDeviceRemoved } from "../../entity/events/IDeviceRemoved";
 import { DeviceType, IDevice } from "../../entity/IDevice";
+import { IEventEmitterInstance } from "../events/IEventEmitter";
 import { IDevicesService } from "../IDevicesService";
 
 const MEDIA_RENDERER_TYPE = "urn:schemas-upnp-org:device:MediaRenderer:1";
@@ -36,7 +39,9 @@ export class SspdDevicesService implements IDevicesService {
 
   private server?: any;
 
-  public startWatchingDevices(): Promise<void> {
+  public startWatchingDevices(
+    eventEmitterInstance: IEventEmitterInstance,
+  ): Promise<void> {
     if (this.server) {
       this.server.stop();
     }
@@ -48,30 +53,38 @@ export class SspdDevicesService implements IDevicesService {
     const client = new Sspd.Client();
     client.on("response", (headers: { [key: string]: string }) => {
       checkDevice(headers, (deviceId, type) => {
-        this.data[deviceId] = {
+        const device: IDevice = {
           id: deviceId,
           name: headers.SERVER,
           type: parseType(type),
           xmlUrl: headers.LOCATION,
         };
+        this.data[deviceId] = device;
+        eventEmitterInstance.addAndEmit(this.buildDeviceAdded(device));
       });
     });
     client.search("ssdp:all");
 
     this.server.on("advertise-alive", (headers: { [key: string]: string }) => {
       checkDevice(headers, (deviceId, type) => {
-        this.data[deviceId] = {
+        const device: IDevice = {
           id: deviceId,
           name: headers.SERVER,
           type: parseType(type),
           xmlUrl: headers.LOCATION,
         };
+        this.data[deviceId] = device;
+        eventEmitterInstance.addAndEmit(this.buildDeviceAdded(device));
       });
     });
 
     this.server.on("advertise-bye", (headers: { [key: string]: string }) => {
       checkDevice(headers, (deviceId, type) => {
-        delete this.data[deviceId];
+        const device = this.data[deviceId];
+        if (device) {
+          delete this.data[deviceId];
+          eventEmitterInstance.addAndEmit(this.buildDeviceRemoved(device));
+        }
       });
     });
 
@@ -90,5 +103,21 @@ export class SspdDevicesService implements IDevicesService {
 
   public getDevice(deviceID: string): Promise<IDevice> {
     return Promise.resolve(this.data[deviceID]);
+  }
+
+  private buildDeviceAdded(device: IDevice): IDeviceAdded {
+    return {
+      deviceId: device.id,
+      emittedOn: new Date(),
+      event: "device-added",
+    };
+  }
+
+  private buildDeviceRemoved(device: IDevice): IDeviceRemoved {
+    return {
+      deviceId: device.id,
+      emittedOn: new Date(),
+      event: "device-removed",
+    };
   }
 }

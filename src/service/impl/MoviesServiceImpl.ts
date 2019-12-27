@@ -1,8 +1,13 @@
+import { IMovieAdded } from "../../entity/events/IMovieAdded";
+import { IMovieRefreshed } from "../../entity/events/IMovieRefreshed";
+import { IMovieRemoved } from "../../entity/events/IMovieRemoved";
+import { IMovieWatchedUpdated } from "../../entity/events/IMovieWatchedUpdated";
 import { IApiMovieSearchResult } from "../../entity/IApiMovieSearchResult";
 import { IMovie } from "../../entity/IMovie";
 import { IPage } from "../../entity/IPage";
 import { IPageRequest } from "../../entity/IPageRequest";
 import { IMoviesRepository } from "../../repositories/IMoviesRepository";
+import { IEventEmitterInstance } from "../events/IEventEmitter";
 import { IApiMoviesService } from "../IApiMoviesService";
 import { IMoviesService } from "../IMoviesService";
 
@@ -23,14 +28,21 @@ export class MoviesServiceImpl implements IMoviesService {
     return this.apiMoviesService.search(q);
   }
 
-  public async create(externalReferenceId: string): Promise<IMovie> {
+  public async create(
+    eventEmitterInstance: IEventEmitterInstance,
+    externalReferenceId: string,
+  ): Promise<IMovie> {
     const movie = await this.apiMoviesService.findById(externalReferenceId);
     await this.moviesRepository.create(movie);
+    eventEmitterInstance.add(this.buildMovieAdded(movie));
 
     return movie;
   }
 
-  public async refresh(movieId: string): Promise<IMovie> {
+  public async refresh(
+    eventEmitterInstance: IEventEmitterInstance,
+    movieId: string,
+  ): Promise<IMovie> {
     const movie = await this.moviesRepository.findById(movieId);
     const newMovie = await this.apiMoviesService.findById(
       movie.externalReferenceId,
@@ -39,12 +51,17 @@ export class MoviesServiceImpl implements IMoviesService {
     newMovie.watched = movie.watched;
 
     await this.moviesRepository.update(newMovie);
+    eventEmitterInstance.add(this.buildMovieRefreshed(newMovie));
 
     return newMovie;
   }
 
-  public delete(movieId: string): Promise<void> {
-    return this.moviesRepository.delete(movieId);
+  public async delete(
+    eventEmitterInstance: IEventEmitterInstance,
+    movieId: string,
+  ): Promise<void> {
+    await this.moviesRepository.delete(movieId);
+    eventEmitterInstance.add(this.buildMovieRemoved(movieId));
   }
 
   public findById(movieId: string): Promise<IMovie> {
@@ -112,7 +129,48 @@ export class MoviesServiceImpl implements IMoviesService {
     };
   }
 
-  public updateWatched(movieId: string, watched: boolean): Promise<void> {
-    return this.moviesRepository.updateWatched(movieId, watched);
+  public async updateWatched(
+    eventEmitterInstance: IEventEmitterInstance,
+    movieId: string,
+    watched: boolean,
+  ): Promise<void> {
+    await this.moviesRepository.updateWatched(movieId, watched);
+    eventEmitterInstance.add(this.buildMovieWatchedUpdated(movieId, watched));
+  }
+
+  private buildMovieAdded(movie: IMovie): IMovieAdded {
+    return {
+      emittedOn: new Date(),
+      event: "movie-added",
+      movieId: movie.id || "",
+    };
+  }
+
+  private buildMovieRefreshed(movie: IMovie): IMovieRefreshed {
+    return {
+      emittedOn: new Date(),
+      event: "movie-refreshed",
+      movieId: movie.id || "",
+    };
+  }
+
+  private buildMovieRemoved(movieId: string): IMovieRemoved {
+    return {
+      emittedOn: new Date(),
+      event: "movie-removed",
+      movieId: movieId || "",
+    };
+  }
+
+  private buildMovieWatchedUpdated(
+    movieId: string,
+    watched: boolean,
+  ): IMovieWatchedUpdated {
+    return {
+      emittedOn: new Date(),
+      event: "movie-watched-updated",
+      movieId,
+      watched,
+    };
   }
 }

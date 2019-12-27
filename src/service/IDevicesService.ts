@@ -1,7 +1,10 @@
 import { IDevice } from "../entity/IDevice";
+import { IEventEmitterInstance } from "./events/IEventEmitter";
 
 export interface IDevicesService {
-  startWatchingDevices(): Promise<void>;
+  startWatchingDevices(
+    eventEmitterInstance: IEventEmitterInstance,
+  ): Promise<void>;
 
   getDevices(): Promise<IDevice[]>;
 

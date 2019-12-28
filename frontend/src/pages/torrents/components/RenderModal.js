@@ -1,10 +1,11 @@
-import axios from "axios";
 import React from "react";
 import { Button, CustomInput, Form, FormGroup, Label, Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 
-class RenderModal extends React.Component {
-  _sourceDevices = axios.CancelToken.source();
+import { findAllDevices } from "../../../services/devicesService";
+import { findAllTorrentVideos } from "../../../services/torrentsService";
+import { isCancelError } from "../../../utils/serviceUtils";
 
+class RenderModal extends React.Component {
   constructor(props) {
     super(props);
 
@@ -25,15 +26,9 @@ class RenderModal extends React.Component {
     this._loadDevices();
   }
 
-  _cancelRequestDevices() {
-    this._sourceDevices.cancel();
-    this._sourceDevices = axios.CancelToken.source();
-  }
-
   _loadVideos(torrentId) {
     this.setState({ loadingVideos: true });
-    axios
-      .get(`/api/torrents/${torrentId}/videos`)
+    findAllTorrentVideos(torrentId)
       .then((response) => {
         this.setState({
           loadingVideos: false,
@@ -41,7 +36,7 @@ class RenderModal extends React.Component {
         });
       })
       .catch((error) => {
-        if (!axios.isCancel(error)) {
+        if (!isCancelError(error)) {
           alert(error.message);
           console.error(error);
           this.setState({ loadingVideos: false, videos: [] });
@@ -50,13 +45,8 @@ class RenderModal extends React.Component {
   }
 
   _loadDevices() {
-    this._cancelRequestDevices();
-
     this.setState({ loadingDevices: true });
-    axios
-      .get("/api/devices", {
-        cancelToken: this._sourceDevices.token,
-      })
+    findAllDevices()
       .then((response) => {
         this.setState({
           loadingDevices: false,
@@ -64,7 +54,7 @@ class RenderModal extends React.Component {
         });
       })
       .catch((error) => {
-        if (!axios.isCancel(error)) {
+        if (!isCancelError(error)) {
           alert(error.message);
           console.error(error);
           this.setState({ loadingDevices: false, devices: [] });

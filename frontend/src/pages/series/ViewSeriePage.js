@@ -1,4 +1,3 @@
-import axios from "axios";
 import React from "react";
 
 import ItemAttributes from "../../components/ItemAttributes";
@@ -7,6 +6,7 @@ import ItemPage from "../../components/ItemPage";
 import ItemPageSection from "../../components/ItemPageSection";
 import ItemPoster from "../../components/ItemPoster";
 import ItemPunctuation from "../../components/ItemPunctuation";
+import { findSerieById, updateSerieEpisodeWatched } from "../../services/seriesService";
 import Loading from "./../../components/Loading";
 import Seasons from "./components/Seasons";
 
@@ -43,8 +43,7 @@ class ViewSeriePage extends React.Component {
 
   _load(id) {
     this.setState({ loading: true });
-    axios
-      .get(`/api/series/${id}`)
+    findSerieById(id)
       .then((response) => {
         this.setState({
           loading: false,
@@ -52,11 +51,9 @@ class ViewSeriePage extends React.Component {
         });
       })
       .catch((error) => {
-        if (!axios.isCancel(error)) {
-          alert(error.message);
-          console.error(error);
-          this.setState({ loading: false });
-        }
+        alert(error.message);
+        console.error(error);
+        this.setState({ loading: false });
       });
   }
 
@@ -66,11 +63,7 @@ class ViewSeriePage extends React.Component {
     const serie = this.state.serie;
 
     this.setState({ loading: true });
-    axios
-      .put(
-        `/api/series/${serie.id}/S${season.number}-E${episode.number}/watched`,
-        { watched },
-      )
+    updateSerieEpisodeWatched(serie.id, season.number, episode.number, watched)
       .then(() => {
         episode.watched = watched;
 
@@ -84,11 +77,9 @@ class ViewSeriePage extends React.Component {
         );
       })
       .catch((error) => {
-        if (!axios.isCancel(error)) {
-          alert(error.message);
-          console.error(error);
-          this.setState({ loading: false });
-        }
+        alert(error.message);
+        console.error(error);
+        this.setState({ loading: false });
       });
   }
 

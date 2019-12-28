@@ -1,9 +1,10 @@
-import axios from "axios";
 import qs from "query-string";
 import React from "react";
 
 import ItemCreateModal from "../../components/ItemCreateModal";
 import ItemsListHeader from "../../components/ItemsListHeader";
+import { createSerie, findAllSeries, refreshSerie, removeSerie, searchSerie } from "../../services/seriesService";
+import { isCancelError } from "../../utils/serviceUtils";
 import ItemsList from "./../../components/ItemsList";
 import Loading from "./../../components/Loading";
 import Page from "./../../components/Page";
@@ -20,8 +21,6 @@ const mapItem = (item, imagePrefix, buttons) => {
 };
 
 class ListSeriesPage extends React.Component {
-  _source = axios.CancelToken.source();
-
   constructor(props) {
     super(props);
     this.state = {
@@ -39,11 +38,6 @@ class ListSeriesPage extends React.Component {
     this._load(query.page || 0);
   }
 
-  _cancelRequest() {
-    this._source.cancel();
-    this._source = axios.CancelToken.source();
-  }
-
   _mapItem(item) {
     return mapItem(item, "/banners/", [
       {
@@ -57,8 +51,7 @@ class ListSeriesPage extends React.Component {
 
   _refresh(id) {
     this.setState({ loading: true });
-    axios
-      .put(`/api/series/${id}/refresh`)
+    refreshSerie(id)
       .then(() => this._load())
       .catch((error) => {
         alert(error.message);
@@ -69,8 +62,7 @@ class ListSeriesPage extends React.Component {
 
   _remove(id) {
     this.setState({ loading: true });
-    axios
-      .delete(`/api/series/${id}`)
+    removeSerie(id)
       .then(() => this._load())
       .catch((error) => {
         alert(error.message);
@@ -83,8 +75,7 @@ class ListSeriesPage extends React.Component {
     this._closeAddModal();
 
     this.setState({ loading: true });
-    axios
-      .post("/api/series", { externalReferenceId })
+    createSerie(externalReferenceId)
       .then(() => this._load())
       .catch((error) => {
         alert(error.message);
@@ -94,18 +85,8 @@ class ListSeriesPage extends React.Component {
   }
 
   _load(page, q) {
-    this._cancelRequest();
-
     this.setState({ loading: true });
-    axios
-      .get("/api/series", {
-        cancelToken: this._source.token,
-        params: {
-          page,
-          order: "name",
-          q,
-        },
-      })
+    findAllSeries(page, q)
       .then((response) => {
         const data = response.data;
         this.setState({
@@ -114,7 +95,7 @@ class ListSeriesPage extends React.Component {
         });
       })
       .catch((error) => {
-        if (!axios.isCancel(error)) {
+        if (!isCancelError(error)) {
           alert(error.message);
           console.error(error);
           this.setState({ loading: false, page: { items: [] } });
@@ -146,7 +127,7 @@ class ListSeriesPage extends React.Component {
         <ItemCreateModal
           toggle={this._closeAddModal.bind(this)}
           mapItem={(item, buttons) => mapItem(item, "", buttons)}
-          searchPath="/api/series/search"
+          search={searchSerie}
           add={this._add.bind(this)}
         />
       );

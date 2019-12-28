@@ -1,12 +1,17 @@
-import axios from "axios";
 import React from "react";
 
 import Loading from "../../components/Loading";
+import {
+  findAllRenderizations,
+  pauseRenderization,
+  playRenderization,
+  seekRenderization,
+  stopRenderization,
+} from "../../services/renderizationsService";
+import { isCancelError } from "../../utils/serviceUtils";
 import Items from "./components/Items";
 
 class ListRenderizationsPage extends React.Component {
-  _source = axios.CancelToken.source();
-
   constructor(props) {
     super(props);
     this.state = {
@@ -19,33 +24,25 @@ class ListRenderizationsPage extends React.Component {
     this._load();
   }
 
-  _cancelRequest() {
-    this._source.cancel();
-    this._source = axios.CancelToken.source();
-  }
-
   _stop(id) {
-    this._action(id, "stop");
+    this._action(stopRenderization(id));
   }
 
   _pause(id) {
-    this._action(id, "pause");
+    this._action(pauseRenderization(id));
   }
 
   _play(id) {
-    this._action(id, "play");
+    this._action(playRenderization(id));
   }
 
   _seek(id, seconds) {
-    this._action(id, "seek", {
-      seconds,
-    });
+    this._action(seekRenderization(id, seconds));
   }
 
-  _action(id, action, body) {
+  _action(requestPromise) {
     this.setState({ loading: true });
-    axios
-      .put(`/api/renderizations/${id}/${action}`, body)
+    requestPromise
       .then(() => this._load())
       .catch((error) => {
         alert(error.message);
@@ -55,13 +52,8 @@ class ListRenderizationsPage extends React.Component {
   }
 
   _load() {
-    this._cancelRequest();
-
     this.setState({ loading: true });
-    axios
-      .get("/api/renderizations", {
-        cancelToken: this._source.token,
-      })
+    findAllRenderizations()
       .then((response) => {
         this.setState({
           loading: false,
@@ -69,7 +61,7 @@ class ListRenderizationsPage extends React.Component {
         });
       })
       .catch((error) => {
-        if (!axios.isCancel(error)) {
+        if (!isCancelError(error)) {
           alert(error.message);
           console.error(error);
           this.setState({ loading: false, items: [] });

@@ -1,7 +1,9 @@
-import axios from "axios";
 import qs from "query-string";
 import React from "react";
 
+import { attachToDeviceATorrentVideo } from "../../services/devicesService";
+import { createTorrentFromMagnet, findAllTorrents, removeTorrent, searchTorrent } from "../../services/torrentsService";
+import { isCancelError } from "../../utils/serviceUtils";
 import Loading from "./../../components/Loading";
 import BrowserPlayer from "./components/BrowserPlayer";
 import CopyModal from "./components/CopyModal";
@@ -12,9 +14,6 @@ import RenderModal from "./components/RenderModal";
 import SearchItems from "./components/SearchItems";
 
 class ListTorrentsPage extends React.Component {
-  _source = axios.CancelToken.source();
-  _sourceSearch = axios.CancelToken.source();
-
   constructor(props) {
     super(props);
 
@@ -41,20 +40,9 @@ class ListTorrentsPage extends React.Component {
     }
   }
 
-  _cancelRequest() {
-    this._source.cancel();
-    this._source = axios.CancelToken.source();
-  }
-
-  _cancelRequestSearch() {
-    this._sourceSearch.cancel();
-    this._sourceSearch = axios.CancelToken.source();
-  }
-
   _add(magnetURI) {
     this.setState({ loading: true });
-    axios
-      .post("/api/torrents", { magnet_uri: magnetURI })
+    createTorrentFromMagnet(magnetURI)
       .then(() => this._load())
       .catch((error) => {
         alert(error.message);
@@ -65,8 +53,7 @@ class ListTorrentsPage extends React.Component {
 
   _remove(id) {
     this.setState({ loading: true });
-    axios
-      .delete(`/api/torrents/${id}`)
+    removeTorrent(id)
       .then(() => this._load())
       .catch((error) => {
         alert(error.message);
@@ -76,13 +63,8 @@ class ListTorrentsPage extends React.Component {
   }
 
   _load() {
-    this._cancelRequest();
-
     this.setState({ loading: true });
-    axios
-      .get("/api/torrents", {
-        cancelToken: this._source.token,
-      })
+    findAllTorrents()
       .then((response) => {
         this.setState({
           loading: false,
@@ -91,7 +73,7 @@ class ListTorrentsPage extends React.Component {
         });
       })
       .catch((error) => {
-        if (!axios.isCancel(error)) {
+        if (!isCancelError(error)) {
           alert(error.message);
           console.error(error);
           this.setState({ loading: false, items: [] });
@@ -107,15 +89,9 @@ class ListTorrentsPage extends React.Component {
   }
 
   _search(value) {
-    this._cancelRequestSearch();
-
     if (value.length > 2) {
       this.setState({ loadingSearch: true });
-      this._request = axios
-        .get("/api/torrents/search", {
-          params: { q: value },
-          cancelToken: this._sourceSearch.token,
-        })
+      searchTorrent(value)
         .then((response) => {
           this.setState({
             loadingSearch: false,
@@ -123,7 +99,7 @@ class ListTorrentsPage extends React.Component {
           });
         })
         .catch((error) => {
-          if (!axios.isCancel(error)) {
+          if (!isCancelError(error)) {
             alert(error.message);
             console.error(error);
             this.setState({ loadingSearch: false, searchItems: null });
@@ -147,19 +123,16 @@ class ListTorrentsPage extends React.Component {
   _renderTorrentsInRemoteDevice(deviceId, torrentId, videoId) {
     this.setState({ loading: true });
 
-    axios
-      .put(`/api/devices/${deviceId}/torrents/${torrentId}/videos/${videoId}`)
+    attachToDeviceATorrentVideo(deviceId, torrentId, videoId)
       .then(() => {
         this.props.history.push({
           pathname: "/renderizations",
         });
       })
       .catch((error) => {
-        if (!axios.isCancel(error)) {
-          alert(error.message);
-          console.error(error);
-          this.setState({ loading: false });
-        }
+        alert(error.message);
+        console.error(error);
+        this.setState({ loading: false });
       });
   }
 

@@ -1,13 +1,11 @@
-import axios from "axios";
 import React from "react";
 import { Input, Modal, ModalBody, ModalHeader } from "reactstrap";
 
+import { isCancelError } from "../utils/serviceUtils";
 import ItemsList from "./ItemsList";
 import Loading from "./Loading";
 
 class ItemCreateModal extends React.Component {
-  _source = axios.CancelToken.source();
-
   constructor(props) {
     super(props);
 
@@ -15,11 +13,6 @@ class ItemCreateModal extends React.Component {
       loading: false,
       items: [],
     };
-  }
-
-  _cancelRequest() {
-    this._source.cancel();
-    this._source = axios.CancelToken.source();
   }
 
   _mapItem(item) {
@@ -43,16 +36,9 @@ class ItemCreateModal extends React.Component {
   }
 
   _search(q) {
-    this._cancelRequest();
-
     this.setState({ loading: true });
-    axios
-      .get(this.props.searchPath, {
-        cancelToken: this._source.token,
-        params: {
-          q,
-        },
-      })
+    this.props
+      .search(q)
       .then((response) => {
         const data = response.data;
         this.setState({
@@ -61,7 +47,7 @@ class ItemCreateModal extends React.Component {
         });
       })
       .catch((error) => {
-        if (!axios.isCancel(error)) {
+        if (!isCancelError(error)) {
           alert(error.message);
           console.error(error);
           this.setState({ loading: false, items: [] });

@@ -1,8 +1,9 @@
-import axios from "axios";
 import qs from "query-string";
 import React from "react";
 
 import ItemCreateModal from "../../components/ItemCreateModal";
+import { createMovie, findAllMovies, refreshMovie, removeMovie, searchMovie } from "../../services/moviesService";
+import { isCancelError } from "../../utils/serviceUtils";
 import ItemsList from "./../../components/ItemsList";
 import ItemsListHeader from "./../../components/ItemsListHeader";
 import Loading from "./../../components/Loading";
@@ -19,8 +20,6 @@ const mapItem = (item, buttons) => {
 };
 
 class ListMoviesPage extends React.Component {
-  _source = axios.CancelToken.source();
-
   constructor(props) {
     super(props);
     this.state = { loading: false, page: { items: [], currentPage: 0 } };
@@ -32,11 +31,6 @@ class ListMoviesPage extends React.Component {
     });
 
     this._load(query.page || 0);
-  }
-
-  _cancelRequest() {
-    this._source.cancel();
-    this._source = axios.CancelToken.source();
   }
 
   _mapItem(item) {
@@ -54,8 +48,7 @@ class ListMoviesPage extends React.Component {
     this._closeAddModal();
 
     this.setState({ loading: true });
-    axios
-      .post("/api/movies", { externalReferenceId })
+    createMovie(externalReferenceId)
       .then(() => this._load())
       .catch((error) => {
         alert(error.message);
@@ -66,8 +59,7 @@ class ListMoviesPage extends React.Component {
 
   _refresh(id) {
     this.setState({ loading: true });
-    axios
-      .put(`/api/movies/${id}/refresh`)
+    refreshMovie(id)
       .then(() => this._load())
       .catch((error) => {
         alert(error.message);
@@ -78,8 +70,7 @@ class ListMoviesPage extends React.Component {
 
   _remove(id) {
     this.setState({ loading: true });
-    axios
-      .delete(`/api/movies/${id}`)
+    removeMovie(id)
       .then(() => this._load())
       .catch((error) => {
         alert(error.message);
@@ -89,18 +80,8 @@ class ListMoviesPage extends React.Component {
   }
 
   _load(page, q) {
-    this._cancelRequest();
-
     this.setState({ loading: true });
-    axios
-      .get("/api/movies", {
-        cancelToken: this._source.token,
-        params: {
-          page,
-          order: "title",
-          q,
-        },
-      })
+    findAllMovies(page, q)
       .then((response) => {
         const data = response.data;
         this.setState({
@@ -109,7 +90,7 @@ class ListMoviesPage extends React.Component {
         });
       })
       .catch((error) => {
-        if (!axios.isCancel(error)) {
+        if (!isCancelError(error)) {
           alert(error.message);
           console.error(error);
           this.setState({ loading: false, page: { items: [] } });
@@ -141,7 +122,7 @@ class ListMoviesPage extends React.Component {
         <ItemCreateModal
           toggle={this._closeAddModal.bind(this)}
           mapItem={mapItem}
-          searchPath="/api/movies/search"
+          search={searchMovie}
           add={this._add.bind(this)}
         />
       );

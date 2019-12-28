@@ -1,4 +1,3 @@
-import axios from "axios";
 import React from "react";
 
 import ItemAttributes from "../../components/ItemAttributes";
@@ -7,6 +6,7 @@ import ItemPage from "../../components/ItemPage";
 import ItemPageSection from "../../components/ItemPageSection";
 import ItemPoster from "../../components/ItemPoster";
 import ItemPunctuation from "../../components/ItemPunctuation";
+import { findMovieById, updateMovieWatched } from "../../services/moviesService";
 import Loading from "./../../components/Loading";
 import MovieLink from "./components/MovieLink";
 
@@ -37,8 +37,7 @@ class ViewMoviePage extends React.Component {
 
   _load(id) {
     this.setState({ loading: true });
-    axios
-      .get(`/api/movies/${id}`)
+    findMovieById(id)
       .then((response) => {
         this.setState({
           loading: false,
@@ -46,19 +45,16 @@ class ViewMoviePage extends React.Component {
         });
       })
       .catch((error) => {
-        if (!axios.isCancel(error)) {
-          alert(error.message);
-          console.error(error);
-          this.setState({ loading: false });
-        }
+        alert(error.message);
+        console.error(error);
+        this.setState({ loading: false });
       });
   }
 
   _updateWatched(watched) {
     this.setState({ loading: true });
     const movie = this.state.movie;
-    axios
-      .put(`/api/movies/${movie.id}/watched`, { watched })
+    updateMovieWatched(movie.id, watched)
       .then(() => {
         this.setState({
           loading: false,
@@ -66,11 +62,9 @@ class ViewMoviePage extends React.Component {
         });
       })
       .catch((error) => {
-        if (!axios.isCancel(error)) {
-          alert(error.message);
-          console.error(error);
-          this.setState({ loading: false });
-        }
+        alert(error.message);
+        console.error(error);
+        this.setState({ loading: false });
       });
   }
 

@@ -1,4 +1,3 @@
-import axios from "axios";
 import copy from "copy-to-clipboard";
 import React from "react";
 import {
@@ -15,9 +14,10 @@ import {
   ModalHeader,
 } from "reactstrap";
 
-class CopyModal extends React.Component {
-  _sourceDevices = axios.CancelToken.source();
+import { findAllTorrentVideos } from "../../../services/torrentsService";
+import { isCancelError } from "../../../utils/serviceUtils";
 
+class CopyModal extends React.Component {
   constructor(props) {
     super(props);
 
@@ -36,8 +36,7 @@ class CopyModal extends React.Component {
 
   _loadVideos(torrentId) {
     this.setState({ loadingVideos: true });
-    axios
-      .get(`/api/torrents/${torrentId}/videos`)
+    findAllTorrentVideos(torrentId)
       .then((response) => {
         this.setState({
           loadingVideos: false,
@@ -45,7 +44,7 @@ class CopyModal extends React.Component {
         });
       })
       .catch((error) => {
-        if (!axios.isCancel(error)) {
+        if (!isCancelError(error)) {
           alert(error.message);
           console.error(error);
           this.setState({ loadingVideos: false, videos: [] });

@@ -6,12 +6,15 @@ import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 
 import App from "./App";
+import WebsocketEventEmitter from "./event-emitter/WebsocketEventEmitter";
 import store from "./redux/store";
 import * as serviceWorker from "./serviceWorker";
 
 ReactDOM.render(
   <Provider store={store}>
-    <App />
+    <WebsocketEventEmitter>
+      <App />
+    </WebsocketEventEmitter>
   </Provider>,
   document.getElementById("root"),
 );

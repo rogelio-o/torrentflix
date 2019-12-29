@@ -13,17 +13,66 @@ import {
 import { errorHandling } from "../../utils/serviceUtils";
 import Items from "./components/Items";
 
+const mapResponseDataToItems = (data) => {
+  const result = {};
+  data.forEach((obj) => (result[obj.id] = obj));
+  return result;
+};
+
 class ListRenderizationsPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       loading: false,
-      items: [],
+      items: {},
     };
   }
 
   componentDidMount() {
     this._load();
+    this._listenUpdates();
+  }
+
+  componentWillUnmount() {
+    this._unlistenUpdates();
+  }
+
+  _listenUpdates() {
+    this._renderizationPositionUpdatedSubscription = eventEmitter.on(
+      "websocket.renderization-position-updated",
+      (event) => {
+        const items = this.state.items;
+        const item = items[event.renderizationId];
+        if (item) {
+          item.position = event.position;
+          item.duration = event.duration;
+
+          this.setState({ items });
+        }
+      },
+    );
+
+    this._renderizationStatusUpdatedSubscription = eventEmitter.on(
+      "websocket.renderization-status-updated",
+      (event) => {
+        const items = this.state.items;
+        const item = items[event.renderizationId];
+        if (item) {
+          item.status = event.newStatus;
+
+          this.setState({ items });
+        }
+      },
+    );
+  }
+
+  _unlistenUpdates() {
+    if (this._renderizationPositionUpdatedSubscription) {
+      this._renderizationPositionUpdatedSubscription.unsubscribe();
+    }
+    if (this._renderizationStatusUpdatedSubscription) {
+      this._renderizationStatusUpdatedSubscription.unsubscribe();
+    }
   }
 
   _stop(id) {
@@ -59,12 +108,12 @@ class ListRenderizationsPage extends React.Component {
       .then((response) => {
         this.setState({
           loading: false,
-          items: response.data,
+          items: mapResponseDataToItems(response.data),
         });
       })
       .catch((error) =>
         errorHandling(this.props.openAlert, error, () =>
-          this.setState({ loading: false, items: [] }),
+          this.setState({ loading: false, items: {} }),
         ),
       );
   }
@@ -77,7 +126,7 @@ class ListRenderizationsPage extends React.Component {
     } else {
       return (
         <Items
-          items={items}
+          items={Object.values(items)}
           stop={this._stop.bind(this)}
           pause={this._pause.bind(this)}
           play={this._play.bind(this)}

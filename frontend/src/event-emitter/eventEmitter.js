@@ -18,10 +18,10 @@ class EventEmitter {
   on(name, handler) {
     var fnName = createName(name);
     this.subjects[fnName] || (this.subjects[fnName] = new Rx.Subject());
-    this.subjects[fnName].subscribe(handler);
+    return this.subjects[fnName].subscribe(handler);
   }
 
-  off(name, handler) {
+  off(name) {
     var fnName = createName(name);
     if (this.subjects[fnName]) {
       this.subjects[fnName].dispose();

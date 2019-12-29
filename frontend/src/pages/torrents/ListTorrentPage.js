@@ -2,6 +2,7 @@ import qs from "query-string";
 import React from "react";
 import { connect } from "react-redux";
 
+import eventEmitter from "../../event-emitter/eventEmitter";
 import { openAlert } from "../../redux/actions";
 import { attachToDeviceATorrentVideo } from "../../services/devicesService";
 import { createTorrentFromMagnet, findAllTorrents, removeTorrent, searchTorrent } from "../../services/torrentsService";
@@ -15,13 +16,19 @@ import MagnetModal from "./components/MagnetModal";
 import RenderModal from "./components/RenderModal";
 import SearchItems from "./components/SearchItems";
 
+const mapResponseDataToItems = (data) => {
+  const result = {};
+  data.forEach((obj) => (result[obj.id] = obj));
+  return result;
+};
+
 class ListTorrentsPage extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
       loading: false,
-      items: [],
+      items: {},
       loadingSearch: false,
       searchItems: null,
       searchQ: "",
@@ -32,6 +39,7 @@ class ListTorrentsPage extends React.Component {
 
   componentDidMount() {
     this._load();
+    this._listenUpdates();
 
     const query = qs.parse(this.props.location.search, {
       ignoreQueryPrefix: true,
@@ -39,6 +47,33 @@ class ListTorrentsPage extends React.Component {
     if (query.search) {
       this.setState({ searchQ: query.search });
       this._search(query.search);
+    }
+  }
+
+  componentWillUnmount() {
+    this._unlistenUpdates();
+  }
+
+  _listenUpdates() {
+    this._downloadDataUpdatedSubscription = eventEmitter.on(
+      "websocket.torrent-download-data-updated",
+      (event) => {
+        const items = this.state.items;
+        const item = items[event.torrentId];
+        if (item) {
+          item.downloaded = event.downloaded;
+          item.downloadedPerentage = event.downloadedPerentage;
+          item.downloadSpeed = event.downloadSpeed;
+
+          this.setState({ items });
+        }
+      },
+    );
+  }
+
+  _unlistenUpdates() {
+    if (this._downloadDataUpdatedSubscription) {
+      this._downloadDataUpdatedSubscription.unsubscribe();
     }
   }
 
@@ -70,13 +105,13 @@ class ListTorrentsPage extends React.Component {
       .then((response) => {
         this.setState({
           loading: false,
-          items: response.data,
+          items: mapResponseDataToItems(response.data),
           searchItems: null,
         });
       })
       .catch((error) =>
         errorHandling(this.props.openAlert, error, () =>
-          this.setState({ loading: false, items: [] }),
+          this.setState({ loading: false, items: {} }),
         ),
       );
   }
@@ -244,7 +279,7 @@ class ListTorrentsPage extends React.Component {
           <SearchItems items={searchItems} add={this._add.bind(this)} />
         ) : (
           <Items
-            items={items}
+            items={Object.values(items)}
             openModal={this._openModal.bind(this)}
             openCopyModal={this._openCopyModal.bind(this)}
             remove={this._remove.bind(this)}

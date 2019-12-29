@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Card, CardBody, CardHeader, Collapse } from "reactstrap";
 
 import Episodes from "./Episodes";

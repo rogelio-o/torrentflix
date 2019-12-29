@@ -1,9 +1,11 @@
 import qs from "query-string";
 import React from "react";
+import { connect } from "react-redux";
 
 import ItemCreateModal from "../../components/ItemCreateModal";
+import { openAlert } from "../../redux/actions";
 import { createMovie, findAllMovies, refreshMovie, removeMovie, searchMovie } from "../../services/moviesService";
-import { isCancelError } from "../../utils/serviceUtils";
+import { errorHandling } from "../../utils/serviceUtils";
 import ItemsList from "./../../components/ItemsList";
 import ItemsListHeader from "./../../components/ItemsListHeader";
 import Loading from "./../../components/Loading";
@@ -50,33 +52,33 @@ class ListMoviesPage extends React.Component {
     this.setState({ loading: true });
     createMovie(externalReferenceId)
       .then(() => this._load())
-      .catch((error) => {
-        alert(error.message);
-        console.error(error);
-        this.setState({ loading: false });
-      });
+      .catch((error) =>
+        errorHandling(this.props.openAlert, error, () =>
+          this.setState({ loading: false }),
+        ),
+      );
   }
 
   _refresh(id) {
     this.setState({ loading: true });
     refreshMovie(id)
       .then(() => this._load())
-      .catch((error) => {
-        alert(error.message);
-        console.error(error);
-        this.setState({ loading: false });
-      });
+      .catch((error) =>
+        errorHandling(this.props.openAlert, error, () =>
+          this.setState({ loading: false }),
+        ),
+      );
   }
 
   _remove(id) {
     this.setState({ loading: true });
     removeMovie(id)
       .then(() => this._load())
-      .catch((error) => {
-        alert(error.message);
-        console.error(error);
-        this.setState({ loading: false });
-      });
+      .catch((error) =>
+        errorHandling(this.props.openAlert, error, () =>
+          this.setState({ loading: false }),
+        ),
+      );
   }
 
   _load(page, q) {
@@ -89,13 +91,11 @@ class ListMoviesPage extends React.Component {
           page: { ...data, items: data.items.map(this._mapItem.bind(this)) },
         });
       })
-      .catch((error) => {
-        if (!isCancelError(error)) {
-          alert(error.message);
-          console.error(error);
-          this.setState({ loading: false, page: { items: [] } });
-        }
-      });
+      .catch((error) =>
+        errorHandling(this.props.openAlert, error, () =>
+          this.setState({ loading: false, page: { items: [] } }),
+        ),
+      );
   }
 
   _onChangeSearch(e) {
@@ -152,4 +152,4 @@ class ListMoviesPage extends React.Component {
   }
 }
 
-export default ListMoviesPage;
+export default connect(null, { openAlert })(ListMoviesPage);

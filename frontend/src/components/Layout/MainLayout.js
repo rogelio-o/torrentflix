@@ -1,14 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  Collapse,
-  Nav,
-  Navbar,
-  NavbarBrand,
-  NavbarToggler,
-  NavItem,
-  NavLink,
-} from "reactstrap";
+import { Collapse, Nav, Navbar, NavbarBrand, NavbarToggler, NavItem, NavLink } from "reactstrap";
+
+import Alert from "./Alert";
 
 const MainLayout = (props) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -46,6 +40,7 @@ const MainLayout = (props) => {
         </Collapse>
       </Navbar>
       {children}
+      <Alert />
     </div>
   );
 };

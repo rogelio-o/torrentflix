@@ -1,7 +1,9 @@
 import React from "react";
+import { connect } from "react-redux";
 import { Input, Modal, ModalBody, ModalHeader } from "reactstrap";
 
-import { isCancelError } from "../utils/serviceUtils";
+import { openAlert } from "../redux/actions";
+import { errorHandling } from "../utils/serviceUtils";
 import ItemsList from "./ItemsList";
 import Loading from "./Loading";
 
@@ -16,16 +18,6 @@ class ItemCreateModal extends React.Component {
   }
 
   _mapItem(item) {
-    console.log(this.props.mapItem);
-    console.log(
-      this.props.mapItem(item, [
-        {
-          onClick: () => this.props.add(item.externalReferenceId),
-          text: "Add",
-          color: "success",
-        },
-      ]),
-    );
     return this.props.mapItem(item, [
       {
         onClick: () => this.props.add(item.externalReferenceId),
@@ -46,13 +38,11 @@ class ItemCreateModal extends React.Component {
           items: data.map(this._mapItem.bind(this)),
         });
       })
-      .catch((error) => {
-        if (!isCancelError(error)) {
-          alert(error.message);
-          console.error(error);
-          this.setState({ loading: false, items: [] });
-        }
-      });
+      .catch((error) =>
+        errorHandling(this.props.openAlert, error, () =>
+          this.setState({ loading: false, items: [] }),
+        ),
+      );
   }
 
   _onChangeSearch(e) {
@@ -80,4 +70,4 @@ class ItemCreateModal extends React.Component {
   }
 }
 
-export default ItemCreateModal;
+export default connect(null, { openAlert })(ItemCreateModal);

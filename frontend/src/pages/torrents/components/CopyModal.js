@@ -1,5 +1,6 @@
 import copy from "copy-to-clipboard";
 import React from "react";
+import { connect } from "react-redux";
 import {
   Button,
   CustomInput,
@@ -14,8 +15,9 @@ import {
   ModalHeader,
 } from "reactstrap";
 
+import { openAlert } from "../../../redux/actions";
 import { findAllTorrentVideos } from "../../../services/torrentsService";
-import { isCancelError } from "../../../utils/serviceUtils";
+import { errorHandling } from "../../../utils/serviceUtils";
 
 class CopyModal extends React.Component {
   constructor(props) {
@@ -43,13 +45,11 @@ class CopyModal extends React.Component {
           videos: response.data,
         });
       })
-      .catch((error) => {
-        if (!isCancelError(error)) {
-          alert(error.message);
-          console.error(error);
-          this.setState({ loadingVideos: false, videos: [] });
-        }
-      });
+      .catch((error) =>
+        errorHandling(this.props.openAlert, error, () =>
+          this.setState({ loadingVideos: false, videos: [] }),
+        ),
+      );
   }
 
   _onVideoChange(e) {
@@ -65,7 +65,7 @@ class CopyModal extends React.Component {
   }
 
   render() {
-    const { toggle, torrent, submit } = this.props;
+    const { toggle, torrent } = this.props;
     const { loadingVideos, videos, selectedVideo } = this.state;
 
     return (
@@ -114,4 +114,4 @@ class CopyModal extends React.Component {
   }
 }
 
-export default CopyModal;
+export default connect(null, { openAlert })(CopyModal);

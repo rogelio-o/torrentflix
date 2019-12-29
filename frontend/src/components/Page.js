@@ -27,7 +27,7 @@ const Page = ({ page, path, loadPage, children }) => {
           </PaginationItem>
         ) : null}
         {range(0, (page.totalPages || 1) - 1).map((pageNum) => (
-          <PaginationItem active={pageNum == page.currentPage}>
+          <PaginationItem active={pageNum === page.currentPage} key={pageNum}>
             <PaginationLink
               tag={Link}
               onClick={(e) => loadPage(pageNum)}

@@ -1,9 +1,11 @@
 import React from "react";
+import { connect } from "react-redux";
 import { Button, CustomInput, Form, FormGroup, Label, Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 
+import { openAlert } from "../../../redux/actions";
 import { findAllDevices } from "../../../services/devicesService";
 import { findAllTorrentVideos } from "../../../services/torrentsService";
-import { isCancelError } from "../../../utils/serviceUtils";
+import { errorHandling } from "../../../utils/serviceUtils";
 
 class RenderModal extends React.Component {
   constructor(props) {
@@ -35,13 +37,11 @@ class RenderModal extends React.Component {
           videos: response.data,
         });
       })
-      .catch((error) => {
-        if (!isCancelError(error)) {
-          alert(error.message);
-          console.error(error);
-          this.setState({ loadingVideos: false, videos: [] });
-        }
-      });
+      .catch((error) =>
+        errorHandling(this.props.openAlert, error, () =>
+          this.setState({ loadingVideos: false, videos: [] }),
+        ),
+      );
   }
 
   _loadDevices() {
@@ -53,13 +53,11 @@ class RenderModal extends React.Component {
           devices: response.data,
         });
       })
-      .catch((error) => {
-        if (!isCancelError(error)) {
-          alert(error.message);
-          console.error(error);
-          this.setState({ loadingDevices: false, devices: [] });
-        }
-      });
+      .catch((error) =>
+        errorHandling(this.props.openAlert, error, () =>
+          this.setState({ loadingDevices: false, devices: [] }),
+        ),
+      );
   }
 
   _onDeviceChange(e) {
@@ -158,4 +156,4 @@ class RenderModal extends React.Component {
   }
 }
 
-export default RenderModal;
+export default connect(null, { openAlert })(RenderModal);

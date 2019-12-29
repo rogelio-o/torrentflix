@@ -1,10 +1,12 @@
 import qs from "query-string";
 import React from "react";
+import { connect } from "react-redux";
 
 import ItemCreateModal from "../../components/ItemCreateModal";
 import ItemsListHeader from "../../components/ItemsListHeader";
+import { openAlert } from "../../redux/actions";
 import { createSerie, findAllSeries, refreshSerie, removeSerie, searchSerie } from "../../services/seriesService";
-import { isCancelError } from "../../utils/serviceUtils";
+import { errorHandling } from "../../utils/serviceUtils";
 import ItemsList from "./../../components/ItemsList";
 import Loading from "./../../components/Loading";
 import Page from "./../../components/Page";
@@ -53,22 +55,22 @@ class ListSeriesPage extends React.Component {
     this.setState({ loading: true });
     refreshSerie(id)
       .then(() => this._load())
-      .catch((error) => {
-        alert(error.message);
-        console.error(error);
-        this.setState({ loading: false });
-      });
+      .catch((error) =>
+        errorHandling(this.props.openAlert, error, () =>
+          this.setState({ loading: false }),
+        ),
+      );
   }
 
   _remove(id) {
     this.setState({ loading: true });
     removeSerie(id)
       .then(() => this._load())
-      .catch((error) => {
-        alert(error.message);
-        console.error(error);
-        this.setState({ loading: false });
-      });
+      .catch((error) =>
+        errorHandling(this.props.openAlert, error, () =>
+          this.setState({ loading: false }),
+        ),
+      );
   }
 
   _add(externalReferenceId) {
@@ -77,11 +79,11 @@ class ListSeriesPage extends React.Component {
     this.setState({ loading: true });
     createSerie(externalReferenceId)
       .then(() => this._load())
-      .catch((error) => {
-        alert(error.message);
-        console.error(error);
-        this.setState({ loading: false });
-      });
+      .catch((error) =>
+        errorHandling(this.props.openAlert, error, () =>
+          this.setState({ loading: false }),
+        ),
+      );
   }
 
   _load(page, q) {
@@ -94,13 +96,11 @@ class ListSeriesPage extends React.Component {
           page: { ...data, items: data.items.map(this._mapItem.bind(this)) },
         });
       })
-      .catch((error) => {
-        if (!isCancelError(error)) {
-          alert(error.message);
-          console.error(error);
-          this.setState({ loading: false, page: { items: [] } });
-        }
-      });
+      .catch((error) =>
+        errorHandling(this.props.openAlert, error, () =>
+          this.setState({ loading: false, page: { items: [] } }),
+        ),
+      );
   }
 
   _onChangeSearch(e) {
@@ -157,4 +157,4 @@ class ListSeriesPage extends React.Component {
   }
 }
 
-export default ListSeriesPage;
+export default connect(null, { openAlert })(ListSeriesPage);

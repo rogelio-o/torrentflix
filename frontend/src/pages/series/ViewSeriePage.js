@@ -1,4 +1,5 @@
 import React from "react";
+import { connect } from "react-redux";
 
 import ItemAttributes from "../../components/ItemAttributes";
 import ItemData from "../../components/ItemData";
@@ -6,7 +7,9 @@ import ItemPage from "../../components/ItemPage";
 import ItemPageSection from "../../components/ItemPageSection";
 import ItemPoster from "../../components/ItemPoster";
 import ItemPunctuation from "../../components/ItemPunctuation";
+import { openAlert } from "../../redux/actions";
 import { findSerieById, updateSerieEpisodeWatched } from "../../services/seriesService";
+import { errorHandling } from "../../utils/serviceUtils";
 import Loading from "./../../components/Loading";
 import Seasons from "./components/Seasons";
 
@@ -50,11 +53,11 @@ class ViewSeriePage extends React.Component {
           serie: response.data,
         });
       })
-      .catch((error) => {
-        alert(error.message);
-        console.error(error);
-        this.setState({ loading: false });
-      });
+      .catch((error) =>
+        errorHandling(this.props.openAlert, error, () =>
+          this.setState({ loading: false }),
+        ),
+      );
   }
 
   _updateWatched(season, episode, watched) {
@@ -76,11 +79,11 @@ class ViewSeriePage extends React.Component {
           },
         );
       })
-      .catch((error) => {
-        alert(error.message);
-        console.error(error);
-        this.setState({ loading: false });
-      });
+      .catch((error) =>
+        errorHandling(this.props.openAlert, error, () =>
+          this.setState({ loading: false }),
+        ),
+      );
   }
 
   render() {
@@ -120,4 +123,4 @@ class ViewSeriePage extends React.Component {
   }
 }
 
-export default ViewSeriePage;
+export default connect(null, { openAlert })(ViewSeriePage);

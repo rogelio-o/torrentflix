@@ -1,6 +1,8 @@
 import React from "react";
+import { connect } from "react-redux";
 
 import Loading from "../../components/Loading";
+import { openAlert } from "../../redux/actions";
 import {
   findAllRenderizations,
   pauseRenderization,
@@ -8,7 +10,7 @@ import {
   seekRenderization,
   stopRenderization,
 } from "../../services/renderizationsService";
-import { isCancelError } from "../../utils/serviceUtils";
+import { errorHandling } from "../../utils/serviceUtils";
 import Items from "./components/Items";
 
 class ListRenderizationsPage extends React.Component {
@@ -44,11 +46,11 @@ class ListRenderizationsPage extends React.Component {
     this.setState({ loading: true });
     requestPromise
       .then(() => this._load())
-      .catch((error) => {
-        alert(error.message);
-        console.error(error);
-        this.setState({ loading: false });
-      });
+      .catch((error) =>
+        errorHandling(this.props.openAlert, error, () =>
+          this.setState({ loading: false }),
+        ),
+      );
   }
 
   _load() {
@@ -60,13 +62,11 @@ class ListRenderizationsPage extends React.Component {
           items: response.data,
         });
       })
-      .catch((error) => {
-        if (!isCancelError(error)) {
-          alert(error.message);
-          console.error(error);
-          this.setState({ loading: false, items: [] });
-        }
-      });
+      .catch((error) =>
+        errorHandling(this.props.openAlert, error, () =>
+          this.setState({ loading: false, items: [] }),
+        ),
+      );
   }
 
   render() {
@@ -88,4 +88,4 @@ class ListRenderizationsPage extends React.Component {
   }
 }
 
-export default ListRenderizationsPage;
+export default connect(null, { openAlert })(ListRenderizationsPage);

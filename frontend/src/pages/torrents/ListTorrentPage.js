@@ -1,9 +1,11 @@
 import qs from "query-string";
 import React from "react";
+import { connect } from "react-redux";
 
+import { openAlert } from "../../redux/actions";
 import { attachToDeviceATorrentVideo } from "../../services/devicesService";
 import { createTorrentFromMagnet, findAllTorrents, removeTorrent, searchTorrent } from "../../services/torrentsService";
-import { isCancelError } from "../../utils/serviceUtils";
+import { errorHandling } from "../../utils/serviceUtils";
 import Loading from "./../../components/Loading";
 import BrowserPlayer from "./components/BrowserPlayer";
 import CopyModal from "./components/CopyModal";
@@ -44,22 +46,22 @@ class ListTorrentsPage extends React.Component {
     this.setState({ loading: true });
     createTorrentFromMagnet(magnetURI)
       .then(() => this._load())
-      .catch((error) => {
-        alert(error.message);
-        console.error(error);
-        this.setState({ loading: false });
-      });
+      .catch((error) =>
+        errorHandling(this.props.openAlert, error, () =>
+          this.setState({ loading: false }),
+        ),
+      );
   }
 
   _remove(id) {
     this.setState({ loading: true });
     removeTorrent(id)
       .then(() => this._load())
-      .catch((error) => {
-        alert(error.message);
-        console.error(error);
-        this.setState({ loading: false });
-      });
+      .catch((error) =>
+        errorHandling(this.props.openAlert, error, () =>
+          this.setState({ loading: false }),
+        ),
+      );
   }
 
   _load() {
@@ -72,13 +74,11 @@ class ListTorrentsPage extends React.Component {
           searchItems: null,
         });
       })
-      .catch((error) => {
-        if (!isCancelError(error)) {
-          alert(error.message);
-          console.error(error);
-          this.setState({ loading: false, items: [] });
-        }
-      });
+      .catch((error) =>
+        errorHandling(this.props.openAlert, error, () =>
+          this.setState({ loading: false, items: [] }),
+        ),
+      );
   }
 
   _onChangeSearch(e) {
@@ -98,13 +98,11 @@ class ListTorrentsPage extends React.Component {
             searchItems: response.data,
           });
         })
-        .catch((error) => {
-          if (!isCancelError(error)) {
-            alert(error.message);
-            console.error(error);
-            this.setState({ loadingSearch: false, searchItems: null });
-          }
-        });
+        .catch((error) =>
+          errorHandling(this.props.openAlert, error, () =>
+            this.setState({ loadingSearch: false, searchItems: null }),
+          ),
+        );
     } else {
       this.setState({ searchItems: null, loadingSearch: false });
     }
@@ -129,11 +127,11 @@ class ListTorrentsPage extends React.Component {
           pathname: "/renderizations",
         });
       })
-      .catch((error) => {
-        alert(error.message);
-        console.error(error);
-        this.setState({ loading: false });
-      });
+      .catch((error) =>
+        errorHandling(this.props.openAlert, error, () =>
+          this.setState({ loading: false }),
+        ),
+      );
   }
 
   _renderTorrentsInBrowser(video) {
@@ -261,4 +259,4 @@ class ListTorrentsPage extends React.Component {
   }
 }
 
-export default ListTorrentsPage;
+export default connect(null, { openAlert })(ListTorrentsPage);

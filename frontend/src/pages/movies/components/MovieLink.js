@@ -6,21 +6,30 @@ import { Link } from "react-router-dom";
 import { Button } from "reactstrap";
 
 import WatchedButton from "../../../components/WatchedButton";
+import { updateMovieWatched } from "../../../services/moviesService";
 
-const MovieLink = ({ q, watched, updateWatched }) => {
+const formatTorrentSearchQuery = (movie) => {
+  return encodeURI(movie.title);
+};
+
+const MovieLink = ({ movie, setMovieWatched }) => {
   return (
     <div className="movie-link">
       <Button
         tag={Link}
         to={{
           pathname: "/torrents",
-          search: `?search=${q}`,
+          search: `?search=${formatTorrentSearchQuery(movie)}`,
         }}
       >
         <FaPlay />
       </Button>
 
-      <WatchedButton watched={watched} updateWatched={updateWatched} />
+      <WatchedButton
+        watched={movie.watched}
+        setWatched={setMovieWatched}
+        updateWatched={(watched) => updateMovieWatched(movie.id, watched)}
+      />
     </div>
   );
 };

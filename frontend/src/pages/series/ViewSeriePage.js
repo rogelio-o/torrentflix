@@ -8,7 +8,7 @@ import ItemPageSection from "../../components/ItemPageSection";
 import ItemPoster from "../../components/ItemPoster";
 import ItemPunctuation from "../../components/ItemPunctuation";
 import { openAlert } from "../../redux/actions";
-import { findSerieById, updateSerieEpisodeWatched } from "../../services/seriesService";
+import { findSerieById } from "../../services/seriesService";
 import { errorHandling } from "../../utils/serviceUtils";
 import Loading from "./../../components/Loading";
 import Seasons from "./components/Seasons";
@@ -55,30 +55,16 @@ class ViewSeriePage extends React.Component {
       );
   }
 
-  _updateWatched(season, episode, watched) {
-    const pageXOffset = window.pageXOffset;
-    const pageYOffset = window.pageYOffset;
-    const serie = this.state.serie;
+  _setSeasonWatched(season, watched) {
+    const { serie } = this.state;
+    season.episodes.forEach((episode) => (episode.watched = watched));
+    this.setState({ serie });
+  }
 
-    this.setState({ loading: true });
-    updateSerieEpisodeWatched(serie.id, season.number, episode.number, watched)
-      .then(() => {
-        episode.watched = watched;
-
-        this.setState(
-          {
-            loading: false,
-          },
-          () => {
-            window.scrollTo(pageXOffset, pageYOffset);
-          },
-        );
-      })
-      .catch((error) =>
-        errorHandling(this.props.openAlert, error, () =>
-          this.setState({ loading: false }),
-        ),
-      );
+  _setEpisodeWatched(episode, watched) {
+    const { serie } = this.state;
+    episode.watched = watched;
+    this.setState({ serie });
   }
 
   render() {
@@ -109,7 +95,8 @@ class ViewSeriePage extends React.Component {
             <ItemData title={serie.name} description={serie.description} />
             <Seasons
               serie={serie}
-              updateWatched={this._updateWatched.bind(this)}
+              setSeasonWatched={this._setSeasonWatched.bind(this)}
+              setEpisodeWatched={this._setEpisodeWatched.bind(this)}
             />
           </ItemPageSection>
         </ItemPage>

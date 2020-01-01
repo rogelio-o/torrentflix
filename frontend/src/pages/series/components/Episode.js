@@ -5,9 +5,10 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 import WatchedButton from "../../../components/WatchedButton";
+import { updateSerieEpisodeWatched } from "../../../services/seriesService";
 import { formatEpisodeCode, formatTorrentSearchQuery } from "../../../utils/episodesUtils";
 
-const Episode = ({ serie, season, episode, updateWatched }) => {
+const Episode = ({ serie, season, episode, setEpisodeWatched }) => {
   return (
     <div className={"episode" + (episode.watched ? " episode-watched" : "")}>
       <div
@@ -32,7 +33,15 @@ const Episode = ({ serie, season, episode, updateWatched }) => {
         ></Link>
         <WatchedButton
           watched={episode.watched}
-          updateWatched={(watched) => updateWatched(season, episode, watched)}
+          setWatched={(watched) => setEpisodeWatched(episode, watched)}
+          updateWatched={(watched) =>
+            updateSerieEpisodeWatched(
+              serie.id,
+              season.number,
+              episode.number,
+              watched,
+            )
+          }
         />
       </div>
       <div className="episode-data">

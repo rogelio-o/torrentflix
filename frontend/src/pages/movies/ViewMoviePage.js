@@ -8,14 +8,10 @@ import ItemPageSection from "../../components/ItemPageSection";
 import ItemPoster from "../../components/ItemPoster";
 import ItemPunctuation from "../../components/ItemPunctuation";
 import { openAlert } from "../../redux/actions";
-import { findMovieById, updateMovieWatched } from "../../services/moviesService";
+import { findMovieById } from "../../services/moviesService";
 import { errorHandling } from "../../utils/serviceUtils";
 import Loading from "./../../components/Loading";
 import MovieLink from "./components/MovieLink";
-
-const formatTorrentSearchQuery = (movie) => {
-  return encodeURI(movie.title);
-};
 
 const parseMovieAttributes = (movie) => {
   const attributes = [];
@@ -54,21 +50,10 @@ class ViewMoviePage extends React.Component {
       );
   }
 
-  _updateWatched(watched) {
-    this.setState({ loading: true });
-    const movie = this.state.movie;
-    updateMovieWatched(movie.id, watched)
-      .then(() => {
-        this.setState({
-          loading: false,
-          movie: { ...movie, watched },
-        });
-      })
-      .catch((error) =>
-        errorHandling(this.props.openAlert, error, () =>
-          this.setState({ loading: false }),
-        ),
-      );
+  _setMovieWatched(watched) {
+    const { movie } = this.state;
+    movie.watched = watched;
+    this.setState({ movie });
   }
 
   render() {
@@ -98,9 +83,8 @@ class ViewMoviePage extends React.Component {
           <ItemPageSection section="data">
             <ItemData title={movie.title} description={movie.description} />
             <MovieLink
-              q={formatTorrentSearchQuery(movie)}
-              watched={movie.watched}
-              updateWatched={this._updateWatched.bind(this)}
+              movie={movie}
+              setMovieWatched={this._setMovieWatched.bind(this)}
             />
           </ItemPageSection>
         </ItemPage>

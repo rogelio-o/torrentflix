@@ -3,7 +3,7 @@ import Slider from "react-slick";
 
 import Episode from "./Episode";
 
-const Episodes = ({ serie, season, updateWatched }) => {
+const Episodes = ({ serie, season, setEpisodeWatched }) => {
   const settings = {
     arrows: true,
     infinite: false,
@@ -35,8 +35,8 @@ const Episodes = ({ serie, season, updateWatched }) => {
           serie={serie}
           season={season}
           episode={episode}
-          updateWatched={updateWatched}
           key={index}
+          setEpisodeWatched={setEpisodeWatched}
         />
       ))}
     </Slider>

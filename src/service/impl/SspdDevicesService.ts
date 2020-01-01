@@ -48,6 +48,7 @@ export class SspdDevicesService implements IDevicesService {
 
     this.server = new Sspd.Server();
     this.server.addUSN(MEDIA_RENDERER_TYPE);
+    this.server.addUSN(MEDIA_RENDERER_TYPE_CHROMECAST);
     this.data = {};
 
     const client = new Sspd.Client();

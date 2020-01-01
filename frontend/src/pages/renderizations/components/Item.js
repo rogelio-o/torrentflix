@@ -1,5 +1,8 @@
+import "./Item.css";
+
 import React from "react";
-import { Button, ButtonGroup, ListGroupItem, ListGroupItemHeading, ListGroupItemText, Progress } from "reactstrap";
+import { FaEllipsisV, FaPause, FaPlay, FaStop } from "react-icons/fa";
+import { Button, ButtonDropdown, DropdownItem, DropdownMenu, DropdownToggle, Progress } from "reactstrap";
 
 const formatTime = (seconds) => {
   let h = 0;
@@ -17,6 +20,14 @@ const formatTime = (seconds) => {
 };
 
 class Item extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      isOpenDropdown: false,
+    };
+  }
+
   _onTimeBarClick(e, item) {
     if (item.duration) {
       const position =
@@ -27,42 +38,61 @@ class Item extends React.Component {
     }
   }
 
-  render() {
-    const { item, play, stop, pause } = this.props;
+  _renderMainActionBtn() {
+    const { item, play, pause } = this.props;
+    const action = item.status === 0 ? pause : play;
+    const Icon = item.status === 0 ? FaPause : FaPlay;
 
     return (
-      <ListGroupItem>
-        <ListGroupItemHeading>
-          {item.deviceID} - {item.torrentID} - {item.videoID}
-        </ListGroupItemHeading>
-        <ListGroupItemText>
-          <Progress
-            striped
-            value={(item.position / item.duration) * 100}
-            onClick={(e) => this._onTimeBarClick(e, item)}
-          >
-            {formatTime(item.position)} / {formatTime(item.duration)}
-          </Progress>
+      <Button
+        className="renderization-play-btn"
+        onClick={() => action(item.id)}
+      >
+        <Icon />
+      </Button>
+    );
+  }
 
-          <ButtonGroup className="mt-3">
-            {item.status !== 2 ? (
-              <Button color="warning" onClick={() => pause(item.id)}>
-                Pause
-              </Button>
-            ) : null}
-            {item.status !== 1 ? (
-              <Button color="danger" onClick={() => stop(item.id)}>
-                Stop
-              </Button>
-            ) : null}
-            {item.status !== 0 ? (
-              <Button color="success" onClick={() => play(item.id)}>
-                Play
-              </Button>
-            ) : null}
-          </ButtonGroup>
-        </ListGroupItemText>
-      </ListGroupItem>
+  render() {
+    const { item, stop } = this.props;
+    const { isOpenDropdown } = this.state;
+    const toggleDropdown = () =>
+      this.setState({ isOpenDropdown: !isOpenDropdown });
+
+    return (
+      <div className="renderization-item">
+        <ButtonDropdown
+          isOpen={isOpenDropdown}
+          toggle={toggleDropdown}
+          className="renderization-actions"
+        >
+          <DropdownToggle>
+            <FaEllipsisV />
+          </DropdownToggle>
+          <DropdownMenu>
+            <DropdownItem onClick={() => stop(item.id)}>
+              <FaStop /> Stop
+            </DropdownItem>
+          </DropdownMenu>
+        </ButtonDropdown>
+        <div className="renderization-play">{this._renderMainActionBtn()}</div>
+        <div className="renderization-data">
+          <h2 className="renderization-name">{item.videoID}</h2>
+          <div className="renderization-subdata">
+            <span className="subdata-value">{item.torrentID}</span>
+            <span className="subdata-value">{item.deviceID}</span>
+          </div>
+          <div className="renderization-timeline">
+            <Progress
+              value={(item.position / item.duration) * 100}
+              onClick={(e) => this._onTimeBarClick(e, item)}
+            />
+            <div className="renderization-timeline-text">
+              {formatTime(item.position)} / {formatTime(item.duration)}
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 }

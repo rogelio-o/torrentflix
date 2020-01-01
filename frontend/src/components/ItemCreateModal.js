@@ -1,10 +1,13 @@
+import "./ItemCreateModal.css";
+
 import React from "react";
 import { connect } from "react-redux";
 import { Input, Modal, ModalBody, ModalHeader } from "reactstrap";
 
 import { openAlert } from "../redux/actions";
 import { errorHandling } from "../utils/serviceUtils";
-import ItemsList from "./ItemsList";
+import BaseItem from "./BaseItem";
+import BaseItemsList from "./BaseItemsList";
 import Loading from "./Loading";
 
 class ItemCreateModal extends React.Component {
@@ -18,13 +21,10 @@ class ItemCreateModal extends React.Component {
   }
 
   _mapItem(item) {
-    return this.props.mapItem(item, [
-      {
-        onClick: () => this.props.add(item.externalReferenceId),
-        text: "Add",
-        color: "success",
-      },
-    ]);
+    const result = this.props.mapItem(item, []);
+    result.externalReferenceId = item.externalReferenceId;
+
+    return result;
   }
 
   _search(q) {
@@ -58,12 +58,35 @@ class ItemCreateModal extends React.Component {
     const { loading, items } = this.state;
 
     return (
-      <Modal isOpen={true} fade={false} toggle={toggle} size="lg">
-        <ModalHeader toggle={toggle}>
-          <Input onChange={this._onChangeSearch.bind(this)} />
+      <Modal isOpen={true} fade={false} toggle={toggle} size="xl">
+        <ModalHeader className="modal-header-input" toggle={toggle}>
+          <Input
+            placeholder="Search..."
+            onChange={this._onChangeSearch.bind(this)}
+            id="search-input"
+          />
         </ModalHeader>
         <ModalBody>
-          {loading ? <Loading /> : <ItemsList items={items} />}
+          {loading ? (
+            <Loading />
+          ) : (
+            <BaseItemsList
+              items={items}
+              itemRenderer={(item) => (
+                <BaseItem
+                  item={item}
+                  dataRenderer={(children) => (
+                    <div
+                      className="item-data item-data-btn"
+                      onClick={() => this.props.add(item.externalReferenceId)}
+                    >
+                      {children}
+                    </div>
+                  )}
+                />
+              )}
+            />
+          )}
         </ModalBody>
       </Modal>
     );

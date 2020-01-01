@@ -1,0 +1,35 @@
+.item-page {
+  padding-bottom: 40px;
+}
+
+.item-page-backdrop {
+  background-size: cover;
+  background-position: top center;
+  height: 250px;
+  position: relative;
+}
+
+.item-page-backdrop:before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 50px;
+  width: 100%;
+  background: transparent !important;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.7) 100%
+  ) !important;
+}
+
+.item-page-inner {
+  margin-top: -50px;
+}
+
+@media (max-width: 767px) {
+  .item-page-inner {
+    margin-top: -170px;
+  }
+}

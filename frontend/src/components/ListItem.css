@@ -1,0 +1,14 @@
+.item .btn-group {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  z-index: 20;
+}
+
+.item .btn-secondary {
+  padding: 6px;
+}
+
+.item .btn-secondary svg {
+  margin: 0;
+}

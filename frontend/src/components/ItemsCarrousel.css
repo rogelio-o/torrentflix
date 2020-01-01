@@ -1,0 +1,30 @@
+.items-carrousel {
+  margin-bottom: 40px;
+  margin-top: 20px;
+  position: relative;
+}
+
+.items-carrousel .carrousel-title {
+  color: #fff;
+  text-transform: uppercase;
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.carrousel-arrow-button {
+  font-size: 18px;
+  position: absolute;
+  top: 50%;
+  margin-top: 0px;
+  color: #fff;
+  z-index: 100;
+  cursor: pointer;
+}
+
+.carrousel-left-button {
+  left: -25px;
+}
+
+.carrousel-right-button {
+  right: -25px;
+}

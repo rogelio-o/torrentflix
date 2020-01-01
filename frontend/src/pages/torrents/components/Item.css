@@ -1,0 +1,87 @@
+.torrent-item {
+  display: flex;
+  position: relative;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 20px 20px;
+  margin-bottom: 15px;
+}
+
+.torrent-item .torrent-data {
+  flex-basis: 0;
+  flex-grow: 1;
+  max-width: 100%;
+}
+
+.torrent-item .torrent-play {
+  flex: 0 0 100px;
+  max-width: 100px;
+  padding-right: 20px;
+}
+
+.torrent-item .torrent-play .btn {
+  border-radius: 50%;
+  padding: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 22px;
+}
+
+.torrent-item .torrent-play .btn:before {
+  content: "";
+  padding-top: 100%;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.torrent-item .torrent-play .btn svg {
+  vertical-align: middle;
+  margin: 0;
+}
+
+.torrent-item .torrent-actions {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
+
+.torrent-item .torrent-actions .btn-secondary {
+  padding: 6px;
+}
+
+.torrent-item .torrent-actions .btn-secondary svg {
+  margin: 0;
+}
+
+.torrent-item .torrent-name {
+  margin-bottom: 5px;
+  display: inline-block;
+  width: 90%;
+  vertical-align: middle;
+  overflow: hidden;
+  font-size: 18px;
+  font-weight: bold;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.torrent-item .progress {
+  margin-top: 15px;
+}
+
+.torrent-item .torrent-download-data .download-value {
+  display: inline-block;
+  margin-right: 10px;
+  color: #999;
+  font-size: 12px;
+}
+
+.torrent-item .torrent-download-data .download-value svg {
+  margin-right: 5px;
+  color: #fff;
+  font-size: 14px;
+}
+
+.torrent-item .torrent-download-data .download-value .number {
+  color: #fff;
+  font-size: 14px;
+}

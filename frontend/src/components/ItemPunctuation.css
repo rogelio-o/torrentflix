@@ -1,0 +1,20 @@
+.punctuation-wrapper {
+  margin-top: 10px;
+}
+
+.punctuation-stars {
+  list-style: none;
+  padding: 0;
+  text-align: center;
+}
+
+.punctuation-stars > li {
+  display: inline-block;
+  margin: 0px 2px;
+  color: #666;
+}
+
+.punctuation-stars > li .whole,
+.punctuation-stars > li .half {
+  color: #ffd80a;
+}

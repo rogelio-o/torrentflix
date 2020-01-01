@@ -135,13 +135,14 @@ export class TTVDBApiSeriesService implements IApiSeriesService {
       externalReferenceId: serie.id.toString(),
       name: serie.seriesName,
       network: serie.network,
+      poster: serie.banner,
       status: serie.status,
     };
   }
 
   private mapSerie(serie: any, episodes: any): ISerieWithSeasons {
     return {
-      backdrop: serie.banner,
+      backdrop: serie.fanart ? serie.fanart : serie.banner,
       description: serie.overview,
       externalReferenceId: serie.id.toString(),
       genres: serie.genre,

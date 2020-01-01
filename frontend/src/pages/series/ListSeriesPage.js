@@ -1,11 +1,23 @@
 import qs from "query-string";
 import React from "react";
+import { FaRedo, FaTimes } from "react-icons/fa";
 import { connect } from "react-redux";
+import { Container } from "reactstrap";
 
 import ItemCreateModal from "../../components/ItemCreateModal";
+import ItemHeader from "../../components/ItemHeader";
+import ItemsCarrousel from "../../components/ItemsCarrousel";
 import ItemsListHeader from "../../components/ItemsListHeader";
 import { openAlert } from "../../redux/actions";
-import { createSerie, findAllSeries, refreshSerie, removeSerie, searchSerie } from "../../services/seriesService";
+import {
+  createSerie,
+  findAllSeries,
+  findAllSeriesNotWatched,
+  refreshSerie,
+  removeSerie,
+  searchSerie,
+} from "../../services/seriesService";
+import { selectRandomly } from "../../utils/arrayUtils";
 import { errorHandling } from "../../utils/serviceUtils";
 import ItemsList from "./../../components/ItemsList";
 import Loading from "./../../components/Loading";
@@ -17,6 +29,7 @@ const mapItem = (item, imagePrefix, buttons) => {
     title: item.name,
     subtitle: item.network,
     image: `https://www.thetvdb.com${imagePrefix}${item.backdrop}`,
+    poster: `https://www.thetvdb.com${imagePrefix}${item.poster}`,
     text: item.description,
     buttons,
   };
@@ -27,7 +40,9 @@ class ListSeriesPage extends React.Component {
     super(props);
     this.state = {
       loading: false,
-      page: { items: [], currentPage: 0 },
+      page: { items: [], currentPage: 0, numItems: 0 },
+      loadingNotWatched: false,
+      pageNotWatched: { items: [], currentPage: 0, numItems: 0 },
       addModalOpen: false,
     };
   }
@@ -38,6 +53,7 @@ class ListSeriesPage extends React.Component {
     });
 
     this._load(query.page || 0);
+    this._loadNotWatched(0);
   }
 
   _mapItem(item) {
@@ -45,9 +61,13 @@ class ListSeriesPage extends React.Component {
       {
         onClick: () => this._refresh(item.id),
         text: "Refresh",
-        color: "warning",
+        icon: FaRedo,
       },
-      { onClick: () => this._remove(item.id), text: "Remove", color: "danger" },
+      {
+        onClick: () => this._remove(item.id),
+        text: "Remove",
+        icon: FaTimes,
+      },
     ]);
   }
 
@@ -98,7 +118,43 @@ class ListSeriesPage extends React.Component {
       })
       .catch((error) =>
         errorHandling(this.props.openAlert, error, () =>
-          this.setState({ loading: false, page: { items: [] } }),
+          this.setState({
+            loading: false,
+            page: { items: [], currentPage: 0, numItems: 0 },
+          }),
+        ),
+      );
+  }
+
+  _loadNotWatched(page, callback) {
+    this.setState({ loadingNotWatched: true });
+    findAllSeriesNotWatched(page)
+      .then((response) => {
+        const data = response.data;
+        this.setState(
+          {
+            loadingNotWatched: false,
+            pageNotWatched: {
+              ...data,
+              items: [
+                ...this.state.pageNotWatched.items,
+                ...data.items.map(this._mapItem.bind(this)),
+              ],
+            },
+          },
+          () => {
+            if (callback) {
+              callback();
+            }
+          },
+        );
+      })
+      .catch((error) =>
+        errorHandling(this.props.openAlert, error, () =>
+          this.setState({
+            loadingNotWatched: false,
+            pageNotWatched: { items: [], currentPage: 0, numItems: 0 },
+          }),
         ),
       );
   }
@@ -137,20 +193,42 @@ class ListSeriesPage extends React.Component {
   }
 
   render() {
-    const { loading, page, addModalOpen } = this.state;
+    const {
+      loading,
+      page,
+      loadingNotWatched,
+      pageNotWatched,
+      addModalOpen,
+    } = this.state;
+    const randomItem = selectRandomly(page.items);
     return (
-      <div>
-        <ItemsListHeader
-          onSearchChange={this._onChangeSearch.bind(this)}
-          onAddClick={this._openAddModal.bind(this)}
-        />
-        {loading ? (
-          <Loading />
-        ) : (
-          <Page path="/series" loadPage={this._load.bind(this)} page={page}>
-            <ItemsList items={page.items} />
-          </Page>
-        )}
+      <div className="list-series-page">
+        <ItemHeader item={randomItem} />
+        <Container>
+          {pageNotWatched.numItems > 0 ? (
+            <ItemsCarrousel
+              items={pageNotWatched.items}
+              loading={loadingNotWatched}
+              hasNextPage={
+                pageNotWatched.totalPages - 1 > pageNotWatched.currentPage
+              }
+              loadNextPage={(callback) =>
+                this._loadNotWatched(pageNotWatched.currentPage + 1, callback)
+              }
+            />
+          ) : null}
+          <ItemsListHeader
+            onSearchChange={this._onChangeSearch.bind(this)}
+            onAddClick={this._openAddModal.bind(this)}
+          />
+          {loading ? (
+            <Loading />
+          ) : (
+            <Page path="/series" loadPage={this._load.bind(this)} page={page}>
+              <ItemsList items={page.items} />
+            </Page>
+          )}
+        </Container>
         {this._renderAddModal(addModalOpen)}
       </div>
     );

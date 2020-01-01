@@ -1,5 +1,7 @@
 import axios from "axios";
 
+import config from "../config/config";
+
 let source = axios.CancelToken.source();
 
 const cancelRequest = () => {
@@ -8,21 +10,21 @@ const cancelRequest = () => {
 };
 
 export const playRenderization = (id) =>
-  axios.put(`/api/renderizations/${id}/play`);
+  axios.put(`${config.host}/api/renderizations/${id}/play`);
 
 export const pauseRenderization = (id) =>
-  axios.put(`/api/renderizations/${id}/pause`);
+  axios.put(`${config.host}/api/renderizations/${id}/pause`);
 
 export const stopRenderization = (id) =>
-  axios.put(`/api/renderizations/${id}/stop`);
+  axios.put(`${config.host}/api/renderizations/${id}/stop`);
 
 export const seekRenderization = (id, seconds) =>
-  axios.put(`/api/renderizations/${id}/seek`, { seconds });
+  axios.put(`${config.host}/api/renderizations/${id}/seek`, { seconds });
 
 export const findAllRenderizations = () => {
   cancelRequest();
 
-  return axios.get("/api/renderizations", {
+  return axios.get(`${config.host}/api/renderizations`, {
     cancelToken: source.token,
   });
 };

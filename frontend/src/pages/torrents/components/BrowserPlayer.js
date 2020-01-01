@@ -23,7 +23,7 @@ const BrowserPlayer = ({ toggle, video }) => {
   };
 
   return (
-    <Modal isOpen={true} fade={false} toggle={toggle} size="lg">
+    <Modal isOpen={true} fade={false} toggle={toggle} size="xl">
       <ModalHeader toggle={toggle}>{video.name}</ModalHeader>
       <ModalBody>
         <VideoPlayer {...videoJsOptions} />

@@ -105,10 +105,13 @@ class RenderModal extends React.Component {
                   type="select"
                   name="device"
                   onChange={this._onDeviceChange.bind(this)}
+                  id="device"
                 >
                   <option>--</option>
-                  {devices.map((device) => (
-                    <option value={device.id}>{device.name}</option>
+                  {devices.map((device, index) => (
+                    <option value={device.id} key={index}>
+                      {device.name}
+                    </option>
                   ))}
                   <option value="browser">Browser</option>
                 </CustomInput>
@@ -130,10 +133,13 @@ class RenderModal extends React.Component {
                   type="select"
                   name="video"
                   onChange={this._onVideoChange.bind(this)}
+                  id="video"
                 >
                   <option>--</option>
-                  {videos.map((video) => (
-                    <option value={video.id}>{video.name}</option>
+                  {videos.map((video, index) => (
+                    <option value={video.id} key={index}>
+                      {video.name}
+                    </option>
                   ))}
                 </CustomInput>
               )}

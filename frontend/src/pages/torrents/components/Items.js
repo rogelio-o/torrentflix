@@ -1,20 +1,20 @@
 import React from "react";
-import { ListGroup } from "reactstrap";
 
 import Item from "./Item";
 
 const Items = ({ items, openModal, openCopyModal, remove }) => {
   return (
-    <ListGroup>
-      {items.map((item) => (
+    <div className="torrents-list">
+      {items.map((item, index) => (
         <Item
           item={item}
           openModal={openModal}
           openCopyModal={openCopyModal}
           remove={remove}
+          key={index}
         />
       ))}
-    </ListGroup>
+    </div>
   );
 };
 

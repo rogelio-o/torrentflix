@@ -1,0 +1,27 @@
+.items-list {
+  display: flex;
+  flex-flow: row wrap;
+}
+
+.items-list .item-wrapper {
+  width: 25%;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 1024px) {
+  .items-list .item-wrapper {
+    width: 33.333333%;
+  }
+}
+
+@media (max-width: 600px) {
+  .items-list .item-wrapper {
+    width: 50%;
+  }
+}
+
+@media (max-width: 480px) {
+  .items-list .item-wrapper {
+    width: 100%;
+  }
+}

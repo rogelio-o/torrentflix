@@ -1,51 +1,85 @@
+import "./Item.css";
+
 import React, { useState } from "react";
-import {
-  Button,
-  ButtonDropdown,
-  ButtonGroup,
-  DropdownItem,
-  DropdownMenu,
-  DropdownToggle,
-  ListGroupItem,
-  ListGroupItemHeading,
-  ListGroupItemText,
-  Progress,
-} from "reactstrap";
+import { FaCloudDownloadAlt, FaCloudUploadAlt, FaEllipsisV, FaLink, FaPlay, FaTimes } from "react-icons/fa";
+import { Button, ButtonDropdown, DropdownItem, DropdownMenu, DropdownToggle, Progress } from "reactstrap";
+
+const wrapParsedSize = (num, suffix) => {
+  return (
+    <span>
+      <span className="number">{num.toFixed(2)}</span>
+      <span className="suffix">{suffix}</span>
+    </span>
+  );
+};
+
+const parseSize = (bytes, suffix = "") => {
+  const kBytes = bytes / 1024;
+  if (Math.floor(kBytes) === 0) {
+    return wrapParsedSize(bytes, "b" + suffix);
+  }
+
+  const mBytes = kBytes / 1024;
+  if (Math.floor(mBytes) === 0) {
+    return wrapParsedSize(kBytes, "Kb" + suffix);
+  }
+
+  const gBytes = mBytes / 1024;
+  if (Math.floor(gBytes) === 0) {
+    return wrapParsedSize(mBytes, "Mb" + suffix);
+  }
+
+  return wrapParsedSize(gBytes, "Gb" + suffix);
+};
 
 const Items = ({ item, openModal, remove, openCopyModal }) => {
-  const [isRenderDropdownOpen, setRenderDropdownOpen] = useState(false);
-  const toggleRenderDropdownOpen = () =>
-    setRenderDropdownOpen(!isRenderDropdownOpen);
+  const [isOpen, setIsOpen] = useState(false);
+  const toggle = () => setIsOpen(!isOpen);
 
   return (
-    <ListGroupItem>
-      <ListGroupItemHeading>{item.name}</ListGroupItemHeading>
-      <ListGroupItemText>
-        <Progress striped value={item.downloadedPerentage * 100}>
-          {item.downloaded} ({item.downloadSpeed}b/s)
-        </Progress>
-
-        <ButtonGroup className="mt-3">
-          <ButtonDropdown
-            isOpen={isRenderDropdownOpen}
-            toggle={toggleRenderDropdownOpen}
-          >
-            <Button color="success" onClick={() => openModal(item)}>
-              Render
-            </Button>
-            <DropdownToggle color="success" split outline />
-            <DropdownMenu>
-              <DropdownItem onClick={() => openCopyModal(item)}>
-                Copy URL
-              </DropdownItem>
-            </DropdownMenu>
-          </ButtonDropdown>
-          <Button color="danger" onClick={() => remove(item.id)}>
-            Delete
-          </Button>
-        </ButtonGroup>
-      </ListGroupItemText>
-    </ListGroupItem>
+    <div className="torrent-item">
+      <ButtonDropdown
+        isOpen={isOpen}
+        toggle={toggle}
+        className="torrent-actions"
+      >
+        <DropdownToggle>
+          <FaEllipsisV />
+        </DropdownToggle>
+        <DropdownMenu>
+          <DropdownItem onClick={() => openCopyModal(item)}>
+            <FaLink /> Copy URL
+          </DropdownItem>
+          <DropdownItem onClick={() => remove(item.id)}>
+            <FaTimes /> Remove
+          </DropdownItem>
+        </DropdownMenu>
+      </ButtonDropdown>
+      <div className="torrent-play">
+        <Button className="torrent-play-btn" onClick={() => openModal(item)}>
+          <FaPlay />
+        </Button>
+      </div>
+      <div className="torrent-data">
+        <h2 className="torrent-name">{item.name}</h2>
+        <div className="torrent-download-data">
+          <span className="download-value download">
+            <FaCloudDownloadAlt />
+            {parseSize(item.downloadSpeed, "/s")}
+          </span>
+          <span className="download-value upload">
+            <FaCloudUploadAlt />
+            {parseSize(item.uploadSpeed, "/s")}
+          </span>
+          <span className="download-value">{parseSize(item.size)}</span>
+          <span className="download-value">
+            <span className="number">{item.numPeers}</span>
+            <span className="suffix">peers</span>
+          </span>
+        </div>
+        <Progress value={item.downloadedPerentage * 100} />
+      </div>
+    </div>
   );
 };
 

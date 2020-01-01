@@ -1,11 +1,10 @@
 import React from "react";
-import { ListGroup } from "reactstrap";
 
 import Item from "./Item";
 
 const Items = ({ items, stop, pause, play, seek }) => {
   return (
-    <ListGroup>
+    <div className="renderizations-list">
       {items.map((item) => (
         <Item
           item={item}
@@ -15,7 +14,7 @@ const Items = ({ items, stop, pause, play, seek }) => {
           seek={seek.bind(this)}
         />
       ))}
-    </ListGroup>
+    </div>
   );
 };
 

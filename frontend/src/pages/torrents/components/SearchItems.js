@@ -1,15 +1,14 @@
 import React from "react";
-import { ListGroup } from "reactstrap";
 
 import SearchItem from "./SearchItem";
 
 const SearchItems = ({ items, add }) => {
   return (
-    <ListGroup>
+    <div className="torrents-search-list">
       {items.map((item) => (
         <SearchItem item={item} add={add} />
       ))}
-    </ListGroup>
+    </div>
   );
 };
 

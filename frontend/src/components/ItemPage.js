@@ -1,11 +1,19 @@
+import "./ItemPage.css";
+
 import React from "react";
 import { Container, Row } from "reactstrap";
 
-const ItemPage = ({ children }) => {
+const ItemPage = ({ backdrop, children }) => {
   return (
-    <Container>
-      <Row>{children}</Row>
-    </Container>
+    <div className="item-page">
+      <div
+        className="item-page-backdrop"
+        style={{ backgroundImage: `url(${backdrop})` }}
+      />
+      <Container className="item-page-inner">
+        <Row>{children}</Row>
+      </Container>
+    </div>
   );
 };
 

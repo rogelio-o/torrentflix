@@ -1,10 +1,22 @@
 import qs from "query-string";
 import React from "react";
+import { FaRedo, FaTimes } from "react-icons/fa";
 import { connect } from "react-redux";
+import { Container } from "reactstrap";
 
 import ItemCreateModal from "../../components/ItemCreateModal";
+import ItemHeader from "../../components/ItemHeader";
+import ItemsCarrousel from "../../components/ItemsCarrousel";
 import { openAlert } from "../../redux/actions";
-import { createMovie, findAllMovies, refreshMovie, removeMovie, searchMovie } from "../../services/moviesService";
+import {
+  createMovie,
+  findAllMovies,
+  findAllMoviesNotWatched,
+  refreshMovie,
+  removeMovie,
+  searchMovie,
+} from "../../services/moviesService";
+import { selectRandomly } from "../../utils/arrayUtils";
 import { errorHandling } from "../../utils/serviceUtils";
 import ItemsList from "./../../components/ItemsList";
 import ItemsListHeader from "./../../components/ItemsListHeader";
@@ -16,6 +28,7 @@ const mapItem = (item, buttons) => {
     link: item.id ? `/movies/${item.id}` : undefined,
     title: item.title,
     image: `https://image.tmdb.org/t/p/original${item.backdrop}`,
+    poster: `https://image.tmdb.org/t/p/original${item.poster}`,
     text: item.description,
     buttons,
   };
@@ -24,7 +37,12 @@ const mapItem = (item, buttons) => {
 class ListMoviesPage extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { loading: false, page: { items: [], currentPage: 0 } };
+    this.state = {
+      loading: false,
+      page: { items: [], currentPage: 0, numItems: 0 },
+      loadingNotWatched: false,
+      pageNotWatched: { items: [], currentPage: 0, numItems: 0 },
+    };
   }
 
   componentDidMount() {
@@ -33,6 +51,7 @@ class ListMoviesPage extends React.Component {
     });
 
     this._load(query.page || 0);
+    this._loadNotWatched(0);
   }
 
   _mapItem(item) {
@@ -40,9 +59,9 @@ class ListMoviesPage extends React.Component {
       {
         onClick: () => this._refresh(item.id),
         text: "Refresh",
-        color: "warning",
+        icon: FaRedo,
       },
-      { onClick: () => this._remove(item.id), text: "Remove", color: "danger" },
+      { onClick: () => this._remove(item.id), text: "Remove", icon: FaTimes },
     ]);
   }
 
@@ -98,6 +117,39 @@ class ListMoviesPage extends React.Component {
       );
   }
 
+  _loadNotWatched(page, callback) {
+    this.setState({ loadingNotWatched: true });
+    findAllMoviesNotWatched(page)
+      .then((response) => {
+        const data = response.data;
+        this.setState(
+          {
+            loadingNotWatched: false,
+            pageNotWatched: {
+              ...data,
+              items: [
+                ...this.state.pageNotWatched.items,
+                ...data.items.map(this._mapItem.bind(this)),
+              ],
+            },
+          },
+          () => {
+            if (callback) {
+              callback();
+            }
+          },
+        );
+      })
+      .catch((error) =>
+        errorHandling(this.props.openAlert, error, () =>
+          this.setState({
+            loadingNotWatched: false,
+            pageNotWatched: { items: [], currentPage: 0, numItems: 0 },
+          }),
+        ),
+      );
+  }
+
   _onChangeSearch(e) {
     const value = e.target.value;
 
@@ -132,20 +184,42 @@ class ListMoviesPage extends React.Component {
   }
 
   render() {
-    const { loading, page, addModalOpen } = this.state;
+    const {
+      loading,
+      page,
+      loadingNotWatched,
+      pageNotWatched,
+      addModalOpen,
+    } = this.state;
+    const randomItem = selectRandomly(page.items);
     return (
-      <div>
-        <ItemsListHeader
-          onSearchChange={this._onChangeSearch.bind(this)}
-          onAddClick={this._openAddModal.bind(this)}
-        />
-        {loading ? (
-          <Loading />
-        ) : (
-          <Page path="/movies" loadPage={this._load.bind(this)} page={page}>
-            <ItemsList items={page.items} />
-          </Page>
-        )}
+      <div className="list-movies-page">
+        <ItemHeader item={randomItem} />
+        <Container>
+          {pageNotWatched.numItems > 0 ? (
+            <ItemsCarrousel
+              items={pageNotWatched.items}
+              loading={loadingNotWatched}
+              hasNextPage={
+                pageNotWatched.totalPages - 1 > pageNotWatched.currentPage
+              }
+              loadNextPage={(callback) =>
+                this._loadNotWatched(pageNotWatched.currentPage + 1, callback)
+              }
+            />
+          ) : null}
+          <ItemsListHeader
+            onSearchChange={this._onChangeSearch.bind(this)}
+            onAddClick={this._openAddModal.bind(this)}
+          />
+          {loading ? (
+            <Loading />
+          ) : (
+            <Page path="/movies" loadPage={this._load.bind(this)} page={page}>
+              <ItemsList items={page.items} />
+            </Page>
+          )}
+        </Container>
         {this._renderAddModal(addModalOpen)}
       </div>
     );

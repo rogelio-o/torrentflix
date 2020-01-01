@@ -1,0 +1,8 @@
+.item-view-data h1 {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.45);
+  margin-bottom: 20px;
+}
+
+.item-view-data {
+  margin-bottom: 30px;
+}

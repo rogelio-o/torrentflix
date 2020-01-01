@@ -1,0 +1,36 @@
+.item-header {
+  background-size: cover;
+  background-position: top center;
+  height: 500px;
+  position: relative;
+}
+
+.item-header .item-header-data {
+  position: absolute;
+  bottom: 20px;
+  left: 50px;
+  max-width: 500px;
+  color: #fff;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.45);
+}
+
+.item-header .item-header-data .btn {
+  text-shadow: none;
+}
+
+.item-header-empty {
+  height: 100px;
+}
+
+@media (max-width: 600px) {
+  .item-header .item-header-data {
+    left: 30px;
+    right: 30px;
+  }
+}
+
+@media (max-width: 500px) {
+  .item-header-empty {
+    height: 80px;
+  }
+}

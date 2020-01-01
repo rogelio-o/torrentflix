@@ -1,0 +1,43 @@
+.items-list-header {
+  margin-top: 0px;
+  padding-top: 40px;
+  border-top: 1px solid #333;
+  margin-bottom: 20px;
+}
+
+.items-list-header .form-control {
+  border: 1px solid #333;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  border-radius: 0;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.items-list-header.open .form-control {
+  opacity: 1;
+}
+
+.items-list-header .btn {
+  background-color: transparent;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid #fff;
+  width: 60px;
+  opacity: 0.65;
+}
+
+.items-list-header .btn:hover,
+.items-list-header .btn:focus,
+.items-list-header .btn:not(:disabled):not(.disabled).active,
+.items-list-header .btn:not(:disabled):not(.disabled):active,
+.items-list-header .show > .btn.dropdown-toggle {
+  opacity: 1;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid #fff;
+}
+
+.items-list-header .btn svg {
+  margin: 0;
+}

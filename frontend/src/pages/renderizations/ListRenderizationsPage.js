@@ -1,7 +1,11 @@
+import "./ListRenderizationsPage.css";
+
 import React from "react";
 import { connect } from "react-redux";
+import { Container } from "reactstrap";
 
 import Loading from "../../components/Loading";
+import eventEmitter from "../../event-emitter/eventEmitter";
 import { openAlert } from "../../redux/actions";
 import {
   findAllRenderizations,
@@ -121,19 +125,21 @@ class ListRenderizationsPage extends React.Component {
   render() {
     const { loading, items } = this.state;
 
-    if (loading) {
-      return <Loading />;
-    } else {
-      return (
-        <Items
-          items={Object.values(items)}
-          stop={this._stop.bind(this)}
-          pause={this._pause.bind(this)}
-          play={this._play.bind(this)}
-          seek={this._seek.bind(this)}
-        />
-      );
-    }
+    return (
+      <Container className="list-renderizations-page">
+        {loading ? (
+          <Loading />
+        ) : (
+          <Items
+            items={Object.values(items)}
+            stop={this._stop.bind(this)}
+            pause={this._pause.bind(this)}
+            play={this._play.bind(this)}
+            seek={this._seek.bind(this)}
+          />
+        )}
+      </Container>
+    );
   }
 }
 

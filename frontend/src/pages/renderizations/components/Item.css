@@ -1,0 +1,110 @@
+.renderization-item {
+  display: flex;
+  position: relative;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 20px 20px;
+  margin-bottom: 15px;
+}
+
+.renderization-item .renderization-data {
+  flex-basis: 0;
+  flex-grow: 1;
+  max-width: 100%;
+}
+
+.renderization-item .renderization-play {
+  flex: 0 0 100px;
+  max-width: 100px;
+  padding-right: 20px;
+}
+
+.renderization-item .renderization-play .btn {
+  border-radius: 50%;
+  padding: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 22px;
+}
+
+.renderization-item .renderization-play .btn:before {
+  content: "";
+  padding-top: 100%;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.renderization-item .renderization-play .btn svg {
+  vertical-align: middle;
+  margin: 0;
+}
+
+.renderization-item .renderization-actions {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
+
+.renderization-item .renderization-actions .btn-secondary {
+  padding: 6px;
+}
+
+.renderization-item .renderization-actions .btn-secondary svg {
+  margin: 0;
+}
+
+.renderization-item .renderization-name {
+  margin-bottom: 5px;
+  display: inline-block;
+  width: 90%;
+  vertical-align: middle;
+  overflow: hidden;
+  font-size: 18px;
+  font-weight: bold;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.renderization-item .renderization-subdata .subdata-value {
+  display: inline-block;
+  margin-right: 10px;
+  color: #999;
+  font-size: 12px;
+}
+
+.renderization-item .renderization-timeline {
+  margin-top: 15px;
+}
+
+.renderization-item .progress {
+  cursor: pointer;
+}
+
+.renderization-item .renderization-timeline .renderization-timeline-text {
+  font-size: 12px;
+  text-align: left;
+}
+
+.renderization-item .renderization-timeline .progress {
+  max-width: 100%;
+}
+
+@media (min-width: 768px) {
+  .renderization-item .renderization-timeline {
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .renderization-item .renderization-timeline .progress {
+    flex-basis: 0;
+    flex-grow: 1;
+  }
+
+  .renderization-item .renderization-timeline .renderization-timeline-text {
+    padding-left: 10px;
+    flex: 0 0 130px;
+    max-width: 130px;
+    text-align: right;
+  }
+}

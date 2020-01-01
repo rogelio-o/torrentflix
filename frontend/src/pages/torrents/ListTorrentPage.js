@@ -1,6 +1,9 @@
+import "./ListTorrentsPage.css";
+
 import qs from "query-string";
 import React from "react";
 import { connect } from "react-redux";
+import { Container } from "reactstrap";
 
 import eventEmitter from "../../event-emitter/eventEmitter";
 import { openAlert } from "../../redux/actions";
@@ -267,7 +270,7 @@ class ListTorrentsPage extends React.Component {
       copyItem,
     } = this.state;
     return (
-      <div>
+      <Container className="list-torrent-page">
         <Header
           searchValue={searchQ}
           onSearchChange={this._onChangeSearch.bind(this)}
@@ -289,7 +292,7 @@ class ListTorrentsPage extends React.Component {
         {this._renderBrowserPlayer(playerVideo)}
         {this._renderMagnetModal(magnetModalOpen)}
         {this._renderCopyModal(copyItem)}
-      </div>
+      </Container>
     );
   }
 }

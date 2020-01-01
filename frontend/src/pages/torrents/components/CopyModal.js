@@ -9,7 +9,6 @@ import {
   Input,
   InputGroup,
   InputGroupAddon,
-  Label,
   Modal,
   ModalBody,
   ModalHeader,
@@ -74,7 +73,6 @@ class CopyModal extends React.Component {
         <ModalBody>
           <Form>
             <FormGroup>
-              <Label for="video">Video</Label>
               {loadingVideos ? (
                 <div>Loading...</div>
               ) : (
@@ -94,7 +92,7 @@ class CopyModal extends React.Component {
             <FormGroup>
               <InputGroup>
                 <Input
-                  readonly
+                  readOnly
                   value={selectedVideo ? selectedVideo.url : ""}
                 />
                 <InputGroupAddon addonType="append">

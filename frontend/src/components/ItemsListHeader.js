@@ -1,16 +1,18 @@
 import React from "react";
-import { Button, Input, InputGroup, InputGroupAddon } from "reactstrap";
+import { FaPlus } from "react-icons/fa";
+import { Button, InputGroupAddon } from "reactstrap";
+
+import CustomListHeader from "./CustomListHeader";
 
 const ItemsListHeader = ({ onSearchChange, onAddClick }) => {
   return (
-    <InputGroup>
-      <Input onChange={onSearchChange} />
+    <CustomListHeader>
       <InputGroupAddon addonType="append">
-        <Button onClick={onAddClick} color="success">
-          Create
+        <Button onClick={onAddClick}>
+          <FaPlus />
         </Button>
       </InputGroupAddon>
-    </InputGroup>
+    </CustomListHeader>
   );
 };
 

@@ -1,0 +1,88 @@
+.episode {
+  padding: 0 10px;
+}
+
+.episode .episode-image {
+  background-size: cover;
+  background-position: top center;
+  position: relative;
+}
+
+.episode .episode-image:before {
+  content: "";
+  display: block;
+  padding-top: 50%;
+  width: 1px;
+}
+
+.episode .episode-image .episode-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9;
+}
+
+.episode .episode-image .watched-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  z-index: 10;
+}
+
+.episode .episode-image .episode-number {
+  position: absolute;
+  left: 5px;
+  bottom: 5px;
+  font-size: 12px;
+  line-height: 12px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.45);
+}
+
+.episode .episode-header {
+  margin: 10px 0 5px;
+}
+
+.episode .episode-name {
+  margin: 0;
+  display: inline-block;
+  width: 70%;
+  vertical-align: middle;
+  overflow: hidden;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.episode .episode-name > a {
+  color: #fff;
+}
+
+.episode .episode-date {
+  color: #808080;
+  width: 30%;
+  display: inline-block;
+  font-size: 12px;
+  line-height: 12px;
+  margin: 0;
+  vertical-align: middle;
+  text-align: right;
+}
+
+.episode .episode-description {
+  margin: 0;
+  font-size: 12px;
+  color: #999;
+}
+
+.episode .btn-secondary {
+  padding: 6px;
+}
+
+.episode .btn-secondary svg {
+  margin: 0;
+}
+
+.episode.episode-watched .episode-image {
+  border-bottom: 2px solid #db202c;
+}

@@ -220,6 +220,8 @@ export class WebTorrentService implements ITorrentService {
       id: torrentID,
       magnetUri: torrent.magnetURI,
       name: torrent.name,
+      numPeers: torrent.numPeers,
+      size: torrent.files.map((f) => f.length).reduce((a, b) => a + b),
       uploadSpeed: torrent.uploadSpeed,
     };
   }

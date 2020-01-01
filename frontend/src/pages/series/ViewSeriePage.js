@@ -18,7 +18,7 @@ const DEFAULT_POSTER = "";
 const parseSerieAttributes = (serie) => {
   const attributes = [{ label: "Network", value: serie.network }];
   if (serie.genres) {
-    attributes.push({ label: "Genres", value: serie.genres });
+    attributes.push({ label: "Genres", value: serie.genres.join(", ") });
   }
 
   return attributes;
@@ -30,7 +30,6 @@ class ViewSeriePage extends React.Component {
     this.state = {
       loading: false,
       serie: { seasons: [] },
-      collapsedSeason: -1,
     };
   }
 
@@ -38,10 +37,6 @@ class ViewSeriePage extends React.Component {
     const id = this.props.match.params.id;
 
     this._load(id);
-  }
-
-  _setCollapsedSeason(collapsedSeason) {
-    this.setState({ collapsedSeason });
   }
 
   _load(id) {
@@ -87,7 +82,7 @@ class ViewSeriePage extends React.Component {
   }
 
   render() {
-    const { loading, serie, collapsedSeason } = this.state;
+    const { loading, serie } = this.state;
 
     const attributes = parseSerieAttributes(serie);
 
@@ -95,7 +90,9 @@ class ViewSeriePage extends React.Component {
       return <Loading />;
     } else {
       return (
-        <ItemPage>
+        <ItemPage
+          backdrop={`https://www.thetvdb.com/banners/${serie.backdrop}`}
+        >
           <ItemPageSection section="subdata">
             <ItemPoster
               poster={
@@ -113,8 +110,6 @@ class ViewSeriePage extends React.Component {
             <Seasons
               serie={serie}
               updateWatched={this._updateWatched.bind(this)}
-              collapsedSeason={collapsedSeason}
-              setCollapsedSeason={this._setCollapsedSeason.bind(this)}
             />
           </ItemPageSection>
         </ItemPage>

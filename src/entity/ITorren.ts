@@ -5,6 +5,8 @@ export interface ITorrent {
 
   magnetUri: string;
 
+  size: number;
+
   downloaded: number;
 
   downloadedPerentage: number;
@@ -12,4 +14,6 @@ export interface ITorrent {
   downloadSpeed: number;
 
   uploadSpeed: number;
+
+  numPeers: number;
 }

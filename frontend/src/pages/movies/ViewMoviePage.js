@@ -20,7 +20,7 @@ const formatTorrentSearchQuery = (movie) => {
 const parseMovieAttributes = (movie) => {
   const attributes = [];
   if (movie.genres) {
-    attributes.push({ label: "Genres", value: movie.genres });
+    attributes.push({ label: "Genres", value: movie.genres.join(", ") });
   }
 
   return attributes;
@@ -80,7 +80,9 @@ class ViewMoviePage extends React.Component {
       return <Loading />;
     } else {
       return (
-        <ItemPage>
+        <ItemPage
+          backdrop={`https://image.tmdb.org/t/p/original${movie.backdrop}`}
+        >
           <ItemPageSection section="subdata">
             <ItemPoster
               poster={

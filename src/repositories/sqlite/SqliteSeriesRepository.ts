@@ -9,6 +9,11 @@ import { groupBy } from "../../utils/arrayUtils";
 import { parseSqlLimit, parseSqlOrder } from "../../utils/sqlUtils";
 import { ISeriesRepository } from "../ISeriesRepository";
 
+const SELECT_SERIE_ATTRS =
+  "s.id as id, s.name as name, s.poster as poster, s.backdrop as backdrop, " +
+  "s.description as description, s.external_reference_id as external_reference_id, s.genres as genres, " +
+  "s.network as network, s.status as status, s.vote_average as vote_average, s.vote_count as vote_count";
+
 export class SqliteSeriesRepository implements ISeriesRepository {
   private dbPromise: Promise<Database>;
 
@@ -71,7 +76,7 @@ export class SqliteSeriesRepository implements ISeriesRepository {
     const db = await this.dbPromise;
 
     const rows = await db.all(
-      "SELECT * FROM series AS s JOIN series_episodes AS e ON s.id = e.serie_id WHERE e.watched = $watched " +
+      `SELECT ${SELECT_SERIE_ATTRS} FROM series AS s JOIN series_episodes AS e ON s.id = e.serie_id WHERE e.watched = $watched ` +
         `AND e.date < date('now') GROUP BY s.id ${parseSqlOrder(
           order,
         )} ${parseSqlLimit(offset, limit)}`,
@@ -91,7 +96,7 @@ export class SqliteSeriesRepository implements ISeriesRepository {
     const db = await this.dbPromise;
 
     const rows = await db.all(
-      "SELECT * FROM series AS s JOIN series_episodes AS e ON s.id = e.serie_id WHERE s.name LIKE $q" +
+      `SELECT ${SELECT_SERIE_ATTRS} FROM series AS s JOIN series_episodes AS e ON s.id = e.serie_id WHERE s.name LIKE $q` +
         " AND e.watched = $watched AND e.date < date('now')" +
         ` GROUP BY s.id ${parseSqlOrder(order, "s.")} ${parseSqlLimit(
           offset,
@@ -126,8 +131,8 @@ export class SqliteSeriesRepository implements ISeriesRepository {
     const db = await this.dbPromise;
 
     const row = await db.get(
-      "SELECT count(*) as count FROM series AS s JOIN series_episodes AS e WHERE e.watched = $watched " +
-        "AND e.date < date('now') GROUP BY s.id",
+      "SELECT count(*) as count FROM (SELECT 1 FROM series AS s JOIN series_episodes AS e ON s.id = e.serie_id " +
+        "WHERE e.watched = $watched AND e.date < date('now') GROUP BY s.id)",
       { $watched: watched },
     );
 
@@ -141,8 +146,8 @@ export class SqliteSeriesRepository implements ISeriesRepository {
     const db = await this.dbPromise;
 
     const row = await db.get(
-      "SELECT count(*) as count FROM series AS s JOIN series_episodes AS e WHERE e.watched = $watched " +
-        "AND name LIKE $q AND e.date < date('now') GROUP BY s.id",
+      "SELECT count(*) as count FROM (SELECT 1 FROM series AS s JOIN series_episodes AS e ON s.id = e.serie_id " +
+        "WHERE e.watched = $watched AND name LIKE $q AND e.date < date('now') GROUP BY s.id)",
       { $q: `%${q}%`, $watched: watched },
     );
 

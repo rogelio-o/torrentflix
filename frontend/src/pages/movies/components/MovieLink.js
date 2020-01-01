@@ -1,6 +1,11 @@
+import "./MovieLink.css";
+
 import React from "react";
+import { FaPlay } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { Button } from "reactstrap";
+
+import WatchedButton from "../../../components/WatchedButton";
 
 const MovieLink = ({ q, watched, updateWatched }) => {
   return (
@@ -12,18 +17,10 @@ const MovieLink = ({ q, watched, updateWatched }) => {
           search: `?search=${q}`,
         }}
       >
-        View
+        <FaPlay />
       </Button>
 
-      {watched ? (
-        <Button color="primary" onClick={() => updateWatched(false)}>
-          Mark as NOT watched
-        </Button>
-      ) : (
-        <Button color="warning" onClick={() => updateWatched(true)}>
-          Mark as watched
-        </Button>
-      )}
+      <WatchedButton watched={watched} updateWatched={updateWatched} />
     </div>
   );
 };

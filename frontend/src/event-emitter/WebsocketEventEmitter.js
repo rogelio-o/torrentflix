@@ -1,18 +1,13 @@
 import React from "react";
 import { connect } from "react-redux";
 
+import config from "../config/config";
 import { openAlert } from "../redux/actions";
 import { errorHandling } from "../utils/serviceUtils";
 import eventEmitter from "./eventEmitter";
 
-const getWebsocketURI = () => {
-  const host = process.env.HOST || "http://localhost:9090";
-
-  return "ws://" + host.replace(/^http:\/\//, "");
-};
-
 class WebsocketEventEmitter extends React.Component {
-  ws = new WebSocket(getWebsocketURI());
+  ws = new WebSocket(config.ws);
 
   componentDidMount() {
     this._loadWebsocket();

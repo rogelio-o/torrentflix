@@ -10,4 +10,6 @@ export interface IApiSerieSearchResult {
   description: string;
 
   backdrop: string;
+
+  poster: string;
 }

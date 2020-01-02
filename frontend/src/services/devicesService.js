@@ -11,13 +11,13 @@ const cancelRequest = () => {
 
 export const attachToDeviceATorrentVideo = (deviceId, torrentId, videoId) =>
   axios.put(
-    `${config.host}/api/devices/${deviceId}/torrents/${torrentId}/videos/${videoId}`,
+    `${config.baseUrl}/api/devices/${deviceId}/torrents/${torrentId}/videos/${videoId}`,
   );
 
 export const findAllDevices = () => {
   cancelRequest();
 
-  return axios.get(`${config.host}/api/devices`, {
+  return axios.get(`${config.baseUrl}/api/devices`, {
     cancelToken: source.token,
   });
 };

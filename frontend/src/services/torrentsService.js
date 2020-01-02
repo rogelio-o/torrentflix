@@ -22,14 +22,14 @@ const cancelRequestVideos = () => {
 };
 
 export const createTorrentFromMagnet = (magnetURI) =>
-  axios.post(`${config.host}/api/torrents`, { magnet_uri: magnetURI });
+  axios.post(`${config.baseUrl}/api/torrents`, { magnet_uri: magnetURI });
 
 export const removeTorrent = (id) =>
-  axios.delete(`${config.host}/api/torrents/${id}`);
+  axios.delete(`${config.baseUrl}/api/torrents/${id}`);
 
 export const findAllTorrents = () => {
   cancelRequest();
-  return axios.get(`${config.host}/api/torrents`, {
+  return axios.get(`${config.baseUrl}/api/torrents`, {
     cancelToken: source.token,
   });
 };
@@ -37,7 +37,7 @@ export const findAllTorrents = () => {
 export const searchTorrent = (q) => {
   cancelRequestSearch();
 
-  return axios.get(`${config.host}/api/torrents/search`, {
+  return axios.get(`${config.baseUrl}/api/torrents/search`, {
     params: { q },
     cancelToken: sourceSearch.token,
   });
@@ -46,7 +46,7 @@ export const searchTorrent = (q) => {
 export const findAllTorrentVideos = (torrentId) => {
   cancelRequestVideos();
 
-  return axios.get(`${config.host}/api/torrents/${torrentId}/videos`, {
+  return axios.get(`${config.baseUrl}/api/torrents/${torrentId}/videos`, {
     cancelToken: sourceVideos.token,
   });
 };

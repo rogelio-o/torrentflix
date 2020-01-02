@@ -22,18 +22,18 @@ const cancelRequestSearch = () => {
 };
 
 export const refreshSerie = (id) =>
-  axios.put(`${config.host}/api/series/${id}/refresh`);
+  axios.put(`${config.baseUrl}/api/series/${id}/refresh`);
 
 export const removeSerie = (id) =>
-  axios.delete(`${config.host}/api/series/${id}`);
+  axios.delete(`${config.baseUrl}/api/series/${id}`);
 
 export const createSerie = (externalReferenceId) =>
-  axios.post(`${config.host}/api/series`, { externalReferenceId });
+  axios.post(`${config.baseUrl}/api/series`, { externalReferenceId });
 
 export const findAllSeries = (page, q) => {
   cancelRequest();
 
-  return axios.get(`${config.host}/api/series`, {
+  return axios.get(`${config.baseUrl}/api/series`, {
     cancelToken: source.token,
     params: {
       page,
@@ -46,7 +46,7 @@ export const findAllSeries = (page, q) => {
 export const findAllSeriesNotWatched = (page, q) => {
   cancelRequestNotWatched();
 
-  return axios.get(`${config.host}/api/series`, {
+  return axios.get(`${config.baseUrl}/api/series`, {
     cancelToken: sourceNotWatched.token,
     params: {
       page,
@@ -58,7 +58,7 @@ export const findAllSeriesNotWatched = (page, q) => {
 };
 
 export const findSerieById = (id) =>
-  axios.get(`${config.host}/api/series/${id}`);
+  axios.get(`${config.baseUrl}/api/series/${id}`);
 
 export const updateSerieEpisodeWatched = (
   serieId,
@@ -67,14 +67,14 @@ export const updateSerieEpisodeWatched = (
   watched,
 ) =>
   axios.put(
-    `${config.host}/api/series/${serieId}/S${seasonNumber}-E${episodeNumber}/watched`,
+    `${config.baseUrl}/api/series/${serieId}/S${seasonNumber}-E${episodeNumber}/watched`,
     { watched },
   );
 
 export const searchSerie = (q) => {
   cancelRequestSearch();
 
-  return axios.get(`${config.host}/api/series/search`, {
+  return axios.get(`${config.baseUrl}/api/series/search`, {
     cancelToken: sourceSearch.token,
     params: {
       q,

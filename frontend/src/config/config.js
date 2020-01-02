@@ -1,9 +1,12 @@
 export default {
-  host: process.env.REACT_APP_HOST || "http://localhost:9090",
+  baseUrl:
+    (process.env.SCHEMA || "http://") +
+    (process.env.HOST || "localhost") +
+    (process.env.PORT || "9090") +
+    (process.env.BASE_PATH || ""),
   ws:
-    "ws://" +
-    (process.env.REACT_APP_HOST || "http://localhost:9090").replace(
-      /^http:\/\//,
-      "",
-    ),
+    (process.env.SCHEMA || "ws://") +
+    (process.env.HOST || "localhost") +
+    (process.env.PORT || "9090") +
+    (process.env.BASE_PATH || ""),
 };

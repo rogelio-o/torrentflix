@@ -6,6 +6,7 @@ import path from "path";
 import sqlite from "sqlite";
 import * as WebSocket from "ws";
 
+import { config } from "./config/config";
 import { logger } from "./config/logger";
 import { DevicesHandler } from "./handlers/DevicesHandler";
 import { MoviesHandler } from "./handlers/MoviesHandler";
@@ -45,16 +46,15 @@ import { ITorrentService } from "./service/ITorrentService";
 
 require("events").EventEmitter.defaultMaxListeners = 0;
 
-const dataFolder = process.env.DATA_FOLDER || "/tmp";
 const dbPromise = Promise.resolve()
-  .then(() => sqlite.open(`${dataFolder}/database.sqlite`))
+  .then(() => sqlite.open(`${config.dataFolder}/database.sqlite`))
   .then((db) => db.migrate({}));
 
 const app = express();
 const server = http.createServer(app);
 const wsServer = new WebSocket.Server({ server });
 
-if (process.env.CORS === "true") {
+if (config.cors) {
   app.use(cors());
 }
 
@@ -72,8 +72,8 @@ const eventEmitter: IEventEmitter = new WsEventEmitter(wsServer);
 const devicesService: IDevicesService = new SspdDevicesService();
 const torrentService: ITorrentService = new WebTorrentService(
   torrentsRepository,
-  dataFolder,
-  process.env.HOST || "http://192.168.0.15:9090",
+  config.dataFolder,
+  config.baseUrl,
   app,
 );
 const renderService: IRenderService = new MediaRendererServiceImpl();
@@ -84,14 +84,14 @@ const playerService: IPlayerService = new PlayerServiceImpl(
 );
 const torrentSearchService: ITorrentSearchService = new ApiTorrentSearchService();
 const apiMoviesService: IApiMoviesService = new TMDBApiMoviesService(
-  process.env.TMDB_API_KEY || "",
+  config.theMovieDbApiKey,
 );
 const moviesService: IMoviesService = new MoviesServiceImpl(
   apiMoviesService,
   moviesRepository,
 );
 const apiSeriesService: IApiSeriesService = new TTVDBApiSeriesService(
-  process.env.TTVDB_API_KEY || "",
+  config.theTvDbApiKey,
 );
 const seriesService: ISeriesService = new SeriesServiceImpl(
   apiSeriesService,

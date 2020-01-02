@@ -21,18 +21,18 @@ const cancelRequestSearch = () => {
 };
 
 export const createMovie = (externalReferenceId) =>
-  axios.post(`${config.host}/api/movies`, { externalReferenceId });
+  axios.post(`${config.baseUrl}/api/movies`, { externalReferenceId });
 
 export const refreshMovie = (id) =>
-  axios.put(`${config.host}/api/movies/${id}/refresh`);
+  axios.put(`${config.baseUrl}/api/movies/${id}/refresh`);
 
 export const removeMovie = (id) =>
-  axios.delete(`${config.host}/api/movies/${id}`);
+  axios.delete(`${config.baseUrl}/api/movies/${id}`);
 
 export const findAllMovies = async (page, q) => {
   cancelRequest();
 
-  return await axios.get(`${config.host}/api/movies`, {
+  return await axios.get(`${config.baseUrl}/api/movies`, {
     cancelToken: source.token,
     params: {
       page,
@@ -44,7 +44,7 @@ export const findAllMovies = async (page, q) => {
 export const findAllMoviesNotWatched = async (page, q) => {
   cancelRequestNotWatched();
 
-  return await axios.get(`${config.host}/api/movies`, {
+  return await axios.get(`${config.baseUrl}/api/movies`, {
     cancelToken: sourceNotWatched.token,
     params: {
       page,
@@ -56,15 +56,15 @@ export const findAllMoviesNotWatched = async (page, q) => {
 };
 
 export const findMovieById = (id) =>
-  axios.get(`${config.host}/api/movies/${id}`);
+  axios.get(`${config.baseUrl}/api/movies/${id}`);
 
 export const updateMovieWatched = (id, watched) =>
-  axios.put(`${config.host}/api/movies/${id}/watched`, { watched });
+  axios.put(`${config.baseUrl}/api/movies/${id}/watched`, { watched });
 
 export const searchMovie = (q) => {
   cancelRequestSearch();
 
-  return axios.get(`${config.host}/api/movies/search`, {
+  return axios.get(`${config.baseUrl}/api/movies/search`, {
     cancelToken: sourceSearch.token,
     params: {
       q,

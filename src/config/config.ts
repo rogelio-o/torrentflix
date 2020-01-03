@@ -1,9 +1,12 @@
+const parsePort = (port: string) => {
+  return port === "80" ? "" : ":" + port;
+};
+
 export const config = {
   baseUrl:
     (process.env.SCHEMA || "http://") +
     (process.env.HOST || "localhost") +
-    ":" +
-    (process.env.PORT || "9090") +
+    parsePort(process.env.PORT || "9090") +
     (process.env.BASE_PATH || ""),
   cors: process.env.CORS === "true",
   dataFolder: process.env.DATA_FOLDER || "/tmp",

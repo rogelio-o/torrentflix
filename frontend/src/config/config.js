@@ -1,14 +1,17 @@
+const parsePort = (port) => {
+  return port === "80" ? "" : ":" + port;
+};
+
 export default {
   baseUrl:
     (process.env.SCHEMA || "http://") +
     (process.env.HOST || "localhost") +
-    ":" +
-    (process.env.PORT || "9090") +
+    parsePort(process.env.PORT || "9090") +
     (process.env.BASE_PATH || ""),
   ws:
-    (process.env.SCHEMA || "ws://") +
+    "ws://" +
     (process.env.HOST || "localhost") +
     ":" +
-    (process.env.PORT || "9090") +
+    parsePort(process.env.PORT || "9090") +
     (process.env.BASE_PATH || ""),
 };

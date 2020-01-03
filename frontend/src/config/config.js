@@ -9,7 +9,7 @@ export default {
     parsePort(process.env.REACT_APP_PORT || "9090") +
     (process.env.REACT_APP_BASE_PATH || ""),
   ws:
-    "ws://" +
+    (process.env.REACT_APP_SCHEMA === "https://" ? "wss://" : "ws://") +
     (process.env.REACT_APP_HOST || "localhost") +
     parsePort(process.env.REACT_APP_PORT || "9090") +
     (process.env.REACT_APP_BASE_PATH || ""),

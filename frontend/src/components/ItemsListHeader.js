@@ -6,7 +6,7 @@ import CustomListHeader from "./CustomListHeader";
 
 const ItemsListHeader = ({ onSearchChange, onAddClick }) => {
   return (
-    <CustomListHeader>
+    <CustomListHeader onSearchChange={onSearchChange}>
       <InputGroupAddon addonType="append">
         <Button onClick={onAddClick}>
           <FaPlus />

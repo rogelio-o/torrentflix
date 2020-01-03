@@ -4,13 +4,13 @@ const parsePort = (port) => {
 
 export default {
   baseUrl:
-    (process.env.SCHEMA || "http://") +
-    (process.env.HOST || "localhost") +
-    parsePort(process.env.PORT || "9090") +
-    (process.env.BASE_PATH || ""),
+    (process.env.REACT_APP_SCHEMA || "http://") +
+    (process.env.REACT_APP_HOST || "localhost") +
+    parsePort(process.env.REACT_APP_PORT || "9090") +
+    (process.env.REACT_APP_BASE_PATH || ""),
   ws:
     "ws://" +
-    (process.env.HOST || "localhost") +
-    parsePort(process.env.PORT || "9090") +
-    (process.env.BASE_PATH || ""),
+    (process.env.REACT_APP_HOST || "localhost") +
+    parsePort(process.env.REACT_APP_PORT || "9090") +
+    (process.env.REACT_APP_BASE_PATH || ""),
 };

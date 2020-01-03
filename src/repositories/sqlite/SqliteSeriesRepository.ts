@@ -26,7 +26,10 @@ export class SqliteSeriesRepository implements ISeriesRepository {
 
     const [seriesRows, episodesRows] = await Promise.all([
       db.all("SELECT * FROM series WHERE id = ?", serieId),
-      db.all("SELECT * FROM series_episodes WHERE serie_id = ?", serieId),
+      db.all(
+        "SELECT * FROM series_episodes WHERE serie_id = ? ORDER BY season ASC, number ASC",
+        serieId,
+      ),
     ]);
 
     return this.mapSerieWithSeasonsRow(seriesRows[0], episodesRows);

@@ -14,9 +14,21 @@ import {
   ModalHeader,
 } from "reactstrap";
 
+import config from "../../../config/config";
 import { openAlert } from "../../../redux/actions";
 import { findAllTorrentVideos } from "../../../services/torrentsService";
 import { errorHandling } from "../../../utils/serviceUtils";
+
+const createStreamUrl = (torrent, video) => {
+  return (
+    config.baseUrl +
+    "/api/torrent/servers/" +
+    torrent.id +
+    "/files/" +
+    video.id +
+    "/stream"
+  );
+};
 
 class CopyModal extends React.Component {
   constructor(props) {
@@ -60,7 +72,9 @@ class CopyModal extends React.Component {
   }
 
   _copy() {
-    copy(this.state.selectedVideo.url);
+    const { torrent } = this.props;
+    const { selectedVideo } = this.state;
+    copy(createStreamUrl(torrent, selectedVideo));
   }
 
   render() {
@@ -82,8 +96,10 @@ class CopyModal extends React.Component {
                   onChange={this._onVideoChange.bind(this)}
                 >
                   <option>--</option>
-                  {videos.map((video) => (
-                    <option value={video.id}>{video.name}</option>
+                  {videos.map((video, index) => (
+                    <option value={video.id} key={index}>
+                      {video.name}
+                    </option>
                   ))}
                 </CustomInput>
               )}
@@ -93,7 +109,9 @@ class CopyModal extends React.Component {
               <InputGroup>
                 <Input
                   readOnly
-                  value={selectedVideo ? selectedVideo.url : ""}
+                  value={
+                    selectedVideo ? createStreamUrl(torrent, selectedVideo) : ""
+                  }
                 />
                 <InputGroupAddon addonType="append">
                   <Button

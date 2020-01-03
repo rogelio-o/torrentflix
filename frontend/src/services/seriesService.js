@@ -39,6 +39,7 @@ export const findAllSeries = (page, q) => {
       page,
       order: "name",
       q,
+      itemsPerPage: 12,
     },
   });
 };

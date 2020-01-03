@@ -38,6 +38,7 @@ export const findAllMovies = async (page, q) => {
       page,
       order: "title",
       q,
+      itemsPerPage: 12,
     },
   });
 };

@@ -11,7 +11,6 @@ export default {
   ws:
     "ws://" +
     (process.env.HOST || "localhost") +
-    ":" +
     parsePort(process.env.PORT || "9090") +
     (process.env.BASE_PATH || ""),
 };

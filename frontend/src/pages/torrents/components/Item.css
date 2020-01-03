@@ -85,3 +85,29 @@
   color: #fff;
   font-size: 14px;
 }
+
+.torrent-item .torrent-actions .dropdown-menu {
+  left: auto !important;
+  right: 0px !important;
+  transform: none !important;
+  top: 100% !important;
+}
+
+@media (max-width: 767px) {
+  .torrent-item .torrent-play {
+    position: absolute;
+    top: 12px;
+    left: 20px;
+    width: 35px;
+    padding-right: 0;
+  }
+
+  .torrent-item .torrent-play .btn {
+    font-size: 12px;
+  }
+
+  .torrent-item .torrent-name {
+    margin-left: 45px;
+    margin-bottom: 10px;
+  }
+}

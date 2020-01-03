@@ -28,3 +28,13 @@
 .carrousel-right-button {
   right: -25px;
 }
+
+@media (max-width: 575px) {
+  .carrousel-left-button {
+    left: 0px;
+  }
+
+  .carrousel-right-button {
+    right: 0px;
+  }
+}

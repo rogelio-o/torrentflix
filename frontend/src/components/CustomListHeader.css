@@ -41,3 +41,10 @@
 .items-list-header .btn svg {
   margin: 0;
 }
+
+.items-list-header .dropdown-menu {
+  left: auto !important;
+  right: 0px !important;
+  transform: none !important;
+  top: 100% !important;
+}

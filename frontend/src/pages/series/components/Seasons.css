@@ -1,3 +1,7 @@
 .serie-seasons-header {
   margin-bottom: 15px;
 }
+
+.serie-seasons .slick-track {
+  margin-left: 0;
+}

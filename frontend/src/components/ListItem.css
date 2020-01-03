@@ -12,3 +12,10 @@
 .item .btn-secondary svg {
   margin: 0;
 }
+
+.item .dropdown-menu {
+  left: auto !important;
+  right: 0px !important;
+  transform: none !important;
+  top: 100% !important;
+}

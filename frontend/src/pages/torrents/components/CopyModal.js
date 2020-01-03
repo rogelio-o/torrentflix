@@ -93,6 +93,7 @@ class CopyModal extends React.Component {
                 <CustomInput
                   type="select"
                   name="video"
+                  id="video"
                   onChange={this._onVideoChange.bind(this)}
                 >
                   <option>--</option>

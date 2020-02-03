@@ -18,7 +18,8 @@ const checkDevice = (
   const parts = headers.USN.split("::");
   if (
     (parts[1] === MEDIA_RENDERER_TYPE ||
-      parts[1] === MEDIA_RENDERER_TYPE_CHROMECAST) &&
+      (parts[1] === MEDIA_RENDERER_TYPE_CHROMECAST &&
+        headers.SERVER.toLowerCase().indexOf("chromecast") > -1)) &&
     (!headers.SERVER || headers.SERVER.indexOf(THIS_SSPD_SERVER) === -1)
   ) {
     const deviceId = parts[0].split(":")[1];
@@ -54,10 +55,11 @@ export class SspdDevicesService implements IDevicesService {
     const client = new Sspd.Client();
     client.on("response", (headers: { [key: string]: string }) => {
       checkDevice(headers, (deviceId, type) => {
+        const parsedType = parseType(type);
         const device: IDevice = {
           id: deviceId,
-          name: headers.SERVER,
-          type: parseType(type),
+          name: headers.SERVER + " " + parsedType,
+          type: parsedType,
           xmlUrl: headers.LOCATION,
         };
         this.data[deviceId] = device;
@@ -68,10 +70,11 @@ export class SspdDevicesService implements IDevicesService {
 
     this.server.on("advertise-alive", (headers: { [key: string]: string }) => {
       checkDevice(headers, (deviceId, type) => {
+        const parsedType = parseType(type);
         const device: IDevice = {
           id: deviceId,
-          name: headers.SERVER,
-          type: parseType(type),
+          name: headers.SERVER + " " + parsedType,
+          type: parsedType,
           xmlUrl: headers.LOCATION,
         };
         this.data[deviceId] = device;

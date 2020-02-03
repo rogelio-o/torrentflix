@@ -1,5 +1,5 @@
 const parsePort = (port: string) => {
-  return port === "80" ? "" : ":" + port;
+  return port === "80" || port === "443" ? "" : ":" + port;
 };
 
 export const config = {
